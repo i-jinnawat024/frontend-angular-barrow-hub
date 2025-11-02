@@ -35,10 +35,10 @@ export class SidebarComponent {
       title: 'Overview',
       items: [
         {
-          label: 'Dashboard',
+          label: 'หน้าหลัก',
           route: '/dashboard',
           icon: 'dashboard',
-          description: 'System overview',
+          description: 'ภาพรวมระบบ',
           exact: true
         }
       ]
@@ -47,24 +47,24 @@ export class SidebarComponent {
       title: 'Catalog',
       items: [
         {
-          label: 'Book Registry',
+          label: 'เพิ่มเล่มทะเบียน',
           route: '/registry-books',
           icon: 'registry',
-          description: 'Manage library records',
+          description: 'จัดการทะเบียนเล่ม',
           exact: true
         },
         {
-          label: 'Borrow',
+          label: 'แจ้งการยืม',
           route: '/registry-books/borrow',
           icon: 'borrow',
-          description: 'Track outgoing items',
+          description: 'จัดการการยืม',
           exact: true
         },
         {
-          label: 'Return',
+          label: 'แจ้งการคืน',
           route: '/registry-books/return',
           icon: 'return',
-          description: 'Handle returns',
+          description: 'จัดการการคืน',
           exact: true,
           badge: 'New'
         }
