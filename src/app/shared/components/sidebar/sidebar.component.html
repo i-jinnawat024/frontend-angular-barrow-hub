@@ -1,0 +1,107 @@
+<!-- Mobile Overlay -->
+@if (isOpen()) {
+  <div
+    class="fixed inset-0 z-50 bg-black/50 transition-opacity md:hidden"
+    (click)="onOverlayClick()"
+    [class.opacity-0]="!isOpen()"
+    [class.pointer-events-none]="!isOpen()"
+  ></div>
+}
+
+<!-- Sidebar -->
+<aside
+  id="app-sidebar"
+  class="fixed top-0 z-50 h-screen border-r border-gray-200 bg-white transition-all duration-300 ease-in-out dark:border-gray-700 dark:bg-gray-800"
+  [class.-translate-x-full]="!isOpen()"
+  [class.translate-x-0]="isOpen()"
+  [style.width]="getSidebarWidth()"
+>
+  <!-- Sidebar Header (Mobile) -->
+  <div class="flex h-16 items-center justify-between border-b border-gray-200 px-4 dark:border-gray-700 md:hidden">
+    <span class="text-lg font-semibold text-gray-900 dark:text-white">เมนู</span>
+    <button
+      type="button"
+      class="inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+      (click)="closeSidebar.emit()"
+      aria-label="ปิดเมนู"
+    >
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Sidebar Content -->
+  <nav class="flex-1 space-y-1  px-3 py-4 md:px-2">
+    @for (item of menuItems; track item.route) {
+      <a
+        [routerLink]="item.route"
+        routerLinkActive="bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
+        [routerLinkActiveOptions]="{ exact: false }"
+        class="group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white md:px-2 md:justify-center"
+        [class.md:justify-start]="!isCollapsed()"
+        (click)="closeSidebar.emit()"
+        [title]="isCollapsed() ? item.label : ''"
+      >
+        @if (item.label === 'แดชบอร์ด') {
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+          </svg>
+        }
+        @if (item.label === 'เอกสาร') {
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+        }
+        @if (item.label === 'การยืม') {
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+          </svg>
+        }
+        @if (item.label === 'เจ้าหน้าที่') {
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+        }
+        <span 
+          class="transition-all duration-300 md:whitespace-nowrap"
+          [class.md:opacity-0]="isCollapsed()"
+          [class.md:max-w-0]="isCollapsed()"
+          [class.md:overflow-hidden]="isCollapsed()"
+        >
+          {{ item.label }}
+        </span>
+        <!-- Tooltip for collapsed state -->
+        @if (isCollapsed()) {
+          <span 
+            class="absolute left-full ml-2 hidden whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-hover:block md:block"
+          >
+            {{ item.label }}
+          </span>
+        }
+      </a>
+    }
+  </nav>
+
+  <!-- Sidebar Footer (Optional) -->
+  <div class="border-t border-gray-200 p-4 dark:border-gray-700 md:p-2">
+    <div class="group relative flex items-center gap-3 md:justify-center" [class.md:justify-start]="!isCollapsed()">
+      <div class="h-10 w-10 flex-shrink-0 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+      <div class="flex-1 transition-all duration-300 md:overflow-hidden" 
+           [class.md:max-w-0]="isCollapsed()"
+           [class.md:opacity-0]="isCollapsed()">
+        <p class="text-sm font-medium text-gray-900 dark:text-white">ผู้ใช้งาน</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400">user@example.com</p>
+      </div>
+      <!-- Tooltip for collapsed footer -->
+      @if (isCollapsed()) {
+        <span 
+          class="absolute left-full top-1/2 z-50 ml-2 hidden -translate-y-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-hover:block md:block"
+        >
+          ผู้ใช้งาน
+        </span>
+      }
+    </div>
+  </div>
+</aside>
+
