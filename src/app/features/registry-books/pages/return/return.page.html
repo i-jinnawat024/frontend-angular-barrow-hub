@@ -1,0 +1,91 @@
+<div class="container mx-auto px-4 py-8 max-w-2xl">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">คืนเล่มทะเบียน</h1>
+    <p class="mt-2 text-gray-600 dark:text-gray-400">เลือกเล่มทะเบียนที่ต้องการคืน</p>
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+    <div class="space-y-6">
+      <!-- Borrow Selection -->
+      <div>
+        <label for="borrowId" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          เล่มทะเบียนที่ต้องการคืน <span class="text-red-500">*</span>
+        </label>
+        <select
+          id="borrowId"
+          formControlName="borrowId"
+          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+        >
+          <option value="">เลือกเล่มทะเบียน</option>
+          @for (borrow of activeBorrows; track borrow.id) {
+            <option [value]="borrow.id">
+              {{ borrow.registryBook.bookNumber }} - {{ borrow.registryBook.title }} 
+              ({{ borrow.borrowerName }})
+            </option>
+          }
+        </select>
+        @if (form.get('borrowId')?.invalid && form.get('borrowId')?.touched) {
+          <p class="mt-1 text-sm text-red-600">กรุณาเลือกเล่มทะเบียน</p>
+        }
+        @if (activeBorrows.length === 0) {
+          <p class="mt-1 text-sm text-yellow-600">ไม่มีเล่มทะเบียนที่ถูกยืมอยู่</p>
+        }
+      </div>
+
+      <!-- Borrow Details Preview -->
+      @if (getSelectedBorrow()) {
+        @let borrow = getSelectedBorrow()!;
+        <div class="rounded-lg bg-gray-50 dark:bg-gray-700 p-4 border border-gray-200 dark:border-gray-600">
+          <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">รายละเอียดการยืม</h3>
+          <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <dt class="text-xs font-medium text-gray-500 dark:text-gray-400">เลขที่เล่มทะเบียน</dt>
+              <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ borrow.registryBook.bookNumber }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium text-gray-500 dark:text-gray-400">ชื่อเล่มทะเบียน</dt>
+              <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ borrow.registryBook.title }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium text-gray-500 dark:text-gray-400">ผู้ยืม</dt>
+              <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ borrow.borrowerName }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium text-gray-500 dark:text-gray-400">วันที่ยืม</dt>
+              <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+                {{ borrow.borrowedAt | date:'dd/MM/yyyy HH:mm' }}
+              </dd>
+            </div>
+            @if (borrow.reason) {
+              <div class="sm:col-span-2">
+                <dt class="text-xs font-medium text-gray-500 dark:text-gray-400">เหตุผลยืม</dt>
+                <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ borrow.reason }}</dd>
+              </div>
+            }
+          </dl>
+        </div>
+      }
+    </div>
+
+    <!-- Actions -->
+    <div class="mt-6 flex items-center justify-end gap-3">
+      <button
+        type="button"
+        class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+        (click)="cancel()"
+      >
+        ยกเลิก
+      </button>
+      <button
+        type="submit"
+        class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        [disabled]="form.invalid || activeBorrows.length === 0"
+      >
+        คืนเล่มทะเบียน
+      </button>
+    </div>
+  </form>
+</div>
+
