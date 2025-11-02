@@ -38,19 +38,20 @@ export class ShellLayoutComponent implements OnInit, OnDestroy {
   protected toggleSidebar(): void {
     // On desktop: toggle between expanded and collapsed
     // On mobile: toggle between open and closed (full sidebar)
+    console.log('object');
     if (this.isDesktop()) {
       if (this.sidebarOpen()) {
         // If sidebar is open, toggle between expanded and collapsed
         this.sidebarCollapsed.update((collapsed) => !collapsed);
       } else {
         // If sidebar is closed, open it expanded
-        this.sidebarOpen.set(true);
+        this.sidebarOpen.set(false);
         this.sidebarCollapsed.set(false);
       }
     } else {
       // On mobile: just toggle open/closed (always expanded when open)
-      this.sidebarOpen.update((isOpen) => !isOpen);
-      this.sidebarCollapsed.set(false);
+      // this.sidebarOpen.update((isOpen) => !isOpen);
+      // this.sidebarCollapsed.set(false);
     }
   }
 
