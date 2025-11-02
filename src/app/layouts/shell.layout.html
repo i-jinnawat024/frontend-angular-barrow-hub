@@ -1,0 +1,17 @@
+<app-header
+  [sidebarOpen]="sidebarOpen()"
+  [sidebarCollapsed]="sidebarCollapsed()"
+  (toggleSidebar)="toggleSidebar()"
+  (closeSidebar)="closeSidebar()"
+></app-header>
+<app-sidebar
+  [isOpen]="sidebarOpen()"
+  [isCollapsed]="sidebarCollapsed()"
+  (closeSidebar)="closeSidebar()"
+></app-sidebar>
+<main 
+  class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-all duration-300"
+  [style.margin-left]="getMainMarginLeft()"
+>
+  <router-outlet />
+</main>
