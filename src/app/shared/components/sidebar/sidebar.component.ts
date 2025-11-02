@@ -71,7 +71,7 @@ export class SidebarComponent {
           route: '/registry-books',
           icon: 'registry',
           description: 'จัดการทะเบียนเล่ม',
-          exact: false
+          exact: true
         },
         {
           label: 'รายชื่อเจ้าหน้าที่',
