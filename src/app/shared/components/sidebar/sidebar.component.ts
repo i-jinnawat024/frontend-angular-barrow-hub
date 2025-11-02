@@ -2,6 +2,22 @@ import { CommonModule } from '@angular/common';
 import { Component, input, output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
+type SidebarIcon = 'dashboard' | 'registry' | 'borrow' | 'return';
+
+interface SidebarNavItem {
+  label: string;
+  route: string;
+  icon: SidebarIcon;
+  description?: string;
+  badge?: string;
+  exact?: boolean;
+}
+
+interface SidebarNavGroup {
+  title?: string;
+  items: SidebarNavItem[];
+}
+
 @Component({
   selector: 'app-sidebar',
   standalone: true,
@@ -14,27 +30,66 @@ export class SidebarComponent {
   isCollapsed = input<boolean>(false);
   closeSidebar = output<void>();
 
-  protected readonly menuItems = [
+  protected readonly navGroups: SidebarNavGroup[] = [
     {
-      label: 'แดชบอร์ด',
-      route: '/dashboard'
+      title: 'Overview',
+      items: [
+        {
+          label: 'หน้าหลัก',
+          route: '/dashboard',
+          icon: 'dashboard',
+          description: 'ภาพรวมระบบ',
+          exact: true
+        }
+      ]
     },
     {
-      label: 'เอกสาร',
-      route: '/documents'
-    },
-    {
-      label: 'การยืม',
-      route: '/loans'
-    },
-    {
-      label: 'เจ้าหน้าที่',
-      route: '/staff'
+      title: 'Catalog',
+      items: [
+        {
+          label: 'เพิ่มเล่มทะเบียน',
+          route: '/registry-books',
+          icon: 'registry',
+          description: 'จัดการทะเบียนเล่ม',
+          exact: true
+        },
+        {
+          label: 'แจ้งการยืม',
+          route: '/registry-books/borrow',
+          icon: 'borrow',
+          description: 'จัดการการยืม',
+          exact: true
+        },
+        {
+          label: 'แจ้งการคืน',
+          route: '/registry-books/return',
+          icon: 'return',
+          description: 'จัดการการคืน',
+          exact: true,
+          badge: 'New'
+        }
+      ]
     }
   ];
 
+  protected readonly currentUser = {
+    initials: 'JI',
+    name: 'Jinnawat Inyos',
+    email: 'user@example.com'
+  };
+
   protected onOverlayClick(): void {
     this.closeSidebar.emit();
+  }
+
+  protected onNavigate(): void {
+    if (typeof window === 'undefined') return;
+
+    const isMobile = window.innerWidth < 768;
+
+    if (isMobile) {
+      this.closeSidebar.emit();
+    }
   }
 
   protected getSidebarWidth(): string {
@@ -43,4 +98,3 @@ export class SidebarComponent {
     return '16rem'; // 256px for expanded
   }
 }
-
