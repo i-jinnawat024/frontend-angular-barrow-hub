@@ -5,11 +5,12 @@ import { Router } from '@angular/router';
 import { RegistryBookService } from '../../services/registry-book.service';
 import { BorrowCreateDto } from '../../../../shared/models/borrow.model';
 import { RegistryBook } from '../../../../shared/models/registry-book.model';
+import { QrScannerComponent } from '../../../../shared/components/qr-scanner/qr-scanner.component';
 
 @Component({
   selector: 'app-borrow',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, QrScannerComponent],
   templateUrl: './borrow.page.html',
   styleUrl: './borrow.page.scss',
   providers: [DatePipe]
@@ -17,6 +18,7 @@ import { RegistryBook } from '../../../../shared/models/registry-book.model';
 export class BorrowPage implements OnInit {
   form: FormGroup;
   availableBooks: RegistryBook[] = [];
+  showScanner = false;
 
   constructor(
     private fb: FormBuilder,
@@ -70,6 +72,31 @@ export class BorrowPage implements OnInit {
 
   cancel(): void {
     this.router.navigate(['/registry-books']);
+  }
+
+  openScanner(): void {
+    this.showScanner = true;
+  }
+
+  onScanSuccess(decodedText: string): void {
+    // Find book by ID from scanned QR code
+    const book = this.registryBookService.getRegistryBookById(decodedText);
+    if (book && book.status === 'available') {
+      this.form.patchValue({
+        registryBookId: book.id
+      });
+      this.showScanner = false;
+    } else {
+      alert('ไม่พบเล่มทะเบียนหรือเล่มทะเบียนไม่พร้อมใช้งาน');
+    }
+  }
+
+  onScanError(error: string): void {
+    alert('เกิดข้อผิดพลาดในการสแกน: ' + error);
+  }
+
+  onScannerClose(): void {
+    this.showScanner = false;
   }
 }
 

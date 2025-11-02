@@ -1,8 +1,9 @@
-<div class="container mx-auto px-4 py-8 max-w-4xl">
+<div class="container mx-auto px-4 py-8 max-w-4xl" id="registry-book-detail-page">
   <!-- Header -->
-  <div class="mb-6 flex items-center justify-between">
+  <div class="mb-6 flex items-center justify-between" id="registry-book-detail-header">
     <button
       type="button"
+      id="btn-back"
       class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
       (click)="goBack()"
     >
@@ -13,6 +14,7 @@
     </button>
     <button
       type="button"
+      id="btn-edit"
       class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700"
       (click)="editRegistryBook()"
     >
@@ -24,40 +26,40 @@
   </div>
 
   @if (registryBook) {
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden" id="registry-book-detail-card">
       <!-- Header Section -->
-      <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ registryBook.title }}</h1>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">เลขที่เล่มทะเบียน: {{ registryBook.bookNumber }}</p>
+      <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900" id="registry-book-detail-header-section">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white" id="registry-book-title">{{ registryBook.title }}</h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400" id="registry-book-number">เลขที่เล่มทะเบียน: {{ registryBook.bookNumber }}</p>
       </div>
 
       <!-- Content Section -->
       <div class="px-6 py-5">
         <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <!-- Description -->
-          <div class="sm:col-span-2">
+          <div class="sm:col-span-2" id="registry-book-description-section">
             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">คำอธิบาย</dt>
-            <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+            <dd class="mt-1 text-sm text-gray-900 dark:text-white" id="registry-book-description">
               {{ registryBook.description || '-' }}
             </dd>
           </div>
 
           <!-- Status -->
-          <div>
+          <div id="registry-book-status-section">
             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">สถานะ</dt>
-            <dd class="mt-1">
+            <dd class="mt-1" id="registry-book-status">
               @if (registryBook.status === 'available') {
-                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" id="status-available">
                   พร้อมใช้งาน
                 </span>
               }
               @if (registryBook.status === 'borrowed') {
-                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200" id="status-borrowed">
                   ถูกยืม
                 </span>
               }
               @if (registryBook.status === 'archived') {
-                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200">
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200" id="status-archived">
                   เก็บไว้
                 </span>
               }
@@ -65,21 +67,77 @@
           </div>
 
           <!-- Created At -->
-          <div>
+          <div id="registry-book-created-at-section">
             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">วันที่สร้าง</dt>
-            <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+            <dd class="mt-1 text-sm text-gray-900 dark:text-white" id="registry-book-created-at">
               {{ registryBook.createdAt | date:'dd/MM/yyyy HH:mm' }}
             </dd>
           </div>
 
           <!-- Updated At -->
-          <div>
+          <div id="registry-book-updated-at-section">
             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">อัปเดตล่าสุด</dt>
-            <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+            <dd class="mt-1 text-sm text-gray-900 dark:text-white" id="registry-book-updated-at">
               {{ registryBook.updatedAt | date:'dd/MM/yyyy HH:mm' }}
             </dd>
           </div>
         </dl>
+
+        <!-- QR Code and Barcode Section -->
+        <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 sm:col-span-2" id="qr-barcode-section">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-medium text-gray-900 dark:text-white" id="qr-barcode-section-title">QR Code และ Barcode</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- QR Code -->
+            <div class="text-center" id="qr-code-container">
+              <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2" id="qr-code-label">QR Code</p>
+              @if (qrCodeDataUrl) {
+                <div class="inline-block p-4 bg-white rounded-lg border border-gray-200 dark:border-gray-700" id="qr-code-wrapper">
+                  <img [src]="qrCodeDataUrl" alt="QR Code" class="w-48 h-48 mx-auto" id="qr-code-image" />
+                   <button
+                type="button"
+                id="btn-print-qr"
+                class="inline-flex items-center rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                (click)="printQrCode()"
+                [disabled]="!qrCodeDataUrl"
+              >
+                <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                </svg>
+                พิมพ์ QR Code
+              </button>
+                </div>
+                
+              } @else {
+                <div class="w-48 h-48 mx-auto bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center" id="qr-code-loading">
+                  <p class="text-xs text-gray-500 dark:text-gray-400">กำลังสร้าง QR Code...</p>
+                </div>
+              }
+            </div>
+
+            <!-- Barcode -->
+            <div class="text-center" id="barcode-container">
+              <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2" id="barcode-label">Barcode</p>
+              <div id="barcode-container-{{ registryBook.id }}" class="inline-block p-4 bg-white rounded-lg border border-gray-200 dark:border-gray-700 " id="barcode-wrapper">
+                <div [id]="'barcode-' + registryBook.id" class="min-h-[100px] flex items-center justify-center" id="barcode-content">
+                  <p class="text-xs text-gray-500 dark:text-gray-400">กำลังสร้าง Barcode...</p>
+                </div>
+                 <button
+                type="button"
+                id="btn-print-barcode"
+                class="inline-flex items-center rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                (click)="printBarcode()"
+              >
+                <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                </svg>
+                พิมพ์ Barcode
+              </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   }
