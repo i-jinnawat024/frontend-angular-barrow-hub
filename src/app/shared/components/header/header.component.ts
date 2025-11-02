@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, input, output, signal, OnInit, OnDestroy, effect } from '@angular/core';
+import { Component, input, output, signal, OnInit, OnDestroy, effect, computed } from '@angular/core';
 
 @Component({
   selector: 'app-header',
@@ -17,8 +17,40 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private resizeListener?: () => void;
 
   protected readonly headerMarginLeft = signal('0');
+  protected readonly isDesktopView = computed(() => this.isDesktopScreen());
 
   sidebarCollapsed = input<boolean>(false);
+
+  protected readonly toggleIcon = computed(() => {
+    const isDesktop = this.isDesktopView();
+    const isOpen = this.sidebarOpen();
+    const isCollapsed = this.sidebarCollapsed();
+
+    if (!isDesktop) {
+      return isOpen ? 'close' : 'menu';
+    }
+
+    if (!isOpen) {
+      return 'menu';
+    }
+
+    return isCollapsed ? 'expand' : 'collapse';
+  });
+
+  protected readonly toggleLabel = computed(() => {
+    const icon = this.toggleIcon();
+
+    switch (icon) {
+      case 'close':
+        return 'Close navigation menu';
+      case 'expand':
+        return 'Expand sidebar';
+      case 'collapse':
+        return 'Collapse sidebar';
+      default:
+        return 'Open navigation menu';
+    }
+  });
 
   constructor() {
     // Update header margin when sidebar state or screen size changes
@@ -60,11 +92,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   protected getHeaderMarginLeft(): string {
     return this.headerMarginLeft();
-  }
-
-  protected getToggleButtonWidth(): string {
-    // Add margin to nav to account for toggle button width
-    return '3.5rem'; // 56px (h-14)
   }
 
   private checkIsDesktop(): boolean {

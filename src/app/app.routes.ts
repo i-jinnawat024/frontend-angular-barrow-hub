@@ -3,23 +3,16 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: '/registry-books',
+    redirectTo: '/dashboard',
     pathMatch: 'full'
   },
   {
     path: 'registry-books',
     loadComponent: () => import('./features/registry-books/pages/registry-book-list/registry-book-list.page').then(m => m.RegistryBookListPage)
   },
+  // ต้องใส่ routes ที่เจาะจงก่อน routes ที่มี parameter
   {
     path: 'registry-books/create',
-    loadComponent: () => import('./features/registry-books/pages/registry-book-form/registry-book-form.page').then(m => m.RegistryBookFormPage)
-  },
-  {
-    path: 'registry-books/:id',
-    loadComponent: () => import('./features/registry-books/pages/registry-book-detail/registry-book-detail.page').then(m => m.RegistryBookDetailPage)
-  },
-  {
-    path: 'registry-books/:id/edit',
     loadComponent: () => import('./features/registry-books/pages/registry-book-form/registry-book-form.page').then(m => m.RegistryBookFormPage)
   },
   {
@@ -29,5 +22,17 @@ export const routes: Routes = [
   {
     path: 'registry-books/return',
     loadComponent: () => import('./features/registry-books/pages/return/return.page').then(m => m.ReturnPage)
+  },
+  {
+    path: 'registry-books/:id/edit',
+    loadComponent: () => import('./features/registry-books/pages/registry-book-form/registry-book-form.page').then(m => m.RegistryBookFormPage)
+  },
+  {
+    path: 'registry-books/:id',
+    loadComponent: () => import('./features/registry-books/pages/registry-book-detail/registry-book-detail.page').then(m => m.RegistryBookDetailPage)
+  },
+  {
+    path: 'dashboard',
+    loadComponent: () => import('./features/dashboard/dashboard.page').then(m => m.DashboardPage)
   }
 ];
