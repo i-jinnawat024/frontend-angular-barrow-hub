@@ -1,0 +1,120 @@
+<div class="container mx-auto px-4 py-8 max-w-2xl">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">ยืมเล่มทะเบียน</h1>
+    <p class="mt-2 text-gray-600 dark:text-gray-400">กรอกข้อมูลเพื่อยืมเล่มทะเบียน</p>
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+    <div class="space-y-6">
+      <!-- Registry Book -->
+      <div>
+        <label for="registryBookId" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          เล่มทะเบียน <span class="text-red-500">*</span>
+        </label>
+        <select
+          id="registryBookId"
+          formControlName="registryBookId"
+          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+        >
+          <option value="">เลือกเล่มทะเบียน</option>
+          @for (book of availableBooks; track book.id) {
+            <option [value]="book.id">{{ book.bookNumber }} - {{ book.title }}</option>
+          }
+        </select>
+        @if (form.get('registryBookId')?.invalid && form.get('registryBookId')?.touched) {
+          <p class="mt-1 text-sm text-red-600">กรุณาเลือกเล่มทะเบียน</p>
+        }
+        @if (availableBooks.length === 0) {
+          <p class="mt-1 text-sm text-yellow-600">ไม่มีเล่มทะเบียนที่พร้อมใช้งาน</p>
+        }
+      </div>
+
+      <!-- Borrower Name -->
+      <div>
+        <label for="borrowerName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          ชื่อคนยืม <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          id="borrowerName"
+          formControlName="borrowerName"
+          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          placeholder="เช่น สมชาย ใจดี"
+        />
+        @if (form.get('borrowerName')?.invalid && form.get('borrowerName')?.touched) {
+          <p class="mt-1 text-sm text-red-600">กรุณากรอกชื่อคนยืม</p>
+        }
+      </div>
+
+      <!-- Borrow Date and Time -->
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <!-- Borrow Date -->
+        <div>
+          <label for="borrowedAt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            วันที่ยืม <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="date"
+            id="borrowedAt"
+            formControlName="borrowedAt"
+            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          />
+          @if (form.get('borrowedAt')?.invalid && form.get('borrowedAt')?.touched) {
+            <p class="mt-1 text-sm text-red-600">กรุณาเลือกวันที่ยืม</p>
+          }
+        </div>
+
+        <!-- Borrow Time -->
+        <div>
+          <label for="borrowedTime" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            เวลาที่ยืม <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="time"
+            id="borrowedTime"
+            formControlName="borrowedTime"
+            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          />
+          @if (form.get('borrowedTime')?.invalid && form.get('borrowedTime')?.touched) {
+            <p class="mt-1 text-sm text-red-600">กรุณาเลือกเวลาที่ยืม</p>
+          }
+        </div>
+      </div>
+
+      <!-- Reason -->
+      <div>
+        <label for="reason" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          เหตุผลยืม (ไม่บังคับ)
+        </label>
+        <textarea
+          id="reason"
+          formControlName="reason"
+          rows="3"
+          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          placeholder="ระบุเหตุผลในการยืม (ถ้ามี)"
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="mt-6 flex items-center justify-end gap-3">
+      <button
+        type="button"
+        class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+        (click)="cancel()"
+      >
+        ยกเลิก
+      </button>
+      <button
+        type="submit"
+        class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        [disabled]="form.invalid || availableBooks.length === 0"
+      >
+        ยืมเล่มทะเบียน
+      </button>
+    </div>
+  </form>
+</div>
+
