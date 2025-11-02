@@ -47,13 +47,6 @@ export class SidebarComponent {
       title: 'Catalog',
       items: [
         {
-          label: 'เพิ่มเล่มทะเบียน',
-          route: '/registry-books',
-          icon: 'registry',
-          description: 'จัดการทะเบียนเล่ม',
-          exact: true
-        },
-        {
           label: 'แจ้งการยืม',
           route: '/registry-books/borrow',
           icon: 'borrow',
@@ -67,7 +60,26 @@ export class SidebarComponent {
           description: 'จัดการการคืน',
           exact: true,
           badge: 'New'
-        }
+        },
+      ]
+    },
+    {
+      title: 'Manage',
+       items: [
+        {
+          label: 'รายการเล่มทะเบียน',
+          route: '/registry-books',
+          icon: 'registry',
+          description: 'จัดการทะเบียนเล่ม',
+          exact: true
+        },
+        {
+          label: 'รายชื่อเจ้าหน้าที่',
+          route: 'staff',
+          icon: 'borrow',
+          description: 'จัดการเจ้าหน้าที่',
+          exact: true
+        },
       ]
     }
   ];

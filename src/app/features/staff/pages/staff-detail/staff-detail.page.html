@@ -1,0 +1,106 @@
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+  <!-- Header -->
+  <div class="mb-6 flex items-center justify-between">
+    <button
+      type="button"
+      class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+      (click)="goBack()"
+    >
+      <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      กลับ
+    </button>
+    <button
+      type="button"
+      class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700"
+      (click)="editStaff()"
+    >
+      <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+      </svg>
+      แก้ไข
+    </button>
+  </div>
+
+  @if (staff) {
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <!-- Header Section -->
+      <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+        <div class="flex items-center">
+          <div class="h-16 w-16 flex-shrink-0 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+            <span class="text-2xl font-medium text-gray-700 dark:text-gray-300">
+              {{ staff.name.charAt(0) }}
+            </span>
+          </div>
+          <div class="ml-4">
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ staff.name }}</h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ staff.position }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Section -->
+      <div class="px-6 py-5">
+        <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <!-- Email -->
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">อีเมล</dt>
+            <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ staff.email }}</dd>
+          </div>
+
+          <!-- Phone -->
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">เบอร์โทรศัพท์</dt>
+            <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ staff.phone || '-' }}</dd>
+          </div>
+
+          <!-- Position -->
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">ตำแหน่ง</dt>
+            <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ staff.position }}</dd>
+          </div>
+
+          <!-- Department -->
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">แผนก</dt>
+            <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ staff.department || '-' }}</dd>
+          </div>
+
+          <!-- Status -->
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">สถานะ</dt>
+            <dd class="mt-1">
+              @if (staff.isActive) {
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                  ใช้งาน
+                </span>
+              } @else {
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200">
+                  ไม่ใช้งาน
+                </span>
+              }
+            </dd>
+          </div>
+
+          <!-- Created At -->
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">วันที่สร้าง</dt>
+            <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+              {{ staff.createdAt | date:'dd/MM/yyyy HH:mm' }}
+            </dd>
+          </div>
+
+          <!-- Updated At -->
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">อัปเดตล่าสุด</dt>
+            <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+              {{ staff.updatedAt | date:'dd/MM/yyyy HH:mm' }}
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  }
+</div>
+
