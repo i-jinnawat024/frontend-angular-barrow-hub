@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, input, output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
-type SidebarIcon = 'dashboard' | 'registry' | 'borrow' | 'return';
+type SidebarIcon = 'dashboard' | 'registry' | 'borrow' | 'return' | 'report';
 
 interface SidebarNavItem {
   label: string;
@@ -71,15 +71,27 @@ export class SidebarComponent {
           route: '/registry-books',
           icon: 'registry',
           description: 'จัดการทะเบียนเล่ม',
-          exact: true
+          exact: false
         },
         {
           label: 'รายชื่อเจ้าหน้าที่',
-          route: 'staff',
+          route: '/staff',
           icon: 'borrow',
           description: 'จัดการเจ้าหน้าที่',
-          exact: true
+          exact: false
         },
+      ]
+    },
+    {
+      title: 'Reports',
+      items: [
+        {
+          label: 'รายงาน',
+          route: '/reports',
+          icon: 'report',
+          description: 'รายงานสรุปข้อมูล',
+          exact: true
+        }
       ]
     }
   ];

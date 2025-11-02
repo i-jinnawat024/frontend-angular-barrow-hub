@@ -32,10 +32,6 @@ export const routes: Routes = [
     loadComponent: () => import('./features/registry-books/pages/registry-book-detail/registry-book-detail.page').then(m => m.RegistryBookDetailPage)
   },
   {
-    path: 'registry-books/return',
-    loadComponent: () => import('./features/registry-books/pages/return/return.page').then(m => m.ReturnPage)
-  },
-  {
     path: 'dashboard',
     loadComponent: () => import('./features/dashboard/dashboard.page').then(m => m.DashboardPage)
   },
@@ -54,5 +50,9 @@ export const routes: Routes = [
   {
     path: 'staff/:id',
     loadComponent: () => import('./features/staff/pages/staff-detail/staff-detail.page').then(m => m.StaffDetailPage)
+  },
+  {
+    path: 'reports',
+    loadComponent: () => import('./features/reports/pages/report/report.page').then(m => m.ReportPage)
   }
 ];
