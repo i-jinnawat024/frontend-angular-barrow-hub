@@ -1,62 +1,62 @@
-<div class="container mx-auto px-4 py-8 max-w-2xl">
+﻿<div class="container mx-auto px-4 py-8 max-w-2xl">
   <!-- Header -->
   <div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-      {{ isEditMode ? 'แก้ไขเล่มทะเบียน' : 'สร้างเล่มทะเบียนใหม่' }}
+    <h1 class="text-3xl font-bold text-primary">
+      {{ isEditMode ? 'à¹à¸à¹‰à¹„à¸‚à¹€à¸¥à¹ˆà¸¡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™' : 'à¸ªà¸£à¹‰à¸²à¸‡à¹€à¸¥à¹ˆà¸¡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™à¹ƒà¸«à¸¡à¹ˆ' }}
     </h1>
-    <p class="mt-2 text-gray-600 dark:text-gray-400">
-      {{ isEditMode ? 'แก้ไขข้อมูลเล่มทะเบียน' : 'กรอกข้อมูลเพื่อสร้างเล่มทะเบียนใหม่' }}
+    <p class="mt-2 text-secondary">
+      {{ isEditMode ? 'à¹à¸à¹‰à¹„à¸‚à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹€à¸¥à¹ˆà¸¡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™' : 'à¸à¸£à¸­à¸à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹€à¸žà¸·à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡à¹€à¸¥à¹ˆà¸¡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™à¹ƒà¸«à¸¡à¹ˆ' }}
     </p>
   </div>
 
   <!-- Form -->
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-surface rounded-lg shadow border border-subtle p-6">
     <div class="space-y-6">
       <!-- Book Number -->
       <div>
-        <label for="bookNumber" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          เลขที่เล่มทะเบียน <span class="text-red-500">*</span>
+        <label for="bookNumber" class="form-label">
+          à¹€à¸¥à¸‚à¸—à¸µà¹ˆà¹€à¸¥à¹ˆà¸¡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™ <span class="text-danger">*</span>
         </label>
         <input
           type="text"
           id="bookNumber"
           formControlName="bookNumber"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          placeholder="เช่น RB-001"
+          class="form-control"
+          placeholder="à¹€à¸Šà¹ˆà¸™ RB-001"
         />
         @if (form.get('bookNumber')?.invalid && form.get('bookNumber')?.touched) {
-          <p class="mt-1 text-sm text-red-600">กรุณากรอกเลขที่เล่มทะเบียน</p>
+          <p class="mt-1 text-sm text-danger">à¸à¸£à¸¸à¸“à¸²à¸à¸£à¸­à¸à¹€à¸¥à¸‚à¸—à¸µà¹ˆà¹€à¸¥à¹ˆà¸¡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™</p>
         }
       </div>
 
       <!-- Title -->
       <div>
-        <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          ชื่อเล่มทะเบียน <span class="text-red-500">*</span>
+        <label for="title" class="form-label">
+          à¸Šà¸·à¹ˆà¸­à¹€à¸¥à¹ˆà¸¡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™ <span class="text-danger">*</span>
         </label>
         <input
           type="text"
           id="title"
           formControlName="title"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          placeholder="เช่น เล่มทะเบียนเอกสารการประชุม"
+          class="form-control"
+          placeholder="à¹€à¸Šà¹ˆà¸™ à¹€à¸¥à¹ˆà¸¡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™à¹€à¸­à¸à¸ªà¸²à¸£à¸à¸²à¸£à¸›à¸£à¸°à¸Šà¸¸à¸¡"
         />
         @if (form.get('title')?.invalid && form.get('title')?.touched) {
-          <p class="mt-1 text-sm text-red-600">กรุณากรอกชื่อเล่มทะเบียน</p>
+          <p class="mt-1 text-sm text-danger">à¸à¸£à¸¸à¸“à¸²à¸à¸£à¸­à¸à¸Šà¸·à¹ˆà¸­à¹€à¸¥à¹ˆà¸¡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™</p>
         }
       </div>
 
       <!-- Description -->
       <div>
-        <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          คำอธิบาย
+        <label for="description" class="form-label">
+          à¸„à¸³à¸­à¸˜à¸´à¸šà¸²à¸¢
         </label>
         <textarea
           id="description"
           formControlName="description"
           rows="4"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          placeholder="คำอธิบายเพิ่มเติมเกี่ยวกับเล่มทะเบียนนี้"
+          class="form-control"
+          placeholder="à¸„à¸³à¸­à¸˜à¸´à¸šà¸²à¸¢à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸•à¸´à¸¡à¹€à¸à¸µà¹ˆà¸¢à¸§à¸à¸±à¸šà¹€à¸¥à¹ˆà¸¡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™à¸™à¸µà¹‰"
         ></textarea>
       </div>
     </div>
@@ -65,19 +65,29 @@
     <div class="mt-6 flex items-center justify-end gap-3">
       <button
         type="button"
-        class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+        class="btn-secondary"
         (click)="cancel()"
       >
-        ยกเลิก
+        à¸¢à¸à¹€à¸¥à¸´à¸
       </button>
       <button
         type="submit"
-        class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        class="btn-primary"
         [disabled]="form.invalid"
       >
-        {{ isEditMode ? 'บันทึกการแก้ไข' : 'สร้างเล่มทะเบียน' }}
+        {{ isEditMode ? 'à¸šà¸±à¸™à¸—à¸¶à¸à¸à¸²à¸£à¹à¸à¹‰à¹„à¸‚' : 'à¸ªà¸£à¹‰à¸²à¸‡à¹€à¸¥à¹ˆà¸¡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™' }}
       </button>
     </div>
   </form>
 </div>
+
+
+
+
+
+
+
+
+
+
 

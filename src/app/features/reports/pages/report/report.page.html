@@ -1,15 +1,15 @@
-<div class="container mx-auto px-4 py-8">
+﻿<div class="container mx-auto px-4 py-8">
   <!-- Header -->
   <div class="mb-8 flex items-center justify-between">
     <div>
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">รายงานการยืม</h1>
-      <p class="mt-2 text-gray-600 dark:text-gray-400">ดูและ export รายงานการยืมตามเดือน</p>
+      <h1 class="text-3xl font-bold text-primary">à¸£à¸²à¸¢à¸‡à¸²à¸™à¸à¸²à¸£à¸¢à¸·à¸¡</h1>
+      <p class="mt-2 text-secondary">à¸”à¸¹à¹à¸¥à¸° export à¸£à¸²à¸¢à¸‡à¸²à¸™à¸à¸²à¸£à¸¢à¸·à¸¡à¸•à¸²à¸¡à¹€à¸”à¸·à¸­à¸™</p>
     </div>
     <div class="flex items-center gap-3">
       @if (borrows.length > 0) {
         <button
           type="button"
-          class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+          class="inline-flex items-center btn-secondary"
           (click)="exportToJSON()"
         >
           <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -19,7 +19,7 @@
         </button>
         <button
           type="button"
-          class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          class="btn-primary"
           (click)="exportToCSV()"
         >
           <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,16 +32,16 @@
   </div>
 
   <!-- Filter Section -->
-  <div class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+  <div class="mb-6 bg-surface rounded-lg shadow border border-subtle p-6">
     <form [formGroup]="form" class="flex items-end gap-4">
       <div class="flex-1">
-        <label for="month" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          เลือกเดือน
+        <label for="month" class="form-label">
+          à¹€à¸¥à¸·à¸­à¸à¹€à¸”à¸·à¸­à¸™
         </label>
         <select
           id="month"
           formControlName="month"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          class="form-control"
         >
           @for (month of [1,2,3,4,5,6,7,8,9,10,11,12]; track month) {
             <option [value]="month">{{ getMonthName(month) }}</option>
@@ -49,13 +49,13 @@
         </select>
       </div>
       <div class="flex-1">
-        <label for="year" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          เลือกปี
+        <label for="year" class="form-label">
+          à¹€à¸¥à¸·à¸­à¸à¸›à¸µ
         </label>
         <select
           id="year"
           formControlName="year"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          class="form-control"
         >
           @for (year of getAvailableYears(); track year) {
             <option [value]="year">{{ year }}</option>
@@ -66,78 +66,78 @@
   </div>
 
   <!-- Summary Card -->
-  <div class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+  <div class="mb-6 bg-surface rounded-lg shadow border border-subtle p-6">
     <div class="flex items-center justify-between">
       <div>
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-          สรุปรายงานเดือน {{ getMonthName(selectedMonth) }} {{ selectedYear }}
+        <h2 class="text-lg font-semibold text-primary">
+          à¸ªà¸£à¸¸à¸›à¸£à¸²à¸¢à¸‡à¸²à¸™à¹€à¸”à¸·à¸­à¸™ {{ getMonthName(selectedMonth) }} {{ selectedYear }}
         </h2>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          จำนวนการยืมทั้งหมด: <span class="font-semibold text-gray-900 dark:text-white">{{ borrows.length }}</span> รายการ
+        <p class="mt-1 text-sm text-muted">
+          à¸ˆà¸³à¸™à¸§à¸™à¸à¸²à¸£à¸¢à¸·à¸¡à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”: <span class="font-semibold text-primary">{{ borrows.length }}</span> à¸£à¸²à¸¢à¸à¸²à¸£
         </p>
       </div>
     </div>
   </div>
 
   <!-- Borrows Table -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
+  <div class="bg-surface rounded-lg shadow border border-subtle overflow-hidden">
     @if (borrows.length > 0) {
       <div class="overflow-x-auto">
         <table class="w-full">
-          <thead class="bg-gray-50 dark:bg-gray-700">
+          <thead class="bg-table-header">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                เลขที่เล่มทะเบียน
+              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                à¹€à¸¥à¸‚à¸—à¸µà¹ˆà¹€à¸¥à¹ˆà¸¡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                ชื่อเล่มทะเบียน
+              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                à¸Šà¸·à¹ˆà¸­à¹€à¸¥à¹ˆà¸¡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                ผู้ยืม
+              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                à¸œà¸¹à¹‰à¸¢à¸·à¸¡
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                วันที่ยืม
+              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                à¸§à¸±à¸™à¸—à¸µà¹ˆà¸¢à¸·à¸¡
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                เวลาที่ยืม
+              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                à¹€à¸§à¸¥à¸²à¸—à¸µà¹ˆà¸¢à¸·à¸¡
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                เหตุผล
+              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                à¹€à¸«à¸•à¸¸à¸œà¸¥
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                สถานะ
+              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                à¸ªà¸–à¸²à¸™à¸°
               </th>
             </tr>
           </thead>
-          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody class="bg-surface divide-y divide-subtle">
             @for (borrow of borrows; track borrow.id) {
-              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+              <tr class="hover:bg-surface-hover">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">
                   {{ borrow.registryBook.bookNumber }}
                 </td>
-                <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
+                <td class="px-6 py-4 text-sm text-primary">
                   {{ borrow.registryBook.title }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-primary">
                   {{ borrow.borrowerName }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-muted">
                   {{ borrow.borrowedAt | date:'dd/MM/yyyy' }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-muted">
                   {{ borrow.borrowedAt | date:'HH:mm' }}
                 </td>
-                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                <td class="px-6 py-4 text-sm text-muted">
                   {{ borrow.reason || '-' }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   @if (borrow.status === 'active') {
-                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
-                      กำลังยืม
+                    <span class="badge badge-warning">
+                      à¸à¸³à¸¥à¸±à¸‡à¸¢à¸·à¸¡
                     </span>
                   } @else {
-                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                      คืนแล้ว
+                    <span class="badge badge-success">
+                      à¸„à¸·à¸™à¹à¸¥à¹‰à¸§
                     </span>
                   }
                 </td>
@@ -148,12 +148,29 @@
       </div>
     } @else {
       <div class="p-12 text-center">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="mx-auto h-12 w-12 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
         </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">ไม่มีข้อมูลการยืม</h3>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">ไม่มีข้อมูลการยืมในเดือน {{ getMonthName(selectedMonth) }} {{ selectedYear }}</p>
+        <h3 class="mt-2 text-sm font-medium text-primary">à¹„à¸¡à¹ˆà¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸à¸²à¸£à¸¢à¸·à¸¡</h3>
+        <p class="mt-1 text-sm text-muted">à¹„à¸¡à¹ˆà¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸à¸²à¸£à¸¢à¸·à¸¡à¹ƒà¸™à¹€à¸”à¸·à¸­à¸™ {{ getMonthName(selectedMonth) }} {{ selectedYear }}</p>
       </div>
     }
   </div>
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

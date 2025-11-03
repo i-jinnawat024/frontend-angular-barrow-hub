@@ -1,53 +1,53 @@
-<div class="container mx-auto px-4 py-8 max-w-2xl">
+﻿<div class="container mx-auto px-4 py-8 max-w-2xl">
   <!-- Header -->
   <div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-      {{ isEditMode ? 'แก้ไขข้อมูลเจ้าหน้าที่' : 'เพิ่มเจ้าหน้าที่ใหม่' }}
+    <h1 class="text-3xl font-bold text-primary">
+      {{ isEditMode ? 'à¹à¸à¹‰à¹„à¸‚à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹€à¸ˆà¹‰à¸²à¸«à¸™à¹‰à¸²à¸—à¸µà¹ˆ' : 'à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸ˆà¹‰à¸²à¸«à¸™à¹‰à¸²à¸—à¸µà¹ˆà¹ƒà¸«à¸¡à¹ˆ' }}
     </h1>
-    <p class="mt-2 text-gray-600 dark:text-gray-400">
-      {{ isEditMode ? 'แก้ไขข้อมูลเจ้าหน้าที่' : 'กรอกข้อมูลเพื่อเพิ่มเจ้าหน้าที่ใหม่' }}
+    <p class="mt-2 text-secondary">
+      {{ isEditMode ? 'à¹à¸à¹‰à¹„à¸‚à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹€à¸ˆà¹‰à¸²à¸«à¸™à¹‰à¸²à¸—à¸µà¹ˆ' : 'à¸à¸£à¸­à¸à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹€à¸žà¸·à¹ˆà¸­à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸ˆà¹‰à¸²à¸«à¸™à¹‰à¸²à¸—à¸µà¹ˆà¹ƒà¸«à¸¡à¹ˆ' }}
     </p>
   </div>
 
   <!-- Form -->
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-surface rounded-lg shadow border border-subtle p-6">
     <div class="space-y-6">
       <!-- Name -->
       <div>
-        <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          ชื่อ-นามสกุล <span class="text-red-500">*</span>
+        <label for="name" class="form-label">
+          à¸Šà¸·à¹ˆà¸­-à¸™à¸²à¸¡à¸ªà¸à¸¸à¸¥ <span class="text-danger">*</span>
         </label>
         <input
           type="text"
           id="name"
           formControlName="name"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          placeholder="เช่น สมชาย ใจดี"
+          class="form-control"
+          placeholder="à¹€à¸Šà¹ˆà¸™ à¸ªà¸¡à¸Šà¸²à¸¢ à¹ƒà¸ˆà¸”à¸µ"
         />
         @if (form.get('name')?.invalid && form.get('name')?.touched) {
-          <p class="mt-1 text-sm text-red-600">กรุณากรอกชื่อ-นามสกุล</p>
+          <p class="mt-1 text-sm text-danger">à¸à¸£à¸¸à¸“à¸²à¸à¸£à¸­à¸à¸Šà¸·à¹ˆà¸­-à¸™à¸²à¸¡à¸ªà¸à¸¸à¸¥</p>
         }
       </div>
 
       <!-- Email -->
       <div>
-        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          อีเมล <span class="text-red-500">*</span>
+        <label for="email" class="form-label">
+          à¸­à¸µà¹€à¸¡à¸¥ <span class="text-danger">*</span>
         </label>
         <input
           type="email"
           id="email"
           formControlName="email"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          placeholder="เช่น somchai@example.com"
+          class="form-control"
+          placeholder="à¹€à¸Šà¹ˆà¸™ somchai@example.com"
         />
         @if (form.get('email')?.invalid && form.get('email')?.touched) {
-          <p class="mt-1 text-sm text-red-600">
+          <p class="mt-1 text-sm text-danger">
             @if (form.get('email')?.errors?.['required']) {
-              กรุณากรอกอีเมล
+              à¸à¸£à¸¸à¸“à¸²à¸à¸£à¸­à¸à¸­à¸µà¹€à¸¡à¸¥
             }
             @if (form.get('email')?.errors?.['email']) {
-              อีเมลไม่ถูกต้อง
+              à¸­à¸µà¹€à¸¡à¸¥à¹„à¸¡à¹ˆà¸–à¸¹à¸à¸•à¹‰à¸­à¸‡
             }
           </p>
         }
@@ -55,46 +55,46 @@
 
       <!-- Phone -->
       <div>
-        <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          เบอร์โทรศัพท์
+        <label for="phone" class="form-label">
+          à¹€à¸šà¸­à¸£à¹Œà¹‚à¸—à¸£à¸¨à¸±à¸žà¸—à¹Œ
         </label>
         <input
           type="tel"
           id="phone"
           formControlName="phone"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          placeholder="เช่น 081-234-5678"
+          class="form-control"
+          placeholder="à¹€à¸Šà¹ˆà¸™ 081-234-5678"
         />
       </div>
 
       <!-- Position -->
       <div>
-        <label for="position" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          ตำแหน่ง <span class="text-red-500">*</span>
+        <label for="position" class="form-label">
+          à¸•à¸³à¹à¸«à¸™à¹ˆà¸‡ <span class="text-danger">*</span>
         </label>
         <input
           type="text"
           id="position"
           formControlName="position"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          placeholder="เช่น ผู้จัดการ"
+          class="form-control"
+          placeholder="à¹€à¸Šà¹ˆà¸™ à¸œà¸¹à¹‰à¸ˆà¸±à¸”à¸à¸²à¸£"
         />
         @if (form.get('position')?.invalid && form.get('position')?.touched) {
-          <p class="mt-1 text-sm text-red-600">กรุณากรอกตำแหน่ง</p>
+          <p class="mt-1 text-sm text-danger">à¸à¸£à¸¸à¸“à¸²à¸à¸£à¸­à¸à¸•à¸³à¹à¸«à¸™à¹ˆà¸‡</p>
         }
       </div>
 
       <!-- Department -->
       <div>
-        <label for="department" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          แผนก
+        <label for="department" class="form-label">
+          à¹à¸œà¸™à¸
         </label>
         <input
           type="text"
           id="department"
           formControlName="department"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          placeholder="เช่น ฝ่ายบริหาร"
+          class="form-control"
+          placeholder="à¹€à¸Šà¹ˆà¸™ à¸à¹ˆà¸²à¸¢à¸šà¸£à¸´à¸«à¸²à¸£"
         />
       </div>
 
@@ -105,9 +105,9 @@
             <input
               type="checkbox"
               formControlName="isActive"
-              class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              class="h-4 w-4 rounded border-subtle accent-primary"
             />
-            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">ใช้งาน</span>
+            <span class="ml-2 text-sm text-secondary">à¹ƒà¸Šà¹‰à¸‡à¸²à¸™</span>
           </label>
         </div>
       }
@@ -117,19 +117,30 @@
     <div class="mt-6 flex items-center justify-end gap-3">
       <button
         type="button"
-        class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+        class="btn-secondary"
         (click)="cancel()"
       >
-        ยกเลิก
+        à¸¢à¸à¹€à¸¥à¸´à¸
       </button>
       <button
         type="submit"
-        class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        class="btn-primary"
         [disabled]="form.invalid"
       >
-        {{ isEditMode ? 'บันทึกการแก้ไข' : 'เพิ่มเจ้าหน้าที่' }}
+        {{ isEditMode ? 'à¸šà¸±à¸™à¸—à¸¶à¸à¸à¸²à¸£à¹à¸à¹‰à¹„à¸‚' : 'à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸ˆà¹‰à¸²à¸«à¸™à¹‰à¸²à¸—à¸µà¹ˆ' }}
       </button>
     </div>
   </form>
 </div>
+
+
+
+
+
+
+
+
+
+
+
 

@@ -1,50 +1,50 @@
-<div class="container mx-auto px-4 py-8 max-w-2xl">
+﻿<div class="container mx-auto px-4 py-8 max-w-2xl">
   <!-- Header -->
   <div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">ยืมเล่มทะเบียน</h1>
-    <p class="mt-2 text-gray-600 dark:text-gray-400">กรอกข้อมูลเพื่อยืมเล่มทะเบียน</p>
+    <h1 class="text-3xl font-bold text-primary">à¸¢à¸·à¸¡à¹€à¸¥à¹ˆà¸¡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™</h1>
+    <p class="mt-2 text-secondary">à¸à¸£à¸­à¸à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹€à¸žà¸·à¹ˆà¸­à¸¢à¸·à¸¡à¹€à¸¥à¹ˆà¸¡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™</p>
   </div>
 
   <!-- Form -->
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-surface rounded-lg shadow border border-subtle p-6">
     <div class="space-y-6">
       <!-- Registry Book -->
       <div>
-        <label for="registryBookId" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          เล่มทะเบียน <span class="text-red-500">*</span>
+        <label for="registryBookId" class="form-label">
+          à¹€à¸¥à¹ˆà¸¡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™ <span class="text-danger">*</span>
         </label>
         <select
           id="registryBookId"
           formControlName="registryBookId"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          class="form-control"
         >
-          <option value="">เลือกเล่มทะเบียน</option>
+          <option value="">à¹€à¸¥à¸·à¸­à¸à¹€à¸¥à¹ˆà¸¡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™</option>
           @for (book of availableBooks; track book.id) {
             <option [value]="book.id">{{ book.bookNumber }} - {{ book.title }}</option>
           }
         </select>
         @if (form.get('registryBookId')?.invalid && form.get('registryBookId')?.touched) {
-          <p class="mt-1 text-sm text-red-600">กรุณาเลือกเล่มทะเบียน</p>
+          <p class="mt-1 text-sm text-danger">à¸à¸£à¸¸à¸“à¸²à¹€à¸¥à¸·à¸­à¸à¹€à¸¥à¹ˆà¸¡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™</p>
         }
         @if (availableBooks.length === 0) {
-          <p class="mt-1 text-sm text-yellow-600">ไม่มีเล่มทะเบียนที่พร้อมใช้งาน</p>
+          <p class="mt-1 text-sm text-warning">à¹„à¸¡à¹ˆà¸¡à¸µà¹€à¸¥à¹ˆà¸¡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™à¸—à¸µà¹ˆà¸žà¸£à¹‰à¸­à¸¡à¹ƒà¸Šà¹‰à¸‡à¸²à¸™</p>
         }
       </div>
 
       <!-- Borrower Name -->
       <div>
-        <label for="borrowerName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          ชื่อคนยืม <span class="text-red-500">*</span>
+        <label for="borrowerName" class="form-label">
+          à¸Šà¸·à¹ˆà¸­à¸„à¸™à¸¢à¸·à¸¡ <span class="text-danger">*</span>
         </label>
         <input
           type="text"
           id="borrowerName"
           formControlName="borrowerName"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          placeholder="เช่น สมชาย ใจดี"
+          class="form-control"
+          placeholder="à¹€à¸Šà¹ˆà¸™ à¸ªà¸¡à¸Šà¸²à¸¢ à¹ƒà¸ˆà¸”à¸µ"
         />
         @if (form.get('borrowerName')?.invalid && form.get('borrowerName')?.touched) {
-          <p class="mt-1 text-sm text-red-600">กรุณากรอกชื่อคนยืม</p>
+          <p class="mt-1 text-sm text-danger">à¸à¸£à¸¸à¸“à¸²à¸à¸£à¸­à¸à¸Šà¸·à¹ˆà¸­à¸„à¸™à¸¢à¸·à¸¡</p>
         }
       </div>
 
@@ -52,48 +52,48 @@
       <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <!-- Borrow Date -->
         <div>
-          <label for="borrowedAt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            วันที่ยืม <span class="text-red-500">*</span>
+          <label for="borrowedAt" class="form-label">
+            à¸§à¸±à¸™à¸—à¸µà¹ˆà¸¢à¸·à¸¡ <span class="text-danger">*</span>
           </label>
           <input
             type="date"
             id="borrowedAt"
             formControlName="borrowedAt"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            class="form-control"
           />
           @if (form.get('borrowedAt')?.invalid && form.get('borrowedAt')?.touched) {
-            <p class="mt-1 text-sm text-red-600">กรุณาเลือกวันที่ยืม</p>
+            <p class="mt-1 text-sm text-danger">à¸à¸£à¸¸à¸“à¸²à¹€à¸¥à¸·à¸­à¸à¸§à¸±à¸™à¸—à¸µà¹ˆà¸¢à¸·à¸¡</p>
           }
         </div>
 
         <!-- Borrow Time -->
         <div>
-          <label for="borrowedTime" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            เวลาที่ยืม <span class="text-red-500">*</span>
+          <label for="borrowedTime" class="form-label">
+            à¹€à¸§à¸¥à¸²à¸—à¸µà¹ˆà¸¢à¸·à¸¡ <span class="text-danger">*</span>
           </label>
           <input
             type="time"
             id="borrowedTime"
             formControlName="borrowedTime"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            class="form-control"
           />
           @if (form.get('borrowedTime')?.invalid && form.get('borrowedTime')?.touched) {
-            <p class="mt-1 text-sm text-red-600">กรุณาเลือกเวลาที่ยืม</p>
+            <p class="mt-1 text-sm text-danger">à¸à¸£à¸¸à¸“à¸²à¹€à¸¥à¸·à¸­à¸à¹€à¸§à¸¥à¸²à¸—à¸µà¹ˆà¸¢à¸·à¸¡</p>
           }
         </div>
       </div>
 
       <!-- Reason -->
       <div>
-        <label for="reason" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          เหตุผลยืม (ไม่บังคับ)
+        <label for="reason" class="form-label">
+          à¹€à¸«à¸•à¸¸à¸œà¸¥à¸¢à¸·à¸¡ (à¹„à¸¡à¹ˆà¸šà¸±à¸‡à¸„à¸±à¸š)
         </label>
         <textarea
           id="reason"
           formControlName="reason"
           rows="3"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          placeholder="ระบุเหตุผลในการยืม (ถ้ามี)"
+          class="form-control"
+          placeholder="à¸£à¸°à¸šà¸¸à¹€à¸«à¸•à¸¸à¸œà¸¥à¹ƒà¸™à¸à¸²à¸£à¸¢à¸·à¸¡ (à¸–à¹‰à¸²à¸¡à¸µ)"
         ></textarea>
       </div>
     </div>
@@ -102,19 +102,29 @@
     <div class="mt-6 flex items-center justify-end gap-3">
       <button
         type="button"
-        class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+        class="btn-secondary"
         (click)="cancel()"
       >
-        ยกเลิก
+        à¸¢à¸à¹€à¸¥à¸´à¸
       </button>
       <button
         type="submit"
-        class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        class="btn-primary"
         [disabled]="form.invalid || availableBooks.length === 0"
       >
-        ยืมเล่มทะเบียน
+        à¸¢à¸·à¸¡à¹€à¸¥à¹ˆà¸¡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™
       </button>
     </div>
   </form>
 </div>
+
+
+
+
+
+
+
+
+
+
 
