@@ -4,10 +4,47 @@
   <meta charset="utf-8">
   <title>FrontendAngularBarrowHub</title>
   <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
+  <script>
+    (function () {
+      const storageKey = 'theme-preference';
+
+      try {
+        const doc = document.documentElement;
+        const body = document.body;
+        if (!doc || !body) {
+          return;
+        }
+
+        const stored = window.localStorage.getItem(storageKey);
+        const isStoredMode = stored === 'light' || stored === 'dark';
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const preference = isStoredMode ? stored : 'system';
+        const mode = preference === 'dark' || (preference === 'system' && systemPrefersDark) ? 'dark' : 'light';
+        const useDark = mode === 'dark';
+
+        doc.classList.toggle('dark', useDark);
+        body.classList.toggle('dark', useDark);
+
+        doc.setAttribute('data-theme', mode);
+        body.setAttribute('data-theme', mode);
+
+        doc.setAttribute('data-mode', mode);
+        body.setAttribute('data-mode', mode);
+
+        doc.setAttribute('data-color-scheme', mode);
+        body.setAttribute('data-color-scheme', mode);
+
+        doc.style.colorScheme = mode;
+        body.style.colorScheme = mode;
+      } catch (error) {
+        console.warn('Theme bootstrap failed:', error);
+      }
+    })();
+  </script>
   <app-root></app-root>
 </body>
 </html>
