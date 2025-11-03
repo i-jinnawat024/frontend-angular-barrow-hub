@@ -1,8 +1,8 @@
 ﻿<div class="container px-4 py-8">
   <!-- Header -->
   <div class="mb-8">
-    <h1 class="text-3xl font-bold text-primary">à¹à¸”à¸Šà¸šà¸­à¸£à¹Œà¸”</h1>
-    <p class="mt-2 text-secondary">à¸ à¸²à¸žà¸£à¸§à¸¡à¸‚à¸­à¸‡à¸£à¸°à¸šà¸šà¸ˆà¸±à¸”à¸à¸²à¸£à¹€à¸­à¸à¸ªà¸²à¸£à¹à¸¥à¸°à¸à¸²à¸£à¸¢à¸·à¸¡</p>
+    <h1 class="text-3xl font-bold text-primary">แดชบอร์ด</h1>
+    <p class="mt-2 text-secondary">ภาพรวมข้อมูลระบบจัดการเอกสารและการยืม</p>
   </div>
 
   <!-- Stats Cards -->
@@ -11,7 +11,7 @@
     <div class="bg-surface rounded-lg shadow p-6 border border-subtle">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-sm font-medium text-secondary">à¹€à¸­à¸à¸ªà¸²à¸£à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”</p>
+          <p class="text-sm font-medium text-secondary">เอกสารทั้งหมด</p>
           <p class="text-3xl font-bold text-primary mt-2">
             {{ stats().totalDocuments }}
           </p>
@@ -28,7 +28,7 @@
     <div class="bg-surface rounded-lg shadow p-6 border border-subtle">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-sm font-medium text-secondary">à¹€à¸ˆà¹‰à¸²à¸«à¸™à¹‰à¸²à¸—à¸µà¹ˆà¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”</p>
+          <p class="text-sm font-medium text-secondary">บุคลากรทั้งหมด</p>
           <p class="text-3xl font-bold text-primary mt-2">
             {{ stats().totalStaff }}
           </p>
@@ -45,7 +45,7 @@
     <div class="bg-surface rounded-lg shadow p-6 border border-subtle">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-sm font-medium text-secondary">à¹€à¸­à¸à¸ªà¸²à¸£à¸—à¸µà¹ˆà¸–à¸¹à¸à¸¢à¸·à¸¡à¸­à¸¢à¸¹à¹ˆ</p>
+          <p class="text-sm font-medium text-secondary">เอกสารที่ถูกยืม</p>
           <p class="text-3xl font-bold text-primary mt-2">
             {{ stats().borrowedDocuments }}
           </p>
@@ -62,8 +62,8 @@
   <!-- Active Loans Table -->
   <div class="bg-surface rounded-lg shadow border border-subtle">
     <div class="p-6 border-b border-subtle">
-      <h2 class="text-xl font-bold text-primary">à¹€à¸­à¸à¸ªà¸²à¸£à¸—à¸µà¹ˆà¸–à¸¹à¸à¸¢à¸·à¸¡à¸­à¸¢à¸¹à¹ˆ</h2>
-      <p class="mt-1 text-sm text-secondary">à¸£à¸²à¸¢à¸à¸²à¸£à¹€à¸­à¸à¸ªà¸²à¸£à¸—à¸µà¹ˆà¸à¸³à¸¥à¸±à¸‡à¸–à¸¹à¸à¸¢à¸·à¸¡à¸­à¸¢à¸¹à¹ˆà¹ƒà¸™à¸›à¸±à¸ˆà¸ˆà¸¸à¸šà¸±à¸™</p>
+      <h2 class="text-xl font-bold text-primary">เอกสารที่ถูกยืมอยู่</h2>
+      <p class="mt-1 text-sm text-secondary">รายการเอกสารทั้งหมดที่ถูกยืมอยู่ในขณะนี้</p>
     </div>
 
     <div class="overflow-x-auto">
@@ -72,19 +72,19 @@
           <thead class="bg-table-header">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                à¹€à¸­à¸à¸ªà¸²à¸£
+                เอกสาร
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                à¸œà¸¹à¹‰à¸¢à¸·à¸¡
+                ผู้ยืม
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                à¸§à¸±à¸™à¸—à¸µà¹ˆà¸¢à¸·à¸¡
+                วันที่ยืม
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                à¸à¸³à¸«à¸™à¸”à¸„à¸·à¸™
+                กำหนดคืน
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                à¸ªà¸–à¸²à¸™à¸°
+                สถานะ
               </th>
             </tr>
           </thead>
@@ -119,7 +119,7 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span class="badge badge-warning">
-                    à¸à¸³à¸¥à¸±à¸‡à¸¢à¸·à¸¡
+                    กำลังยืม
                   </span>
                 </td>
               </tr>
@@ -131,30 +131,10 @@
           <svg class="mx-auto h-12 w-12 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
           </svg>
-          <h3 class="mt-2 text-sm font-medium text-primary">à¹„à¸¡à¹ˆà¸¡à¸µà¹€à¸­à¸à¸ªà¸²à¸£à¸—à¸µà¹ˆà¸–à¸¹à¸à¸¢à¸·à¸¡à¸­à¸¢à¸¹à¹ˆ</h3>
-          <p class="mt-1 text-sm text-muted">à¹„à¸¡à¹ˆà¸¡à¸µà¹€à¸­à¸à¸ªà¸²à¸£à¹ƒà¸”à¸—à¸µà¹ˆà¸à¸³à¸¥à¸±à¸‡à¸–à¸¹à¸à¸¢à¸·à¸¡à¸­à¸¢à¸¹à¹ˆà¹ƒà¸™à¸‚à¸“à¸°à¸™à¸µà¹‰</p>
+          <h3 class="mt-2 text-sm font-medium text-primary">ไม่มีเอกสารที่ถูกยืม</h3>
+          <p class="mt-1 text-sm text-muted">ไม่มีเอกสารใดที่กำลังถูกยืมอยู่ในขณะนี้</p>
         </div>
       }
     </div>
   </div>
 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

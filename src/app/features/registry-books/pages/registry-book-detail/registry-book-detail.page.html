@@ -9,7 +9,7 @@
       <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
       </svg>
-      à¸à¸¥à¸±à¸š
+      กลับ
     </button>
     <button
       type="button"
@@ -19,7 +19,7 @@
       <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
       </svg>
-      à¹à¸à¹‰à¹„à¸‚
+      แก้ไข
     </button>
   </div>
 
@@ -28,15 +28,15 @@
       <!-- Header Section -->
       <div class="px-6 py-5 border-b border-subtle bg-surface-alt">
         <h1 class="text-2xl font-bold text-primary">{{ registryBook.title }}</h1>
-        <p class="mt-1 text-sm text-muted">à¹€à¸¥à¸‚à¸—à¸µà¹ˆà¹€à¸¥à¹ˆà¸¡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™: {{ registryBook.bookNumber }}</p>
+        <p class="mt-1 text-sm text-muted">เลขทะเบียนหนังสือ: {{ registryBook.bookNumber }}</p>
       </div>
 
       <!-- Content Section -->
       <div class="px-6 py-5">
-        <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <!-- Description -->
           <div class="sm:col-span-2">
-            <dt class="text-sm font-medium text-muted">à¸„à¸³à¸­à¸˜à¸´à¸šà¸²à¸¢</dt>
+            <dt class="text-sm font-medium text-muted">คำอธิบาย</dt>
             <dd class="mt-1 text-sm text-primary">
               {{ registryBook.description || '-' }}
             </dd>
@@ -44,54 +44,43 @@
 
           <!-- Status -->
           <div>
-            <dt class="text-sm font-medium text-muted">à¸ªà¸–à¸²à¸™à¸°</dt>
-            <dd class="mt-1">
+            <div class="text-sm font-medium text-muted">สถานะ</div>
+            <div class="mt-1">
               @if (registryBook.status === 'available') {
                 <span class="badge badge-success">
-                  à¸žà¸£à¹‰à¸­à¸¡à¹ƒà¸Šà¹‰à¸‡à¸²à¸™
+                  พร้อมให้ยืม
                 </span>
               }
               @if (registryBook.status === 'borrowed') {
                 <span class="badge badge-warning">
-                  à¸–à¸¹à¸à¸¢à¸·à¸¡
+                  ถูกยืม
                 </span>
               }
               @if (registryBook.status === 'archived') {
                 <span class="badge badge-neutral">
-                  à¹€à¸à¹‡à¸šà¹„à¸§à¹‰
+                  ถูกเก็บ
                 </span>
               }
-            </dd>
+            </div>
           </div>
 
           <!-- Created At -->
           <div>
-            <dt class="text-sm font-medium text-muted">à¸§à¸±à¸™à¸—à¸µà¹ˆà¸ªà¸£à¹‰à¸²à¸‡</dt>
-            <dd class="mt-1 text-sm text-primary">
+            <div class="text-sm font-medium text-muted">วันที่สร้าง</div>
+            <div class="mt-1 text-sm text-primary">
               {{ registryBook.createdAt | date:'dd/MM/yyyy HH:mm' }}
-            </dd>
+            </div>
           </div>
 
           <!-- Updated At -->
           <div>
-            <dt class="text-sm font-medium text-muted">à¸­à¸±à¸›à¹€à¸”à¸•à¸¥à¹ˆà¸²à¸ªà¸¸à¸”</dt>
-            <dd class="mt-1 text-sm text-primary">
+            <div class="text-sm font-medium text-muted">วันที่อัพเดท</div>
+            <div class="mt-1 text-sm text-primary">
               {{ registryBook.updatedAt | date:'dd/MM/yyyy HH:mm' }}
-            </dd>
+            </div>
           </div>
-        </dl>
+        </div>
       </div>
     </div>
   }
 </div>
-
-
-
-
-
-
-
-
-
-
-

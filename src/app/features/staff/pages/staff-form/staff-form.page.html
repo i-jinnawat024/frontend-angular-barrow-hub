@@ -2,10 +2,10 @@
   <!-- Header -->
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-primary">
-      {{ isEditMode ? 'à¹à¸à¹‰à¹„à¸‚à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹€à¸ˆà¹‰à¸²à¸«à¸™à¹‰à¸²à¸—à¸µà¹ˆ' : 'à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸ˆà¹‰à¸²à¸«à¸™à¹‰à¸²à¸—à¸µà¹ˆà¹ƒà¸«à¸¡à¹ˆ' }}
+      {{ isEditMode ? 'แก้ไขข้อมูลบุคลากร' : 'เพิ่มบุคลากรใหม่' }}
     </h1>
     <p class="mt-2 text-secondary">
-      {{ isEditMode ? 'à¹à¸à¹‰à¹„à¸‚à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹€à¸ˆà¹‰à¸²à¸«à¸™à¹‰à¸²à¸—à¸µà¹ˆ' : 'à¸à¸£à¸­à¸à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹€à¸žà¸·à¹ˆà¸­à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸ˆà¹‰à¸²à¸«à¸™à¹‰à¸²à¸—à¸µà¹ˆà¹ƒà¸«à¸¡à¹ˆ' }}
+      {{ isEditMode ? 'แก้ไขข้อมูลบุคลากร' : 'กรุณากรอกข้อมูลเพื่อเพิ่มบุคลากรใหม่' }}
     </p>
   </div>
 
@@ -15,39 +15,39 @@
       <!-- Name -->
       <div>
         <label for="name" class="form-label">
-          à¸Šà¸·à¹ˆà¸­-à¸™à¸²à¸¡à¸ªà¸à¸¸à¸¥ <span class="text-danger">*</span>
+          ชื่อ-นามสกุล <span class="text-danger">*</span>
         </label>
         <input
           type="text"
           id="name"
           formControlName="name"
           class="form-control"
-          placeholder="à¹€à¸Šà¹ˆà¸™ à¸ªà¸¡à¸Šà¸²à¸¢ à¹ƒà¸ˆà¸”à¸µ"
+          placeholder="เช่น สมชาย ดีมาก"
         />
         @if (form.get('name')?.invalid && form.get('name')?.touched) {
-          <p class="mt-1 text-sm text-danger">à¸à¸£à¸¸à¸“à¸²à¸à¸£à¸­à¸à¸Šà¸·à¹ˆà¸­-à¸™à¸²à¸¡à¸ªà¸à¸¸à¸¥</p>
+          <p class="mt-1 text-sm text-danger">กรุณากรอกชื่อ-นามสกุล</p>
         }
       </div>
 
       <!-- Email -->
       <div>
         <label for="email" class="form-label">
-          à¸­à¸µà¹€à¸¡à¸¥ <span class="text-danger">*</span>
+          อีเมล <span class="text-danger">*</span>
         </label>
         <input
           type="email"
           id="email"
           formControlName="email"
           class="form-control"
-          placeholder="à¹€à¸Šà¹ˆà¸™ somchai@example.com"
+          placeholder="เช่น somchai@example.com"
         />
         @if (form.get('email')?.invalid && form.get('email')?.touched) {
           <p class="mt-1 text-sm text-danger">
             @if (form.get('email')?.errors?.['required']) {
-              à¸à¸£à¸¸à¸“à¸²à¸à¸£à¸­à¸à¸­à¸µà¹€à¸¡à¸¥
+              กรุณากรอกอีเมล
             }
             @if (form.get('email')?.errors?.['email']) {
-              à¸­à¸µà¹€à¸¡à¸¥à¹„à¸¡à¹ˆà¸–à¸¹à¸à¸•à¹‰à¸­à¸‡
+              อีเมลไม่ถูกต้อง
             }
           </p>
         }
@@ -56,45 +56,45 @@
       <!-- Phone -->
       <div>
         <label for="phone" class="form-label">
-          à¹€à¸šà¸­à¸£à¹Œà¹‚à¸—à¸£à¸¨à¸±à¸žà¸—à¹Œ
+          เบอร์โทรศัพท์
         </label>
         <input
           type="tel"
           id="phone"
           formControlName="phone"
           class="form-control"
-          placeholder="à¹€à¸Šà¹ˆà¸™ 081-234-5678"
+          placeholder="เช่น 081-234-5678"
         />
       </div>
 
       <!-- Position -->
       <div>
         <label for="position" class="form-label">
-          à¸•à¸³à¹à¸«à¸™à¹ˆà¸‡ <span class="text-danger">*</span>
+          ตำแหน่ง <span class="text-danger">*</span>
         </label>
         <input
           type="text"
           id="position"
           formControlName="position"
           class="form-control"
-          placeholder="à¹€à¸Šà¹ˆà¸™ à¸œà¸¹à¹‰à¸ˆà¸±à¸”à¸à¸²à¸£"
+          placeholder="เช่น พนักงาน"
         />
         @if (form.get('position')?.invalid && form.get('position')?.touched) {
-          <p class="mt-1 text-sm text-danger">à¸à¸£à¸¸à¸“à¸²à¸à¸£à¸­à¸à¸•à¸³à¹à¸«à¸™à¹ˆà¸‡</p>
+          <p class="mt-1 text-sm text-danger">กรุณากรอกตำแหน่ง</p>
         }
       </div>
 
       <!-- Department -->
       <div>
         <label for="department" class="form-label">
-          à¹à¸œà¸™à¸
+          แผนก
         </label>
         <input
           type="text"
           id="department"
           formControlName="department"
           class="form-control"
-          placeholder="à¹€à¸Šà¹ˆà¸™ à¸à¹ˆà¸²à¸¢à¸šà¸£à¸´à¸«à¸²à¸£"
+          placeholder="เช่น สำนักงาน"
         />
       </div>
 
@@ -107,7 +107,7 @@
               formControlName="isActive"
               class="h-4 w-4 rounded border-subtle accent-primary"
             />
-            <span class="ml-2 text-sm text-secondary">à¹ƒà¸Šà¹‰à¸‡à¸²à¸™</span>
+            <span class="ml-2 text-sm text-secondary">ใช้งาน</span>
           </label>
         </div>
       }
@@ -120,27 +120,15 @@
         class="btn-secondary"
         (click)="cancel()"
       >
-        à¸¢à¸à¹€à¸¥à¸´à¸
+        ยกเลิก
       </button>
       <button
         type="submit"
         class="btn-primary"
         [disabled]="form.invalid"
       >
-        {{ isEditMode ? 'à¸šà¸±à¸™à¸—à¸¶à¸à¸à¸²à¸£à¹à¸à¹‰à¹„à¸‚' : 'à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸ˆà¹‰à¸²à¸«à¸™à¹‰à¸²à¸—à¸µà¹ˆ' }}
+        {{ isEditMode ? 'บันทึกการแก้ไข' : 'เพิ่มบุคลากร' }}
       </button>
     </div>
   </form>
 </div>
-
-
-
-
-
-
-
-
-
-
-
-
