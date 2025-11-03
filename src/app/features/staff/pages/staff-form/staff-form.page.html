@@ -1,48 +1,48 @@
-<div class="container mx-auto px-4 py-8 max-w-2xl">
+﻿<div class="container mx-auto px-4 py-8 max-w-2xl">
   <!-- Header -->
   <div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-      {{ isEditMode ? 'แก้ไขข้อมูลเจ้าหน้าที่' : 'เพิ่มเจ้าหน้าที่ใหม่' }}
+    <h1 class="text-3xl font-bold text-primary">
+      {{ isEditMode ? 'แก้ไขข้อมูลบุคลากร' : 'เพิ่มบุคลากรใหม่' }}
     </h1>
-    <p class="mt-2 text-gray-600 dark:text-gray-400">
-      {{ isEditMode ? 'แก้ไขข้อมูลเจ้าหน้าที่' : 'กรอกข้อมูลเพื่อเพิ่มเจ้าหน้าที่ใหม่' }}
+    <p class="mt-2 text-secondary">
+      {{ isEditMode ? 'แก้ไขข้อมูลบุคลากร' : 'กรุณากรอกข้อมูลเพื่อเพิ่มบุคลากรใหม่' }}
     </p>
   </div>
 
   <!-- Form -->
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-surface rounded-lg shadow border border-subtle p-6">
     <div class="space-y-6">
       <!-- Name -->
       <div>
-        <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          ชื่อ-นามสกุล <span class="text-red-500">*</span>
+        <label for="name" class="form-label">
+          ชื่อ-นามสกุล <span class="text-danger">*</span>
         </label>
         <input
           type="text"
           id="name"
           formControlName="name"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          placeholder="เช่น สมชาย ใจดี"
+          class="form-control"
+          placeholder="เช่น สมชาย ดีมาก"
         />
         @if (form.get('name')?.invalid && form.get('name')?.touched) {
-          <p class="mt-1 text-sm text-red-600">กรุณากรอกชื่อ-นามสกุล</p>
+          <p class="mt-1 text-sm text-danger">กรุณากรอกชื่อ-นามสกุล</p>
         }
       </div>
 
       <!-- Email -->
       <div>
-        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          อีเมล <span class="text-red-500">*</span>
+        <label for="email" class="form-label">
+          อีเมล <span class="text-danger">*</span>
         </label>
         <input
           type="email"
           id="email"
           formControlName="email"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          class="form-control"
           placeholder="เช่น somchai@example.com"
         />
         @if (form.get('email')?.invalid && form.get('email')?.touched) {
-          <p class="mt-1 text-sm text-red-600">
+          <p class="mt-1 text-sm text-danger">
             @if (form.get('email')?.errors?.['required']) {
               กรุณากรอกอีเมล
             }
@@ -55,46 +55,46 @@
 
       <!-- Phone -->
       <div>
-        <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label for="phone" class="form-label">
           เบอร์โทรศัพท์
         </label>
         <input
           type="tel"
           id="phone"
           formControlName="phone"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          class="form-control"
           placeholder="เช่น 081-234-5678"
         />
       </div>
 
       <!-- Position -->
       <div>
-        <label for="position" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          ตำแหน่ง <span class="text-red-500">*</span>
+        <label for="position" class="form-label">
+          ตำแหน่ง <span class="text-danger">*</span>
         </label>
         <input
           type="text"
           id="position"
           formControlName="position"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          placeholder="เช่น ผู้จัดการ"
+          class="form-control"
+          placeholder="เช่น พนักงาน"
         />
         @if (form.get('position')?.invalid && form.get('position')?.touched) {
-          <p class="mt-1 text-sm text-red-600">กรุณากรอกตำแหน่ง</p>
+          <p class="mt-1 text-sm text-danger">กรุณากรอกตำแหน่ง</p>
         }
       </div>
 
       <!-- Department -->
       <div>
-        <label for="department" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label for="department" class="form-label">
           แผนก
         </label>
         <input
           type="text"
           id="department"
           formControlName="department"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          placeholder="เช่น ฝ่ายบริหาร"
+          class="form-control"
+          placeholder="เช่น สำนักงาน"
         />
       </div>
 
@@ -105,9 +105,9 @@
             <input
               type="checkbox"
               formControlName="isActive"
-              class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              class="h-4 w-4 rounded border-subtle accent-primary"
             />
-            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">ใช้งาน</span>
+            <span class="ml-2 text-sm text-secondary">ใช้งาน</span>
           </label>
         </div>
       }
@@ -117,19 +117,18 @@
     <div class="mt-6 flex items-center justify-end gap-3">
       <button
         type="button"
-        class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+        class="btn-secondary"
         (click)="cancel()"
       >
         ยกเลิก
       </button>
       <button
         type="submit"
-        class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        class="btn-primary"
         [disabled]="form.invalid"
       >
-        {{ isEditMode ? 'บันทึกการแก้ไข' : 'เพิ่มเจ้าหน้าที่' }}
+        {{ isEditMode ? 'บันทึกการแก้ไข' : 'เพิ่มบุคลากร' }}
       </button>
     </div>
   </form>
 </div>
-

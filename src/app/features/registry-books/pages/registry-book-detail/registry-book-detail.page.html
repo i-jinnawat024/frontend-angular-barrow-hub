@@ -35,7 +35,7 @@
 
       <!-- Content Section -->
       <div class="px-6 py-5">
-        <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <!-- Description -->
           <div class="sm:col-span-2" id="registry-book-description-section">
             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">คำอธิบาย</dt>
@@ -63,7 +63,7 @@
                   เก็บไว้
                 </span>
               }
-            </dd>
+            </div>
           </div>
 
           <!-- Created At -->
@@ -71,7 +71,7 @@
             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">วันที่สร้าง</dt>
             <dd class="mt-1 text-sm text-gray-900 dark:text-white" id="registry-book-created-at">
               {{ registryBook.createdAt | date:'dd/MM/yyyy HH:mm' }}
-            </dd>
+            </div>
           </div>
 
           <!-- Updated At -->
@@ -79,7 +79,7 @@
             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">อัปเดตล่าสุด</dt>
             <dd class="mt-1 text-sm text-gray-900 dark:text-white" id="registry-book-updated-at">
               {{ registryBook.updatedAt | date:'dd/MM/yyyy HH:mm' }}
-            </dd>
+            </div>
           </div>
         </dl>
 
@@ -142,4 +142,3 @@
     </div>
   }
 </div>
-
