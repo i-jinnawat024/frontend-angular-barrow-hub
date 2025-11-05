@@ -1,9 +1,9 @@
-import { Document } from './document.model';
+import { IDocument } from './document.model';
 import { Staff } from './staff.model';
 
 export interface Loan {
   id: string;
-  document: Document;
+  document: IDocument;
   borrower: Staff;
   borrowedAt: Date;
   expectedReturnAt: Date;

@@ -11,7 +11,7 @@ export class RegistryBookService {
   private registryBooks: RegistryBook[] = [
     {
       id: '1',
-      bookNumber: 'RB-001',
+      bookNumber: 'BH-DOC-001',
       name: 'สมชาย ใจดี',
       description: 'เล่มทะเบียนสำหรับบันทึกเอกสารการประชุม',
       status: 'active',
@@ -20,7 +20,7 @@ export class RegistryBookService {
     },
     {
       id: '2',
-      bookNumber: 'RB-002',
+      bookNumber: 'BH-DOC-002',
       name: 'สมชาย ใจดี',
       description: 'เล่มทะเบียนสำหรับโครงการต่างๆ',
       status: 'borrowed',
@@ -29,7 +29,7 @@ export class RegistryBookService {
     },
     {
       id: '3',
-      bookNumber: 'RB-003',
+      bookNumber: 'BH-DOC-003',
       name: 'สมชาย ใจดี',
       description: 'เล่มทะเบียนสำหรับสัญญาต่างๆ',
       status: 'active',
@@ -38,7 +38,7 @@ export class RegistryBookService {
     },
     {
       id: '4',
-      bookNumber: 'RB-004',
+      bookNumber: 'BH-DOC-004',
       name: 'สมชาย ใจดี',
       description: 'เล่มทะเบียนสำหรับสัญญาต่างๆ',
       status: 'inactive',

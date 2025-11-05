@@ -23,6 +23,9 @@ export class StaffListPage implements OnInit {
   private readonly staffMembers = signal<Staff[]>([]);
   protected readonly searchTerm = signal('');
   protected readonly sortState = signal<SortState>({ ...defaultSortState });
+  protected readonly isDesktopView = computed(() => this.isDesktopScreen());
+  private readonly isDesktopScreen = signal(this.checkIsDesktop());
+
 
   protected readonly columns: Array<{
     label: string;
@@ -37,23 +40,23 @@ export class StaffListPage implements OnInit {
       accessor: (member) => member.name,
     },
     {
-      label: 'อีเมล',
-      property: 'email',
-      sortable: true,
-      accessor: (member) => member.email,
+      label: 'เบอร์โทร',
+      property: 'phoneNumber',
+      sortable: false,
+      accessor: (member) => member.phone,
     },
-    {
-      label: 'ตำแหน่ง',
-      property: 'position',
-      sortable: true,
-      accessor: (member) => member.position,
-    },
-    {
-      label: 'หน่วยงาน',
-      property: 'department',
-      sortable: true,
-      accessor: (member) => member.department ?? '',
-    },
+    // {
+    //   label: 'ตำแหน่ง',
+    //   property: 'position',
+    //   sortable: true,
+    //   accessor: (member) => member.position,
+    // },
+    // {
+    //   label: 'หน่วยงาน',
+    //   property: 'department',
+    //   sortable: true,
+    //   accessor: (member) => member.department ?? '',
+    // },
     {
       label: 'สถานะ',
       property: 'isActive',
@@ -61,7 +64,7 @@ export class StaffListPage implements OnInit {
       accessor: (member) => (member.isActive ? 'active' : 'inactive'),
     },
     {
-      label: 'การจัดการ',
+      label: 'จัดการ',
       property: 'actions',
       sortable: false,
     },
@@ -172,5 +175,8 @@ export class StaffListPage implements OnInit {
   protected isSortedDescending(property: string): boolean {
     const sort = this.sortState();
     return sort.active === property && sort.direction === 'desc';
+  }
+  private checkIsDesktop(): boolean {
+    return typeof window !== 'undefined' && window.innerWidth >= 768;
   }
 }

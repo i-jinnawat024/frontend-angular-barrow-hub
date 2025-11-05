@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { Document } from '../../shared/models/document.model';
+import { IDocument } from '../../shared/models/document.model';
 import { Staff } from '../../shared/models/staff.model';
 import { Loan } from '../../shared/models/loan.model';
 
@@ -15,51 +15,56 @@ export interface DashboardStats {
 })
 export class DashboardService {
   // Mock data
-  private documents: Document[] = [
+  private documents: IDocument[] = [
     {
       id: '1',
-      title: 'เอกสารการประชุมคณะกรรมการ',
-      documentNumber: 'DOC-001',
-      description: 'รายงานการประชุมประจำเดือน',
+      first_name: 'สมชาย',
+      last_name: 'ใจดี',
+      documentNumber: 'BH-DOC-001',
       status: 'available',
       createdAt: new Date('2024-01-15'),
-      updatedAt: new Date('2024-01-15')
+      updatedAt: new Date('2024-01-15'),
+      deletedAt: null
     },
     {
       id: '2',
-      title: 'คู่มือการปฏิบัติงาน',
-      documentNumber: 'DOC-002',
-      description: 'คู่มือสำหรับเจ้าหน้าที่ใหม่',
+      first_name: 'สมหญิง',
+      last_name: 'รักงาน',
+      documentNumber: 'BH-DOC-002',
       status: 'borrowed',
       createdAt: new Date('2024-02-01'),
-      updatedAt: new Date('2024-02-10')
+      updatedAt: new Date('2024-02-10'),
+      deletedAt: null
     },
     {
       id: '3',
-      title: 'รายงานงบประมาณ',
-      documentNumber: 'DOC-003',
-      description: 'รายงานงบประมาณปี 2024',
+      first_name: 'วิชัย',
+      last_name: 'เก่งมาก',
+      documentNumber: 'BH-DOC-003',
       status: 'borrowed',
       createdAt: new Date('2024-01-20'),
-      updatedAt: new Date('2024-02-05')
+      updatedAt: new Date('2024-02-05'),
+      deletedAt: null
     },
     {
       id: '4',
-      title: 'นโยบายการให้บริการ',
-      documentNumber: 'DOC-004',
-      description: 'นโยบายและแนวทางปฏิบัติ',
+      first_name: 'มาลี',
+      last_name: 'สวยงาม',
+      documentNumber: 'BH-DOC-004',
       status: 'available',
       createdAt: new Date('2024-03-01'),
-      updatedAt: new Date('2024-03-01')
+      updatedAt: new Date('2024-03-01'),
+      deletedAt: null
     },
     {
       id: '5',
-      title: 'สัญญาโครงการ',
-      documentNumber: 'DOC-005',
-      description: 'สัญญาโครงการพัฒนาระบบ',
+      first_name: 'ประเสริฐ',
+      last_name: 'ดีมาก',
+      documentNumber: 'BH-DOC-005',
       status: 'borrowed',
       createdAt: new Date('2024-02-15'),
-      updatedAt: new Date('2024-02-20')
+      updatedAt: new Date('2024-02-20'),
+      deletedAt: null
     }
   ];
 
@@ -162,7 +167,7 @@ export class DashboardService {
     return this.stats.asReadonly();
   }
 
-  getDocuments(): Document[] {
+  getDocuments(): IDocument[] {
     return this.documents;
   }
 

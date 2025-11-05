@@ -2,54 +2,51 @@
   <!-- Header -->
   <div class="mb-4 flex items-center justify-between">
     <div>
-      <h1 class="text-3xl font-bold text-primary">ทะเบียนหนังสือ</h1>
-      <p class="mt-2 text-secondary">จัดการรายการทะเบียนหนังสือทั้งหมดในระบบ</p>
+      <h1 class="text-3xl font-bold text-primary">เล่มทะเบียน</h1>
+      <p class="mt-2 text-secondary">จัดการรายการเล่มทะเบียนทั้งหมดในระบบ</p>
     </div>
     <button
       type="button"
       class="btn-primary cursor-pointer"
       mat-button
       (click)="createRegistryBook()"
-      style="font-size: 14px; padding: 4px 12px"
     >
       <mat-icon style="font-size: 18px; width: 18px; height: 18px">add</mat-icon>
       @if (this.isDesktopView()) {
-        <span style="margin-left: 4px">เพิ่มทะเบียนหนังสือ</span>
+        <span style="margin-left: 4px">เพิ่มเล่มทะเบียน</span>
       }
     </button>
   </div>
 
-  <!-- Filters -->
-  <div class="bg-surface rounded-lg border border-subtle shadow-sm p-4">
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div class="relative w-full sm:w-80">
-        <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
-          <mat-icon class="text-secondary text-base">search</mat-icon>
-        </div>
-        <input
-          type="search"
-          class="form-control w-full ps-10 pe-10"
-          placeholder="ค้นหา"
-          autocomplete="off"
-          [value]="searchTerm()"
-          (input)="onSearchTermChange($event)"
-        />
-        @if (hasSearchTerm()) {
-          <button
-            type="button"
-            class="table-search-clear"
-            (click)="clearSearch()"
-            aria-label="ล้างการค้นหา"
-          >
-            <mat-icon class="text-secondary text-base">close</mat-icon>
-          </button>
-        }
-      </div>
-    </div>
-  </div>
-
   <!-- Registry Books Table -->
   <div class="bg-surface rounded-lg shadow border border-subtle overflow-hidden mt-4">
+       <div class="border-b border-subtle bg-surface-alt px-4 py-4">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div class="relative w-full sm:w-80">
+          <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+            <mat-icon class="text-secondary text-base">search</mat-icon>
+          </div>
+          <input
+            type="search"
+            class="form-control w-full ps-10 pe-10"
+            placeholder="ค้นหาเล่มทะเบียน"
+            autocomplete="off"
+            [value]="searchTerm()"
+            (input)="onSearchTermChange($event)"
+          />
+          @if (hasSearchTerm()) {
+            <button
+              type="button"
+              class="table-search-clear"
+              (click)="clearSearch()"
+              aria-label="ล้างการค้นหา"
+            >
+              <mat-icon class="text-secondary text-base">close</mat-icon>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
     <div class="overflow-x-auto">
       @if (filteredRegistryBooks().length > 0) {
         <table class="w-full text-sm text-left rtl:text-right text-secondary">
@@ -177,8 +174,8 @@
               d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
             ></path>
           </svg>
-          <h3 class="mt-2 text-sm font-medium text-primary">ยังไม่มีทะเบียนหนังสือ</h3>
-          <p class="mt-1 text-sm text-muted">เพิ่มทะเบียนหนังสือเล่มแรกเพื่อเริ่มจัดการข้อมูล</p>
+          <h3 class="mt-2 text-sm font-medium text-primary">ยังไม่มีเล่มทะเบียน</h3>
+          <p class="mt-1 text-sm text-muted">เพิ่มเล่มทะเบียนแรกเพื่อเริ่มจัดการข้อมูล</p>
         </div>
       } @else {
         <div class="p-12 text-center">

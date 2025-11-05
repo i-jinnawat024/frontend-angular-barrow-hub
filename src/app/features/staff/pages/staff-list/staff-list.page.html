@@ -5,199 +5,179 @@
       <h1 class="text-3xl font-bold text-primary">รายชื่อบุคลากร</h1>
       <p class="mt-2 text-secondary">จัดการข้อมูลบุคลากรให้เป็นระบบมากยิ่งขึ้น</p>
     </div>
-    <button type="button" class="btn-primary" (click)="createStaff()">
-      <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-      </svg>
-      เพิ่มบุคลากร
+    <button type="button" class="btn-primary cursor-pointer"  mat-button (click)="createStaff()">
+       <mat-icon style="font-size: 18px; width: 18px; height: 18px">add</mat-icon>
+      @if (this.isDesktopView()) {
+        <span style="margin-left: 4px">เพิ่มบุคลากร</span>
+      }
     </button>
-  </div>
-
-  <!-- Filters -->
-  <div class="bg-surface rounded-lg border border-subtle shadow-sm p-4 mb-4">
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div class="relative w-full sm:w-80">
-        <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
-          <mat-icon class="text-secondary text-base">search</mat-icon>
-        </div>
-        <input
-          type="search"
-          class="form-control w-full ps-10 pe-10"
-          placeholder="ค้นหาบุคลากร"
-          autocomplete="off"
-          [value]="searchTerm()"
-          (input)="onSearchTermChange($event)"
-        />
-        @if (hasSearchTerm()) {
-          <button
-            type="button"
-            class="table-search-clear"
-            (click)="clearSearch()"
-            aria-label="ล้างการค้นหา"
-          >
-            <mat-icon class="text-secondary text-base">close</mat-icon>
-          </button>
-        }
-      </div>
-    </div>
   </div>
 
   <!-- Staff Table -->
   <div class="bg-surface rounded-lg shadow border border-subtle overflow-hidden">
+    <div class="border-b border-subtle bg-surface-alt px-4 py-4">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div class="relative w-full sm:w-80">
+          <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+            <mat-icon class="text-secondary text-base">search</mat-icon>
+          </div>
+          <input
+            type="search"
+            class="form-control w-full ps-10 pe-10"
+            placeholder="ค้นหาบุคลากร"
+            autocomplete="off"
+            [value]="searchTerm()"
+            (input)="onSearchTermChange($event)"
+          />
+          @if (hasSearchTerm()) {
+            <button
+              type="button"
+              class="table-search-clear"
+              (click)="clearSearch()"
+              aria-label="ล้างการค้นหา"
+            >
+              <mat-icon class="text-secondary text-base">close</mat-icon>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
     <div class="overflow-x-auto">
       @if (filteredStaff().length > 0) {
-        <table class="w-full text-sm">
-          <thead class="bg-table-header text-xs uppercase text-secondary">
-            <tr>
-              @for (column of columns; track column.property) {
-                <th scope="col" class="px-6 py-3 text-left font-medium tracking-wider">
-                  @if (column.sortable) {
-                    <button
-                      type="button"
-                      class="table-sort-button"
-                      (click)="toggleSort(column.property)"
-                      [attr.aria-sort]="
-                        isSortedAscending(column.property)
-                          ? 'ascending'
-                          : isSortedDescending(column.property)
-                          ? 'descending'
-                          : 'none'
-                      "
-                    >
-                      <span>{{ column.label }}</span>
-                      <mat-icon class="table-sort-icon">
-                        @if (isSortedAscending(column.property)) {
-                          arrow_upward
-                        } @else if (isSortedDescending(column.property)) {
-                          arrow_downward
-                        } @else {
-                          unfold_more
-                        }
-                      </mat-icon>
-                    </button>
-                  } @else {
-                    <span class="table-header-label">{{ column.label }}</span>
-                  }
-                </th>
+      <table class="w-full text-sm">
+        <thead class="bg-table-header text-xs uppercase text-secondary">
+          <tr>
+            @for (column of columns; track column.property) {
+            <th scope="col" class="px-6 py-3 text-left font-medium tracking-wider">
+              @if (column.sortable) {
+              <button
+                type="button"
+                class="table-sort-button"
+                (click)="toggleSort(column.property)"
+                [attr.aria-sort]="
+                  isSortedAscending(column.property)
+                    ? 'ascending'
+                    : isSortedDescending(column.property)
+                    ? 'descending'
+                    : 'none'
+                "
+              >
+                <span>{{ column.label }}</span>
+                <mat-icon class="table-sort-icon">
+                  @if (isSortedAscending(column.property)) { arrow_upward } @else if
+                  (isSortedDescending(column.property)) { arrow_downward } @else { unfold_more }
+                </mat-icon>
+              </button>
+              } @else {
+              <span class="table-header-label">{{ column.label }}</span>
               }
-            </tr>
-          </thead>
-          <tbody class="bg-surface divide-y divide-subtle">
-            @for (member of filteredStaff(); track member.id) {
-              <tr class="hover:bg-surface-hover">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center">
-                    <div
-                      class="h-10 w-10 flex-shrink-0 rounded-full avatar-placeholder flex items-center justify-center"
-                    >
-                      <span class="text-sm font-medium text-secondary">
-                        {{ member.name.charAt(0) }}
-                      </span>
-                    </div>
-                    <div class="ml-4">
-                      <div class="text-sm font-medium text-primary">{{ member.name }}</div>
-                      @if (member.phone) {
-                        <div class="text-sm text-muted">{{ member.phone }}</div>
-                      }
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-primary">
-                  {{ member.email }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-primary">
-                  {{ member.position }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-muted">
-                  {{ member.department || '-' }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  @if (member.isActive) {
-                    <span class="badge badge-success"> ใช้งานอยู่ </span>
-                  } @else {
-                    <span class="badge badge-neutral"> ปิดใช้งาน </span>
-                  }
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div class="flex items-center gap-2">
-                    <button
-                      type="button"
-                      class="text-link hover:text-link-strong"
-                      (click)="viewDetails(member.id)"
-                      title="ดูรายละเอียด"
-                    >
-                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                        ></path>
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                        ></path>
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      class="text-success hover:text-success-strong"
-                      (click)="editStaff(member.id)"
-                      title="แก้ไข"
-                    >
-                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                        ></path>
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      class="text-danger hover:text-danger-strong"
-                      (click)="deleteStaff(member.id)"
-                      title="ลบ"
-                    >
-                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        ></path>
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
+            </th>
             }
-          </tbody>
-        </table>
+          </tr>
+        </thead>
+        <tbody class="bg-surface divide-subtle">
+          @for (member of filteredStaff(); track member.id) {
+          <tr class="hover:bg-surface-hover">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <div
+                  class="h-10 w-10 flex-shrink-0 rounded-full avatar-placeholder flex items-center justify-center"
+                >
+                  <span class="text-sm font-medium text-secondary">
+                    {{ member.name.charAt(0) }}
+                  </span>
+                </div>
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-primary">{{ member.name }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-primary">
+              {{ member.phone || '-' }}
+            </td>
+            <!-- <td class="px-6 py-4 whitespace-nowrap text-sm text-muted">
+                  {{ member.department || '-' }}
+                </td> -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              @if (member.isActive) {
+              <span class="badge badge-success"> ใช้งานอยู่ </span>
+              } @else {
+              <span class="badge badge-neutral"> ปิดใช้งาน </span>
+              }
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  class="text-link hover:text-link-strong cursor-pointer"
+                  (click)="viewDetails(member.id)"
+                  title="ดูรายละเอียด"
+                >
+                  <mat-icon
+                    class="material-symbols-outlined"
+                    style="font-size: 20px; width: 18px; height: 18px"
+                  >
+                    visibility
+                  </mat-icon>
+                </button>
+                <button
+                  type="button"
+                  class="text-success hover:text-success-strong cursor-pointer"
+                  (click)="editStaff(member.id)"
+                  title="แก้ไข"
+                >
+                  <mat-icon
+                    class="material-symbols-outlined"
+                    style="font-size: 20px; width: 18px; height: 18px"
+                  >
+                    edit_document
+                  </mat-icon>
+                </button>
+                <button
+                  type="button"
+                  class="text-danger hover:text-danger-strong cursor-pointer"
+                  (click)="deleteStaff(member.id)"
+                  title="ลบ"
+                >
+                  <mat-icon
+                    class="material-symbols-outlined"
+                    style="font-size: 20px; width: 18px; height: 18px"
+                  >
+                    delete
+                  </mat-icon>
+                </button>
+              </div>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
       } @else if (staffCount() === 0 && !hasSearchTerm()) {
-        <div class="p-12 text-center">
-          <svg class="mx-auto h-12 w-12 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-            ></path>
-          </svg>
-          <h3 class="mt-2 text-sm font-medium text-primary">ยังไม่มีข้อมูลบุคลากร</h3>
-          <p class="mt-1 text-sm text-muted">เพิ่มบุคลากรใหม่เพื่อเริ่มต้นใช้งานระบบจัดการ</p>
-        </div>
+      <div class="p-12 text-center">
+        <svg
+          class="mx-auto h-12 w-12 text-muted"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+          ></path>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-primary">ยังไม่มีข้อมูลบุคลากร</h3>
+        <p class="mt-1 text-sm text-muted">เพิ่มบุคลากรใหม่เพื่อเริ่มต้นใช้งานระบบจัดการ</p>
+      </div>
       } @else {
-        <div class="p-12 text-center">
-          <mat-icon class="material-symbols-outlined text-muted" style="font-size: 48px">
-            search_off
-          </mat-icon>
-          <h3 class="mt-2 text-sm font-medium text-primary">ไม่พบบุคลากรที่ค้นหา</h3>
-          <p class="mt-1 text-sm text-muted">ลองปรับคำค้นหรือเงื่อนไขแล้วค้นหาอีกครั้ง</p>
-        </div>
+      <div class="p-12 text-center">
+        <mat-icon class="material-symbols-outlined text-muted" style="font-size: 48px">
+          search_off
+        </mat-icon>
+        <h3 class="mt-2 text-sm font-medium text-primary">ไม่พบบุคลากรที่ค้นหา</h3>
+        <p class="mt-1 text-sm text-muted">ลองปรับคำค้นหรือเงื่อนไขแล้วค้นหาอีกครั้ง</p>
+      </div>
       }
     </div>
   </div>
