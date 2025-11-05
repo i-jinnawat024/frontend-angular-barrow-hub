@@ -60,12 +60,12 @@ export class SidebarComponent {
           description: 'จัดการการคืน',
           exact: true,
           badge: 'New'
-        },
+        }
       ]
     },
     {
       title: 'Manage',
-       items: [
+      items: [
         {
           label: 'รายการเล่มทะเบียน',
           route: '/registry-books',
@@ -79,7 +79,7 @@ export class SidebarComponent {
           icon: 'borrow',
           description: 'จัดการเจ้าหน้าที่',
           exact: false
-        },
+        }
       ]
     },
     {
@@ -109,16 +109,8 @@ export class SidebarComponent {
   protected onNavigate(): void {
     if (typeof window === 'undefined') return;
 
-    const isMobile = window.innerWidth < 768;
-
-    if (isMobile) {
+    if (window.innerWidth < 768) {
       this.closeSidebar.emit();
     }
-  }
-
-  protected getSidebarWidth(): string {
-    if (!this.isOpen()) return '0';
-    if (this.isCollapsed()) return '4rem'; // 64px for collapsed
-    return '16rem'; // 256px for expanded
   }
 }
