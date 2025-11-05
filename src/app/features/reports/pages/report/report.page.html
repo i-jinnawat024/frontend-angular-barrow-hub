@@ -2,12 +2,12 @@
   <!-- Header -->
   <div class="mb-8 flex items-center justify-between">
     <div>
-      <h1 class="text-3xl font-bold text-primary">รายงานการยืมหนังสือ</h1>
-      <p class="mt-2 text-secondary">ตรวจสอบสถิติและส่งออกรายงานการยืมหนังสือได้ง่าย</p>
+      <h1 class="text-3xl font-bold text-primary">รายงานการยืมเล่มทะเบียน</h1>
+      <p class="mt-2 text-secondary">ตรวจสอบสถิติและส่งออกรายงานการยืมเล่มทะเบียน</p>
     </div>
     <div class="flex items-center gap-3">
       @if (filteredBorrows().length > 0) {
-        <button type="button" class="inline-flex items-center btn-secondary" (click)="exportToJSON()">
+        <!-- <button type="button" class="inline-flex items-center btn-secondary" (click)="exportToJSON()">
           <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               stroke-linecap="round"
@@ -17,17 +17,10 @@
             ></path>
           </svg>
           ส่งออก JSON
-        </button>
-        <button type="button" class="btn-primary" (click)="exportToCSV()">
-          <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 10v6m0 0l-3-3m3 3 3-3m2 8H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"
-            ></path>
-          </svg>
-          ส่งออก CSV
+        </button> -->
+        <button type="button" class="btn-primary cursor-pointer" (click)="exportToCSV()">
+          <mat-icon style="font-size: 18px; width: 18px; height: 18px">download</mat-icon>
+          ดาวน์โหลด CSV
         </button>
       }
     </div>
@@ -161,7 +154,8 @@
                   {{ borrow.borrowedAt | date: 'HH:mm' }}
                 </td>
                 <td class="px-6 py-4 text-sm text-muted">
-                  {{ borrow.reason || '-' }}
+                  <!-- {{ borrow.reason || '-' }} -->
+                    -
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   @if (borrow.status === 'active') {

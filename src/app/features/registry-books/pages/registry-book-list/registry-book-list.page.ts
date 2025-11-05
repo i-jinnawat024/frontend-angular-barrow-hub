@@ -34,12 +34,12 @@ export class RegistryBookListPage implements OnInit {
   }> = [
     {
       label: 'เลขทะเบียน',
-      property: 'bookNumber',
+      property: 'DocumnetNumber',
       sortable: true,
       accessor: (book) => book.bookNumber,
     },
     {
-      label: 'ชื่อหนังสือ',
+      label: 'ชื่อ-นามสกุล',
       property: 'name',
       sortable: true,
       accessor: (book) => book.name,
@@ -51,7 +51,7 @@ export class RegistryBookListPage implements OnInit {
       accessor: (book) => book.status,
     },
     {
-      label: 'การดำเนินการ',
+      label: 'จัดการ',
       property: 'actions',
       sortable: false,
     },
@@ -124,7 +124,7 @@ export class RegistryBookListPage implements OnInit {
   }
 
   deleteRegistryBook(id: string): void {
-    if (confirm('ต้องการลบทะเบียนหนังสือรายการนี้หรือไม่?')) {
+    if (confirm('ต้องการลบเล่มทะเบียนรายการนี้หรือไม่?')) {
       const success = this.registryBookService.deleteRegistryBook(id);
       if (success) {
         this.loadRegistryBooks();
