@@ -1,9 +1,9 @@
 <!-- Mobile overlay -->
 @if (isOpen()) {
-  <div
-    class="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm transition-opacity md:hidden"
-    (click)="onOverlayClick()"
-  ></div>
+<div
+  class="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm transition-opacity md:hidden"
+  (click)="onOverlayClick()"
+></div>
 }
 
 <!-- Sidebar -->
@@ -18,14 +18,16 @@
     <!-- Sidebar header -->
     <div class="flex h-14 items-center justify-between border-b border-subtle px-4 md:h-16 md:px-3">
       <div class="flex items-center gap-3">
-        <div class="flex h-9 w-9 items-center justify-center rounded-md border border-subtle bg-[var(--color-primary)] text-sm font-semibold text-[var(--color-on-primary)]">
+        <div
+          class="flex h-9 w-9 items-center justify-center rounded-md border border-subtle bg-[var(--color-primary)] text-sm font-semibold text-[var(--color-on-primary)]"
+        >
           BH
         </div>
         @if (!isCollapsed()) {
-          <div class="flex flex-col text-primary transition-opacity duration-200">
-            <span class="text-sm font-semibold leading-tight">Barrow Hub</span>
-            <span class="text-xs text-muted">Library command center</span>
-          </div>
+        <div class="flex flex-col text-primary transition-opacity duration-200">
+          <span class="text-sm font-semibold leading-tight">Barrow Hub</span>
+          <span class="text-xs text-muted">Library command center</span>
+        </div>
         }
       </div>
       <button
@@ -34,7 +36,13 @@
         (click)="closeSidebar.emit()"
         aria-label="Close navigation menu"
       >
-        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <svg
+          class="h-4 w-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
@@ -43,82 +51,70 @@
     <!-- Sidebar content -->
     <div class="flex-1 px-2 py-4">
       @for (group of navGroups; track group.title) {
-        <div class="mb-6 last:mb-0">
-          @if (!isCollapsed() && group.title) {
-            <p class="px-3 text-xs font-semibold uppercase tracking-wide text-muted">
-              {{ group.title }}
-            </p>
-          }
-          <nav class="mt-2 grid gap-1">
-            @for (item of group.items; track item.route) {
-              <a
-                [routerLink]="item.route"
-                routerLinkActive="bg-surface-alt text-primary"
-                [routerLinkActiveOptions]="item.exact === false ? { exact: false } : { exact: true }"
-                class="group relative flex items-center gap-3 rounded-lg py-2 text-sm font-medium text-muted transition hover:bg-surface-hover hover:text-[var(--color-text-primary)]"
-                [class.justify-center]="isCollapsed()"
-                [class.px-2]="isCollapsed()"
-                [class.px-3]="!isCollapsed()"
-                (click)="onNavigate()"
-              >
-                <span class="flex h-9 w-9 items-center justify-center rounded-md border border-transparent bg-surface-alt text-primary transition group-hover:bg-[var(--color-surface-hover)]">
-                  @switch (item.icon) {
-                    @case ('dashboard') {
-                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h7v7H4zM13 4h7v4h-7zM13 11h7v9h-7zM4 13h7v7H4z" />
-                      </svg>
-                    }
-                    @case ('registry') {
-                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 5a2 2 0 012-2h9.5L20 7.5V19a2 2 0 01-2 2H6a2 2 0 01-2-2z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 3v5h5" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 13h8M8 17h6M8 9h2" />
-                      </svg>
-                    }
-                    @case ('borrow') {
-                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m0-14a4 4 0 014-4h4v6h-4a4 4 0 01-4-4zm0 14a4 4 0 01-4 4H4v-6h4a4 4 0 014 4z" />
-                      </svg>
-                    }
-                    @case ('return') {
-                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 20v-6h-6" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 14l-3 3-3-3" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 10l3-3 3 3" />
-                      </svg>
-                    }
-                    @case ('report') {
-                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                    }
-                  }
-                </span>
-                @if (!isCollapsed()) {
-                  <span class="flex flex-1 flex-col truncate">
-                    <span class="truncate">{{ item.label }}</span>
-                    @if (item.description) {
-                      <span class="truncate text-xs font-normal text-muted">
-                        {{ item.description }}
-                      </span>
-                    }
-                  </span>
-                  @if (item.badge) {
-                    <span class="ml-auto inline-flex items-center rounded-full bg-[var(--color-primary)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-on-primary)]">
-                      {{ item.badge }}
-                    </span>
-                  }
-                }
-                @if (isCollapsed()) {
-                  <span class="pointer-events-none absolute left-full z-50 ml-2 hidden whitespace-nowrap rounded-md bg-[var(--color-primary)] px-2 py-1 text-xs text-[var(--color-on-primary)] opacity-0 shadow-lg transition group-hover:block group-hover:opacity-100">
-                    {{ item.label }}
-                  </span>
-                }
-              </a>
+      <div class="mb-6 last:mb-0">
+        @if (!isCollapsed() && group.title) {
+        <p class="px-3 text-xs font-semibold uppercase tracking-wide text-muted">
+          {{ group.title }}
+        </p>
+        }
+        <nav class="mt-2 grid gap-1">
+          @for (item of group.items; track item.route) {
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="bg-surface-alt text-primary"
+            [routerLinkActiveOptions]="item.exact === false ? { exact: false } : { exact: true }"
+            class="group relative flex items-center gap-3 rounded-lg py-2 text-sm font-medium text-muted transition hover:bg-surface-hover hover:text-[var(--color-text-primary)]"
+            [class.justify-center]="isCollapsed()"
+            [class.px-2]="isCollapsed()"
+            [class.px-3]="!isCollapsed()"
+            (click)="onNavigate()"
+          >
+            <span
+              class="flex h-9 w-9 items-center justify-center rounded-md border border-transparent bg-surface-alt text-primary transition group-hover:bg-[var(--color-surface-hover)]"
+            >
+              @switch (item.icon) { @case ('dashboard') {
+              <mat-icon class="material-symbols-outlined"> dashboard </mat-icon>
+              } @case ('registry') {
+              <mat-icon class="material-symbols-outlined"> exit_to_app </mat-icon>
+              } @case ('borrow') {
+              <mat-icon class="material-symbols-outlined"> exit_to_app </mat-icon>
+              } @case ('registry-book') {
+              <mat-icon class="material-symbols-outlined"> book_5 </mat-icon>
+              } @case ('return') {
+              <mat-icon class="material-symbols-outlined"> undo </mat-icon>
+              } @case ('report') {
+              <mat-icon class="material-symbols-outlined"> docs </mat-icon>
+              } @case ('staff') {
+              <mat-icon class="material-symbols-outlined"> group </mat-icon>
+              }
+             }
+            </span>
+            @if (!isCollapsed()) {
+            <span class="flex flex-1 flex-col truncate">
+              <span class="truncate">{{ item.label }}</span>
+              @if (item.description) {
+              <span class="truncate text-xs font-normal text-muted">
+                {{ item.description }}
+              </span>
+              }
+            </span>
+            @if (item.badge) {
+            <span
+              class="ml-auto inline-flex items-center rounded-full bg-[var(--color-primary)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-on-primary)]"
+            >
+              {{ item.badge }}
+            </span>
+            } } @if (isCollapsed()) {
+            <span
+              class="pointer-events-none absolute left-full z-50 ml-2 hidden whitespace-nowrap rounded-md bg-[var(--color-primary)] px-2 py-1 text-xs text-[var(--color-on-primary)] opacity-0 shadow-lg transition group-hover:block group-hover:opacity-100"
+            >
+              {{ item.label }}
+            </span>
             }
-          </nav>
-        </div>
+          </a>
+          }
+        </nav>
+      </div>
       }
     </div>
 
@@ -128,24 +124,32 @@
         type="button"
         class="group relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition hover:bg-surface-hover"
       >
-
-          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-primary)] text-sm font-semibold text-[var(--color-on-primary)]">
-            {{ currentUser.initials }}
-          </div>
+        <div
+          class="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-primary)] text-sm font-semibold text-[var(--color-on-primary)]"
+        >
+          {{ currentUser.initials }}
+        </div>
 
         @if (!isCollapsed()) {
-          <div class="flex flex-1 flex-col text-sm">
-            <span class="font-medium text-primary">{{ currentUser.name }}</span>
-            <span class="text-xs text-muted">{{ currentUser.email }}</span>
-          </div>
-          <svg class="h-4 w-4 text-muted transition group-hover:text-[var(--color-text-primary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        }
-        @if (isCollapsed()) {
-          <span class="pointer-events-none absolute left-full z-50 ml-2 hidden whitespace-nowrap rounded-md bg-[var(--color-primary)] px-2 py-1 text-xs text-[var(--color-on-primary)] opacity-0 shadow-lg transition group-hover:block group-hover:opacity-100">
-            {{ currentUser.name }}
-          </span>
+        <div class="flex flex-1 flex-col text-sm">
+          <span class="font-medium text-primary">{{ currentUser.name }}</span>
+          <span class="text-xs text-muted">{{ currentUser.email }}</span>
+        </div>
+        <svg
+          class="h-4 w-4 text-muted transition group-hover:text-[var(--color-text-primary)]"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+        } @if (isCollapsed()) {
+        <span
+          class="pointer-events-none absolute left-full z-50 ml-2 hidden whitespace-nowrap rounded-md bg-[var(--color-primary)] px-2 py-1 text-xs text-[var(--color-on-primary)] opacity-0 shadow-lg transition group-hover:block group-hover:opacity-100"
+        >
+          {{ currentUser.name }}
+        </span>
         }
       </button>
     </div>
