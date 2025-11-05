@@ -1,44 +1,28 @@
 import { DOCUMENT } from '@angular/common';
-import { Injectable, OnDestroy, computed, effect, inject, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
 
-export type ThemePreference = 'light' | 'dark' | 'system';
 export type ThemeMode = 'light' | 'dark';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ThemeService implements OnDestroy {
+export class ThemeService {
   private readonly storageKey = 'theme-preference';
   private readonly document = inject(DOCUMENT);
 
-  private readonly themePreference = signal<ThemePreference>('system');
-  private readonly systemPrefersDark = signal(false);
+  private readonly themePreference = signal<ThemeMode>('light');
 
-  private readonly mediaQueryList = this.isBrowser()
-    ? window.matchMedia('(prefers-color-scheme: dark)')
-    : undefined;
-
-  readonly preference = computed(() => this.themePreference());
-
-  readonly theme = computed<ThemeMode>(() => {
-    const preference = this.themePreference();
-    if (preference === 'system') {
-      return this.systemPrefersDark() ? 'dark' : 'light';
-    }
-
-    return preference;
-  });
+  readonly theme = computed(() => this.themePreference());
 
   constructor() {
     if (this.isBrowser()) {
-      const storedPreference = window.localStorage.getItem(this.storageKey) as ThemePreference | null;
-      if (storedPreference === 'light' || storedPreference === 'dark' || storedPreference === 'system') {
-        this.themePreference.set(storedPreference);
-      }
+      const storedPreference = window.localStorage.getItem(this.storageKey) as ThemeMode | null;
 
-      if (this.mediaQueryList) {
-        this.systemPrefersDark.set(this.mediaQueryList.matches);
-        this.mediaQueryList.addEventListener('change', this.onSystemPreferenceChange);
+      if (storedPreference === 'light' || storedPreference === 'dark') {
+        this.themePreference.set(storedPreference);
+      } else {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        this.themePreference.set(prefersDark ? 'dark' : 'light');
       }
     }
 
@@ -48,21 +32,10 @@ export class ThemeService implements OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
-    if (this.mediaQueryList) {
-      this.mediaQueryList.removeEventListener('change', this.onSystemPreferenceChange);
-    }
-  }
-
-  setPreference(preference: ThemePreference): void {
+  setPreference(preference: ThemeMode): void {
     this.themePreference.set(preference);
 
     if (!this.isBrowser()) {
-      return;
-    }
-
-    if (preference === 'system') {
-      window.localStorage.removeItem(this.storageKey);
       return;
     }
 
@@ -72,18 +45,6 @@ export class ThemeService implements OnDestroy {
   toggleTheme(): void {
     const current = this.theme();
     this.setPreference(current === 'dark' ? 'light' : 'dark');
-  }
-
-  cyclePreference(): void {
-    const currentPreference = this.themePreference();
-
-    if (currentPreference === 'light') {
-      this.setPreference('dark');
-    } else if (currentPreference === 'dark') {
-      this.setPreference('system');
-    } else {
-      this.setPreference('light');
-    }
   }
 
   private applyTheme(mode: ThemeMode): void {
@@ -101,11 +62,9 @@ export class ThemeService implements OnDestroy {
 
     const useDark = mode === 'dark';
 
-    // Toggle the dark class once on both <html> and <body>
     rootElement.classList.toggle('dark', useDark);
     bodyElement.classList.toggle('dark', useDark);
 
-    // Store the active mode so CSS and third-party libraries can react
     rootElement.setAttribute('data-theme', mode);
     bodyElement.setAttribute('data-theme', mode);
 
@@ -118,10 +77,6 @@ export class ThemeService implements OnDestroy {
     rootElement.style.colorScheme = mode;
     bodyElement.style.colorScheme = mode;
   }
-
-  private onSystemPreferenceChange = (event: MediaQueryListEvent): void => {
-    this.systemPrefersDark.set(event.matches);
-  };
 
   private isBrowser(): boolean {
     return typeof window !== 'undefined' && typeof document !== 'undefined';
