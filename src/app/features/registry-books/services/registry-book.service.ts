@@ -12,16 +12,16 @@ export class RegistryBookService {
     {
       id: '1',
       bookNumber: 'RB-001',
-      title: 'เล่มทะเบียนเอกสารการประชุม',
+      name: 'สมชาย ใจดี',
       description: 'เล่มทะเบียนสำหรับบันทึกเอกสารการประชุม',
-      status: 'available',
+      status: 'active',
       createdAt: new Date('2024-01-15'),
       updatedAt: new Date('2024-01-15')
     },
     {
       id: '2',
       bookNumber: 'RB-002',
-      title: 'เล่มทะเบียนโครงการ',
+      name: 'สมชาย ใจดี',
       description: 'เล่มทะเบียนสำหรับโครงการต่างๆ',
       status: 'borrowed',
       createdAt: new Date('2024-02-01'),
@@ -30,11 +30,20 @@ export class RegistryBookService {
     {
       id: '3',
       bookNumber: 'RB-003',
-      title: 'เล่มทะเบียนสัญญา',
+      name: 'สมชาย ใจดี',
       description: 'เล่มทะเบียนสำหรับสัญญาต่างๆ',
-      status: 'available',
+      status: 'active',
       createdAt: new Date('2024-03-01'),
       updatedAt: new Date('2024-03-01')
+    },
+    {
+      id: '4',
+      bookNumber: 'RB-004',
+      name: 'สมชาย ใจดี',
+      description: 'เล่มทะเบียนสำหรับสัญญาต่างๆ',
+      status: 'inactive',
+      createdAt: new Date('2024-04-01'),
+      updatedAt: new Date('2024-04-01')
     }
   ];
 
@@ -64,7 +73,7 @@ export class RegistryBookService {
     const newBook: RegistryBook = {
       id: Date.now().toString(),
       ...dto,
-      status: 'available',
+      status: 'active',
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -156,7 +165,7 @@ export class RegistryBookService {
     borrow.returnedAt = dto.returnedAt;
 
     // Update registry book status
-    this.updateRegistryBook(borrow.registryBook.id, { status: 'available' });
+    this.updateRegistryBook(borrow.registryBook.id, { status: 'active' });
 
     return newReturn;
   }
