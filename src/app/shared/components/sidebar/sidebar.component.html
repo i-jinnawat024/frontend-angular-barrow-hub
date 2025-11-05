@@ -26,7 +26,7 @@
         @if (!isCollapsed()) {
         <div class="flex flex-col text-primary transition-opacity duration-200">
           <span class="text-sm font-semibold leading-tight">Barrow Hub</span>
-          <span class="text-xs text-muted">Library command center</span>
+          <span class="text-xs text-muted">ระบบยืม-คืนเอกสาร</span>
         </div>
         }
       </div>
@@ -86,8 +86,7 @@
               <mat-icon class="material-symbols-outlined"> docs </mat-icon>
               } @case ('staff') {
               <mat-icon class="material-symbols-outlined"> group </mat-icon>
-              }
-             }
+              } }
             </span>
             @if (!isCollapsed()) {
             <span class="flex flex-1 flex-col truncate">
@@ -104,13 +103,7 @@
             >
               {{ item.badge }}
             </span>
-            } } @if (isCollapsed()) {
-            <span
-              class="pointer-events-none absolute left-full z-50 ml-2 hidden whitespace-nowrap rounded-md bg-[var(--color-primary)] px-2 py-1 text-xs text-[var(--color-on-primary)] opacity-0 shadow-lg transition group-hover:block group-hover:opacity-100"
-            >
-              {{ item.label }}
-            </span>
-            }
+            } }
           </a>
           }
         </nav>
@@ -122,7 +115,7 @@
     <div class="border-t border-subtle p-3">
       <button
         type="button"
-        class="group relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition hover:bg-surface-hover"
+        class="group relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition hover:bg-surface-hover cursor-pointer"
       >
         <div
           class="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-primary)] text-sm font-semibold text-[var(--color-on-primary)]"
@@ -135,21 +128,7 @@
           <span class="font-medium text-primary">{{ currentUser.name }}</span>
           <span class="text-xs text-muted">{{ currentUser.email }}</span>
         </div>
-        <svg
-          class="h-4 w-4 text-muted transition group-hover:text-[var(--color-text-primary)]"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-        } @if (isCollapsed()) {
-        <span
-          class="pointer-events-none absolute left-full z-50 ml-2 hidden whitespace-nowrap rounded-md bg-[var(--color-primary)] px-2 py-1 text-xs text-[var(--color-on-primary)] opacity-0 shadow-lg transition group-hover:block group-hover:opacity-100"
-        >
-          {{ currentUser.name }}
-        </span>
+        <mat-icon class="material-symbols-outlined"> chevron_right </mat-icon>
         }
       </button>
     </div>

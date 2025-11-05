@@ -1,18 +1,22 @@
-﻿<div class="container mx-auto px-4 py-8 max-w-2xl">
+<div class="container mx-auto px-4 py-8 max-w-2xl">
   <!-- Header -->
   <div class="mb-8">
-    <h1 class="text-3xl font-bold text-primary">คืนหนังสือทะเบียน</h1>
-    <p class="mt-2 text-secondary">กรุณาเลือกหนังสือทะเบียนที่ต้องการคืน</p>
+    <h1 class="text-3xl font-bold text-primary">บันทึกการคืนเล่มทะเบียน</h1>
+    <p class="mt-2 text-secondary">เลือกเอกสารที่ยืมอยู่และบันทึกการคืนให้ครบถ้วน</p>
   </div>
 
   <!-- Form -->
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-surface rounded-lg shadow border border-subtle p-6">
+  <form
+    [formGroup]="form"
+    (ngSubmit)="onSubmit()"
+    class="bg-surface rounded-lg shadow border border-subtle p-6"
+  >
     <div class="space-y-6">
       <!-- Borrow Selection -->
       <div>
         <div class="flex items-center justify-between mb-2">
           <label for="borrowId" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            เล่มทะเบียนที่ต้องการคืน <span class="text-red-500">*</span>
+            เลือกรายการยืม <span class="text-red-500">*</span>
           </label>
           <button
             type="button"
@@ -20,29 +24,30 @@
             (click)="openScanner()"
           >
             <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
+              ></path>
             </svg>
             สแกน QR Code
           </button>
         </div>
-        <select
-          id="borrowId"
-          formControlName="borrowId"
-          class="form-control"
-        >
-          <option value="">กรุณาเลือกหนังสือทะเบียน</option>
+        <select id="borrowId" formControlName="borrowId" class="form-control">
+          <option value="">เลือกรายการที่ต้องการคืน</option>
           @for (borrow of activeBorrows; track borrow.id) {
             <option [value]="borrow.id">
-              {{ borrow.registryBook.bookNumber }} - {{ borrow.registryBook.title }} 
+              {{ borrow.registryBook.bookNumber }} - {{ borrow.registryBook.name }}
               ({{ borrow.borrowerName }})
             </option>
           }
         </select>
         @if (form.get('borrowId')?.invalid && form.get('borrowId')?.touched) {
-          <p class="mt-1 text-sm text-danger">กรุณาเลือกหนังสือทะเบียน</p>
+          <p class="mt-1 text-sm text-danger">กรุณาเลือกรายการที่ต้องการคืน</p>
         }
         @if (activeBorrows.length === 0) {
-          <p class="mt-1 text-sm text-warning">ไม่มีหนังสือทะเบียนที่ถูกยืมอยู่</p>
+          <p class="mt-1 text-sm text-warning">ไม่มีรายการยืมที่ยังค้างอยู่</p>
         }
       </div>
 
@@ -53,21 +58,21 @@
           <h3 class="text-sm font-medium text-primary mb-3">รายละเอียดการยืม</h3>
           <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <dt class="text-xs font-medium text-muted">เลขทะเบียนหนังสือ</dt>
+              <dt class="text-xs font-medium text-muted">เลขทะเบียนเล่มทะเบียน</dt>
               <dd class="mt-1 text-sm text-primary">{{ borrow.registryBook.bookNumber }}</dd>
             </div>
             <div>
-              <dt class="text-xs font-medium text-muted">ชื่อหนังสือทะเบียน</dt>
-              <dd class="mt-1 text-sm text-primary">{{ borrow.registryBook.title }}</dd>
+              <dt class="text-xs font-medium text-muted">ชื่อเล่มทะเบียน</dt>
+              <dd class="mt-1 text-sm text-primary">{{ borrow.registryBook.name }}</dd>
             </div>
             <div>
-              <dt class="text-xs font-medium text-muted">ชื่อผู้ยืม</dt>
+              <dt class="text-xs font-medium text-muted">ผู้ยืม</dt>
               <dd class="mt-1 text-sm text-primary">{{ borrow.borrowerName }}</dd>
             </div>
             <div>
               <dt class="text-xs font-medium text-muted">วันที่ยืม</dt>
               <dd class="mt-1 text-sm text-primary">
-                {{ borrow.borrowedAt | date:'dd/MM/yyyy HH:mm' }}
+                {{ borrow.borrowedAt | date: 'dd/MM/yyyy HH:mm' }}
               </dd>
             </div>
             @if (borrow.reason) {
@@ -83,11 +88,7 @@
 
     <!-- Actions -->
     <div class="mt-6 flex items-center justify-end gap-3">
-      <button
-        type="button"
-        class="btn-secondary"
-        (click)="cancel()"
-      >
+      <button type="button" class="btn-secondary" (click)="cancel()">
         ยกเลิก
       </button>
       <button
@@ -95,7 +96,7 @@
         class="btn-primary"
         [disabled]="form.invalid || activeBorrows.length === 0"
       >
-        คืนหนังสือทะเบียน
+        บันทึกการคืน
       </button>
     </div>
   </form>

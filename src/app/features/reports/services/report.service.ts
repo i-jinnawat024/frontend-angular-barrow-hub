@@ -3,52 +3,67 @@ import { RegistryBookService } from '../../registry-books/services/registry-book
 import { Borrow } from '../../../shared/models/borrow.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ReportService {
-  constructor(
-    private registryBookService: RegistryBookService
-  ) {}
+  constructor(private readonly registryBookService: RegistryBookService) {}
 
   getBorrowsByMonth(year: number, month: number): Borrow[] {
     const allBorrows = this.registryBookService.getBorrows();
-    
-    return allBorrows.filter(borrow => {
+
+    return allBorrows.filter((borrow) => {
       const borrowDate = new Date(borrow.borrowedAt);
-      return borrowDate.getFullYear() === year && borrowDate.getMonth() === month - 1;
+      return (
+        borrowDate.getFullYear() === year &&
+        borrowDate.getMonth() === month - 1
+      );
     });
   }
 
   exportToCSV(borrows: Borrow[], year: number, month: number): void {
-    // CSV Header
-    const headers = ['เลขที่เล่มทะเบียน', 'ชื่อเล่มทะเบียน', 'ผู้ยืม', 'วันที่ยืม', 'เวลาที่ยืม', 'เหตุผล', 'สถานะ'];
-    const rows = borrows.map(borrow => {
+    const headers = [
+      'เลขทะเบียน',
+      'ชื่อหนังสือ',
+      'ผู้ยืม',
+      'วันที่ยืม',
+      'เวลาที่ยืม',
+      'เหตุผล',
+      'สถานะ',
+    ];
+
+    const rows = borrows.map((borrow) => {
       const borrowDate = new Date(borrow.borrowedAt);
       return [
         borrow.registryBook.bookNumber,
-        borrow.registryBook.title,
+        borrow.registryBook.name,
         borrow.borrowerName,
         borrowDate.toLocaleDateString('th-TH'),
-        borrowDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+        borrowDate.toLocaleTimeString('th-TH', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
         borrow.reason || '-',
-        borrow.status === 'active' ? 'กำลังยืม' : 'คืนแล้ว'
+        borrow.status === 'active' ? 'กำลังยืม' : 'คืนแล้ว',
       ];
     });
 
-    // Combine headers and rows
     const csvContent = [
       headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(',')),
     ].join('\n');
 
-    // Add BOM for UTF-8 with Thai characters
     const BOM = '\uFEFF';
-    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([BOM + csvContent], {
+      type: 'text/csv;charset=utf-8;',
+    });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
-    
+
     link.setAttribute('href', url);
-    link.setAttribute('download', `รายงานการยืม_${year}_${String(month).padStart(2, '0')}.csv`);
+    link.setAttribute(
+      'download',
+      `รายงานการยืมหนังสือ_${year}_${String(month).padStart(2, '0')}.csv`,
+    );
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -57,30 +72,34 @@ export class ReportService {
 
   exportToJSON(borrows: Borrow[], year: number, month: number): void {
     const reportData = {
-      month: month,
-      year: year,
+      month,
+      year,
       totalBorrows: borrows.length,
-      borrows: borrows.map(borrow => ({
+      borrows: borrows.map((borrow) => ({
         id: borrow.id,
         bookNumber: borrow.registryBook.bookNumber,
-        bookTitle: borrow.registryBook.title,
+        name: borrow.registryBook.name,
         borrowerName: borrow.borrowerName,
         borrowedAt: borrow.borrowedAt,
         reason: borrow.reason,
-        status: borrow.status
-      }))
+        status: borrow.status,
+      })),
     };
 
-    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(reportData, null, 2)], {
+      type: 'application/json',
+    });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
-    
+
     link.setAttribute('href', url);
-    link.setAttribute('download', `รายงานการยืม_${year}_${String(month).padStart(2, '0')}.json`);
+    link.setAttribute(
+      'download',
+      `รายงานการยืมหนังสือ_${year}_${String(month).padStart(2, '0')}.json`,
+    );
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   }
 }
-
