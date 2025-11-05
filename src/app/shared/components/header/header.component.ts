@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, input, output, signal, OnInit, OnDestroy, effect, computed } from '@angular/core';
 import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
+import {  MatIconModule } from "@angular/material/icon";
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, ThemeToggleComponent],
+  imports: [CommonModule, ThemeToggleComponent, MatIconModule],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })
