@@ -1,8 +1,8 @@
-﻿<div class="container px-4 py-8">
+﻿<div class="container-fluid px-4 py-8">
   <!-- Header -->
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-primary">แดชบอร์ด</h1>
-    <p class="mt-2 text-secondary">ภาพรวมข้อมูลระบบจัดการเอกสารและการยืม</p>
+    <p class="mt-2 text-secondary">ภาพรวมข้อมูลระบบจัดการเล่มทะเบียนและการยืม</p>
   </div>
 
   <!-- Stats Cards -->
@@ -11,15 +11,13 @@
     <div class="bg-surface rounded-lg shadow p-6 border border-subtle">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-sm font-medium text-secondary">เอกสารทั้งหมด</p>
+          <p class="text-sm font-medium text-secondary">เล่มทะเบียนทั้งหมด</p>
           <p class="text-3xl font-bold text-primary mt-2">
             {{ stats().totalDocuments }}
           </p>
         </div>
         <div class="p-3 icon-accent-primary-bg rounded-full">
-          <svg class="w-8 h-8 icon-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-          </svg>
+          <mat-icon class="material-symbols-outlined">book_4</mat-icon>
         </div>
       </div>
     </div>
@@ -34,9 +32,7 @@
           </p>
         </div>
         <div class="p-3 icon-accent-success-bg rounded-full">
-          <svg class="w-8 h-8 icon-accent-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-          </svg>
+          <mat-icon class="material-symbols-outlined">groups</mat-icon>
         </div>
       </div>
     </div>
@@ -45,15 +41,13 @@
     <div class="bg-surface rounded-lg shadow p-6 border border-subtle">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-sm font-medium text-secondary">เอกสารที่ถูกยืม</p>
+          <p class="text-sm font-medium text-secondary">เล่มทะเบียนที่ถูกยืม</p>
           <p class="text-3xl font-bold text-primary mt-2">
             {{ stats().borrowedDocuments }}
           </p>
         </div>
         <div class="p-3 icon-accent-warning-bg rounded-full">
-          <svg class="w-8 h-8 icon-accent-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-          </svg>
+          <mat-icon class="material-symbols-outlined">compare_arrows</mat-icon>
         </div>
       </div>
     </div>
@@ -61,79 +55,76 @@
 
   <!-- Active Loans Table -->
   <div class="bg-surface rounded-lg shadow border border-subtle">
-    <div class="p-6 border-b border-subtle">
-      <h2 class="text-xl font-bold text-primary">เอกสารที่ถูกยืมอยู่</h2>
-      <p class="mt-1 text-sm text-secondary">รายการเอกสารทั้งหมดที่ถูกยืมอยู่ในขณะนี้</p>
-    </div>
-
     <div class="overflow-x-auto">
-      @if (getActiveLoans().length > 0) {
-        <table class="w-full">
-          <thead class="bg-table-header">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                เอกสาร
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                ผู้ยืม
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                วันที่ยืม
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                กำหนดคืน
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                สถานะ
-              </th>
-            </tr>
+      @if (getActiveLoans().length > 0 && false ) {
+      <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left rtl:text-right">
+          <caption
+            class="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-red dark:text-white dark:bg-gray-800 light:bg-white"
+          >
+            เล่มทะเบียนที่ถูกยืมอยู่
+            <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
+              รายการเล่มทะเบียนทั้งหมดที่ถูกยืมอยู่ในขณะนี้
+            </p>
+          </caption>
+          <thead
+            class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+          >
+            @for (header of tableHeader; track header.property) {
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider"
+            >
+              {{ header.label }}
+            </th>
+            }
           </thead>
-          <tbody class="bg-surface divide-y divide-subtle">
+          <tbody>
             @for (loan of getActiveLoans(); track loan.id) {
-              <tr class="hover:bg-surface-hover">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex flex-col">
-                    <div class="text-sm font-medium text-primary">
-                      {{ loan.document.title }}
-                    </div>
-                    <div class="text-sm text-muted">
-                      {{ loan.document.documentNumber }}
-                    </div>
+            <tr
+              class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-blue-500"
+            >
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex flex-col">
+                  <div class="text-sm font-medium text-primary">
+                    {{ loan.document.title }}
                   </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex flex-col">
-                    <div class="text-sm font-medium text-primary">
-                      {{ loan.borrower.name }}
-                    </div>
-                    <div class="text-sm text-muted">
-                      {{ loan.borrower.position }}
-                    </div>
+                  <div class="text-sm text-muted">
+                    {{ loan.document.documentNumber }}
                   </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-muted">
-                  {{ loan.borrowedAt | date:'dd/MM/yyyy' }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-muted">
-                  {{ loan.expectedReturnAt | date:'dd/MM/yyyy' }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="badge badge-warning">
-                    กำลังยืม
-                  </span>
-                </td>
-              </tr>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex flex-col">
+                  <div class="text-sm font-medium text-primary">
+                    {{ loan.borrower.name }}
+                  </div>
+                  <div class="text-sm text-muted">
+                    {{ loan.borrower.position }}
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-muted">
+                {{ loan.borrowedAt | date : 'dd/MM/yyyy' }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="badge badge-warning"> กำลังยืม </span>
+              </td>
+              <!-- <td class="px-6 py-4 text-right">
+                <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                  >Edit</a
+                >
+              </td> -->
+            </tr>
             }
           </tbody>
         </table>
+      </div>
       } @else {
-        <div class="p-12 text-center">
-          <svg class="mx-auto h-12 w-12 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
-          </svg>
-          <h3 class="mt-2 text-sm font-medium text-primary">ไม่มีเอกสารที่ถูกยืม</h3>
-          <p class="mt-1 text-sm text-muted">ไม่มีเอกสารใดที่กำลังถูกยืมอยู่ในขณะนี้</p>
-        </div>
+      <div class="p-12 text-center">
+        <mat-icon class="material-symbols-outlined"> inventory_2 </mat-icon>
+        <h3 class="mt-2 text-sm font-medium text-primary">ไม่มีเล่มทะเบียนที่ถูกยืม</h3>
+        <p class="mt-1 text-sm text-muted">ไม่มีเล่มทะเบียนใดที่กำลังถูกยืมอยู่ในขณะนี้</p>
+      </div>
       }
     </div>
   </div>
