@@ -198,6 +198,52 @@ body {
     background-color: var(--color-neutral-container);
     color: var(--color-text-secondary);
   }
+
+  .table-sort-button {
+    @apply inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider;
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s ease;
+  }
+
+  .table-sort-button:hover,
+  .table-sort-button:focus-visible {
+    color: var(--color-text-primary);
+  }
+
+  .table-sort-button:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  .table-sort-icon {
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .table-header-label {
+    @apply inline-flex items-center text-xs font-semibold uppercase tracking-wider;
+    color: var(--color-text-secondary);
+  }
+
+  .table-search-clear {
+    @apply absolute inset-y-0 flex items-center justify-center;
+    right: 0.5rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    color: var(--color-text-secondary);
+    transition: color 0.2s ease;
+  }
+
+  .table-search-clear:hover,
+  .table-search-clear:focus-visible {
+    color: var(--color-text-primary);
+  }
 }
 
 @layer utilities {

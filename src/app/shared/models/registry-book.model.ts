@@ -1,23 +1,23 @@
 export interface RegistryBook {
   id: string;
   bookNumber: string;
-  title: string;
+  name: string;
   description?: string;
-  status: 'available' | 'borrowed' | 'archived';
+  status: 'active' | 'borrowed' | 'archived' |'inactive';
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface RegistryBookCreateDto {
   bookNumber: string;
-  title: string;
+  name: string;
   description?: string;
 }
 
 export interface RegistryBookUpdateDto {
   bookNumber?: string;
-  title?: string;
+  name?: string;
   description?: string;
-  status?: 'available' | 'borrowed' | 'archived';
+  status?: 'active' | 'borrowed' | 'archived' |'inactive';
 }
 

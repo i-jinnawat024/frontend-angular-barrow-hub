@@ -48,7 +48,7 @@ export class RegistryBookFormPage implements OnInit {
     if (book) {
       this.form.patchValue({
         bookNumber: book.bookNumber,
-        title: book.title,
+        name: book.name,
         description: book.description || ''
       });
     }

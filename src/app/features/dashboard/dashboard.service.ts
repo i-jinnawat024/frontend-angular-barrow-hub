@@ -111,7 +111,7 @@ export class DashboardService {
       id: '1',
       document: this.documents[1],
       borrower: this.staff[0],
-      borrowedAt: new Date('2024-02-10'),
+      borrowedAt: new Date('2025-11-03'),
       expectedReturnAt: new Date('2024-03-10'),
       status: 'active'
     },
@@ -119,7 +119,7 @@ export class DashboardService {
       id: '2',
       document: this.documents[2],
       borrower: this.staff[2],
-      borrowedAt: new Date('2024-02-05'),
+      borrowedAt: new Date('2025-10-31'),
       expectedReturnAt: new Date('2024-03-05'),
       status: 'active'
     },

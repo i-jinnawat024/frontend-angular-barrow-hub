@@ -15,7 +15,7 @@
       <!-- Book Number -->
       <div>
         <label for="bookNumber" class="form-label">
-          เลขทะเบียนหนังสือ <span class="text-danger">*</span>
+          เลขทะเบียน <span class="text-danger">*</span>
         </label>
         <input
           type="text"
@@ -25,7 +25,7 @@
           placeholder="เช่น RB-001"
         />
         @if (form.get('bookNumber')?.invalid && form.get('bookNumber')?.touched) {
-          <p class="mt-1 text-sm text-danger">กรุณากรอกเลขทะเบียนหนังสือ</p>
+          <p class="mt-1 text-sm text-danger">กรุณากรอกเลขทะเบียน</p>
         }
       </div>
 

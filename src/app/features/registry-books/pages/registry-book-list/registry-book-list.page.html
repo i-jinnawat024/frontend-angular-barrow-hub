@@ -1,107 +1,160 @@
-﻿<div class="container mx-auto px-4 py-8">
+﻿<div class="container-fluid mx-auto px-4 py-8">
   <!-- Header -->
-  <div class="mb-8 flex items-center justify-between">
+  <div class="mb-4 flex items-center justify-between">
     <div>
-      <h1 class="text-3xl font-bold text-primary">รายการหนังสือทะเบียน</h1>
-      <p class="mt-2 text-secondary">รายการจัดการหนังสือทะเบียนทั้งหมด</p>
+      <h1 class="text-3xl font-bold text-primary">ทะเบียนหนังสือ</h1>
+      <p class="mt-2 text-secondary">จัดการรายการทะเบียนหนังสือทั้งหมดในระบบ</p>
     </div>
     <button
       type="button"
-      class="btn-primary"
+      class="btn-primary cursor-pointer"
+      mat-button
       (click)="createRegistryBook()"
+      style="font-size: 14px; padding: 4px 12px"
     >
-      <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-      </svg>
-      สร้างหนังสือทะเบียนใหม่
+      <mat-icon style="font-size: 18px; width: 18px; height: 18px">add</mat-icon>
+      @if (this.isDesktopView()) {
+        <span style="margin-left: 4px">เพิ่มทะเบียนหนังสือ</span>
+      }
     </button>
   </div>
 
+  <!-- Filters -->
+  <div class="bg-surface rounded-lg border border-subtle shadow-sm p-4">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div class="relative w-full sm:w-80">
+        <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+          <mat-icon class="text-secondary text-base">search</mat-icon>
+        </div>
+        <input
+          type="search"
+          class="form-control w-full ps-10 pe-10"
+          placeholder="ค้นหา"
+          autocomplete="off"
+          [value]="searchTerm()"
+          (input)="onSearchTermChange($event)"
+        />
+        @if (hasSearchTerm()) {
+          <button
+            type="button"
+            class="table-search-clear"
+            (click)="clearSearch()"
+            aria-label="ล้างการค้นหา"
+          >
+            <mat-icon class="text-secondary text-base">close</mat-icon>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
   <!-- Registry Books Table -->
-  <div class="bg-surface rounded-lg shadow border border-subtle overflow-hidden">
+  <div class="bg-surface rounded-lg shadow border border-subtle overflow-hidden mt-4">
     <div class="overflow-x-auto">
-      @if (registryBooks.length > 0) {
-        <table class="w-full">
-          <thead class="bg-table-header">
+      @if (filteredRegistryBooks().length > 0) {
+        <table class="w-full text-sm text-left rtl:text-right text-secondary">
+          <thead class="bg-table-header text-xs uppercase text-secondary">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                เลขทะเบียนหนังสือ
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                ชื่อหนังสือทะเบียน
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                คำอธิบาย
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                สถานะ
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                การจัดการ
-              </th>
+              @for (column of columns; track column.property) {
+                <th scope="col" class="px-6 py-3">
+                  @if (column.sortable) {
+                    <button
+                      type="button"
+                      class="table-sort-button"
+                      (click)="toggleSort(column.property)"
+                      [attr.aria-sort]="
+                        isSortedAscending(column.property)
+                          ? 'ascending'
+                          : isSortedDescending(column.property)
+                          ? 'descending'
+                          : 'none'
+                      "
+                    >
+                      <span>{{ column.label }}</span>
+                      <mat-icon class="table-sort-icon">
+                        @if (isSortedAscending(column.property)) {
+                          arrow_upward
+                        } @else if (isSortedDescending(column.property)) {
+                          arrow_downward
+                        } @else {
+                          unfold_more
+                        }
+                      </mat-icon>
+                    </button>
+                  } @else {
+                    <span class="table-header-label">{{ column.label }}</span>
+                  }
+                </th>
+              }
             </tr>
           </thead>
-          <tbody class="bg-surface divide-y divide-subtle">
-            @for (book of registryBooks; track book.id) {
-              <tr class="hover:bg-surface-hover">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">
+          <tbody>
+            @for (book of filteredRegistryBooks(); track book.id) {
+              <tr class="bg-surface transition hover:bg-surface-hover">
+                <th scope="row" class="px-6 py-4 font-medium text-secondary">
                   {{ book.bookNumber }}
+                </th>
+                <td class="px-6 py-4">
+                  {{ book.name }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-primary">
-                  {{ book.title }}
-                </td>
-                <td class="px-6 py-4 text-sm text-muted">
-                  {{ book.description || '-' }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  @if (book.status === 'available') {
-                    <span class="badge badge-success">
-                      พร้อมให้ยืม
-                    </span>
-                  }
-                  @if (book.status === 'borrowed') {
-                    <span class="badge badge-warning">
-                      ถูกยืม
-                    </span>
-                  }
-                  @if (book.status === 'archived') {
-                    <span class="badge badge-neutral">
-                      ถูกเก็บ
-                    </span>
+                <td class="px-6 py-4">
+                  @switch (book.status) {
+                    @case ('active') {
+                      <span class="badge badge-success"> พร้อมใช้งาน </span>
+                    }
+                    @case ('borrowed') {
+                      <span class="badge badge-warning"> กำลังยืม </span>
+                    }
+                    @case ('archived') {
+                      <span class="badge badge-neutral"> เก็บถาวร </span>
+                    }
+                    @default {
+                      <span class="badge badge-alert" style="background-color: #dc3545; color: white">
+                        ไม่ทราบสถานะ
+                      </span>
+                    }
                   }
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex items-center gap-2">
                     <button
                       type="button"
-                      class="text-link hover:text-link-strong"
+                      class="text-link hover:text-link-strong cursor-pointer"
                       (click)="viewDetails(book.id)"
                       title="ดูรายละเอียด"
                     >
-                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                      </svg>
+                      <mat-icon
+                        class="material-symbols-outlined"
+                        style="font-size: 20px; width: 18px; height: 18px"
+                      >
+                        visibility
+                      </mat-icon>
                     </button>
                     <button
                       type="button"
-                      class="text-success hover:text-success-strong"
+                      class="text-success hover:text-success-strong cursor-pointer"
                       (click)="editRegistryBook(book.id)"
                       title="แก้ไข"
                     >
-                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                      </svg>
+                      <mat-icon
+                        class="material-symbols-outlined"
+                        style="font-size: 20px; width: 18px; height: 18px"
+                      >
+                        edit_document
+                      </mat-icon>
                     </button>
                     <button
                       type="button"
-                      class="text-danger hover:text-danger-strong"
+                      class="text-danger hover:text-danger-strong cursor-pointer"
                       (click)="deleteRegistryBook(book.id)"
                       title="ลบ"
                     >
-                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                      </svg>
+                      <mat-icon
+                        class="material-symbols-outlined"
+                        style="font-size: 20px; width: 18px; height: 18px"
+                      >
+                        delete
+                      </mat-icon>
                     </button>
                   </div>
                 </td>
@@ -109,13 +162,31 @@
             }
           </tbody>
         </table>
+      } @else if (registryBookCount() === 0 && !hasSearchTerm()) {
+        <div class="p-12 text-center">
+          <svg
+            class="mx-auto h-12 w-12 text-muted"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+            ></path>
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-primary">ยังไม่มีทะเบียนหนังสือ</h3>
+          <p class="mt-1 text-sm text-muted">เพิ่มทะเบียนหนังสือเล่มแรกเพื่อเริ่มจัดการข้อมูล</p>
+        </div>
       } @else {
         <div class="p-12 text-center">
-          <svg class="mx-auto h-12 w-12 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-          </svg>
-          <h3 class="mt-2 text-sm font-medium text-primary">ไม่มีหนังสือทะเบียน</h3>
-          <p class="mt-1 text-sm text-muted">กรุณาสร้างหนังสือทะเบียนใหม่เพื่อเริ่มต้นใช้งาน</p>
+          <mat-icon class="material-symbols-outlined text-muted" style="font-size: 48px">
+            search_off
+          </mat-icon>
+          <h3 class="mt-2 text-sm font-medium text-primary">ไม่พบรายการที่ค้นหา</h3>
+          <p class="mt-1 text-sm text-muted">กรุณาปรับคำค้นหรือเงื่อนไขแล้วลองอีกครั้ง</p>
         </div>
       }
     </div>
