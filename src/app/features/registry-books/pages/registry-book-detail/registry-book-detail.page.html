@@ -8,7 +8,7 @@
       (click)="goBack()"
     >
       <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-widivh="2" d="M15 19l-7-7 7-7"></path>
       </svg>
       กลับ
     </button>
@@ -19,7 +19,7 @@
       (click)="editRegistryBook()"
     >
       <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-widivh="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
       </svg>
       แก้ไข
     </button>
@@ -35,19 +35,19 @@
 
       <!-- Content Section -->
       <div class="px-6 py-5">
-        <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <!-- Description -->
           <div class="sm:col-span-2" id="registry-book-description-section">
-            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">คำอธิบาย</dt>
-            <dd class="mt-1 text-sm text-gray-900 dark:text-white" id="registry-book-description">
+            <div class="text-sm font-medium text-gray-500 dark:text-gray-400">คำอธิบาย</div>
+            <div class="mt-1 text-sm text-gray-900 dark:text-white" id="registry-book-description">
               {{ registryBook.description || '-' }}
-            </dd>
+            </div>
           </div>
 
           <!-- Status -->
           <div id="registry-book-status-section">
-            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">สถานะ</dt>
-            <dd class="mt-1" id="registry-book-status">
+            <div class="text-sm font-medium text-gray-500 dark:text-gray-400">สถานะ</div>
+            <div class="mt-1" id="registry-book-status">
               @if (registryBook.status === 'available') {
                 <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" id="status-available">
                   พร้อมใช้งาน
@@ -63,26 +63,25 @@
                   เก็บไว้
                 </span>
               }
-            </dd>
+            </div>
           </div>
 
           <!-- Created At -->
           <div id="registry-book-created-at-section">
-            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">วันที่สร้าง</dt>
-            <dd class="mt-1 text-sm text-gray-900 dark:text-white" id="registry-book-created-at">
-              {{ registryBook.createdAt | date:'dd/MM/yyyy HH:mm' }}
-            </dd>
+            <div class="text-sm font-medium text-gray-500 dark:text-gray-400">วันที่สร้าง</div>
+            <div class="mt-1 text-sm text-gray-900 dark:text-white" id="registry-book-created-at">
+              {{ registryBook.createdAt | date:'div/MM/yyyy HH:mm' }}
+            </div>
           </div>
 
           <!-- Updated At -->
           <div id="registry-book-updated-at-section">
-            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">อัปเดตล่าสุด</dt>
-            <dd class="mt-1 text-sm text-gray-900 dark:text-white" id="registry-book-updated-at">
-              {{ registryBook.updatedAt | date:'dd/MM/yyyy HH:mm' }}
-            </dd>
+            <div class="text-sm font-medium text-gray-500 dark:text-gray-400">อัปเดตล่าสุด</div>
+            <div class="mt-1 text-sm text-gray-900 dark:text-white" id="registry-book-updated-at">
+              {{ registryBook.updatedAt | date:'div/MM/yyyy HH:mm' }}
+            </div>
           </div>
-        </dl>
-
+        
         <!-- QR Code and Barcode Section -->
         <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 sm:col-span-2" id="qr-barcode-section">
           <div class="flex items-center justify-between mb-4">
@@ -103,7 +102,7 @@
                 [disabled]="!qrCodeDataUrl"
               >
                 <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-widivh="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
                 </svg>
                 พิมพ์ QR Code
               </button>
@@ -130,7 +129,7 @@
                 (click)="printBarcode()"
               >
                 <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-widivh="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
                 </svg>
                 พิมพ์ Barcode
               </button>
@@ -138,8 +137,9 @@
             </div>
           </div>
         </div>
+        </div>
       </div>
     </div>
+   
   }
 </div>
-
