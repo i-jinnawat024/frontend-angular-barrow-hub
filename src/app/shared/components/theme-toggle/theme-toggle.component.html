@@ -1,40 +1,18 @@
 <button
   type="button"
   id="btn-theme-toggle"
-  class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-subtle bg-surface text-muted shadow-sm transition hover:bg-surface-hover hover:text-[var(--color-text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-info)]"
+  class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-subtle bg-surface text-muted shadow-sm transition hover:bg-surface-hover hover:text-[var(--color-text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-info)] cursor-pointer"
   (click)="onToggle()"
   [attr.aria-label]="label()"
   [title]="getPreferenceLabel()"
->
-  <ng-container [ngSwitch]="icon()">
-    <!-- Sun Icon (Light Mode) -->
-    <svg
-      *ngSwitchCase="'sun'"
-      id="icon-theme-sun"
-      class="h-5 w-5"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      aria-hidden="true"
-    >
-      <circle cx="12" cy="12" r="4"></circle>
-      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
-    </svg>
-    
-    <!-- Moon Icon (Dark Mode) -->
-    <svg
-      *ngSwitchCase="'moon'"
-      id="icon-theme-moon"
-      class="h-5 w-5"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      aria-hidden="true"
-    >
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-    </svg>
-  </ng-container>
+> 
+  @switch (icon()) {
+    @case ('sun') {
+      <mat-icon class="material-symbols-outlined">light_mode</mat-icon>
+    }
+    @case ('moon') {
+      <mat-icon class="material-symbols-outlined">dark_mode</mat-icon>
+    }
+  }
   <span class="sr-only" id="theme-toggle-label">{{ getPreferenceLabel() }}</span>
 </button>

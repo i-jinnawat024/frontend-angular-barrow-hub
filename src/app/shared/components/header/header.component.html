@@ -16,10 +16,16 @@
       >
       @switch (toggleIcon()) {
         @case('expand'){
-            <mat-icon class="material-symbols-outlined">right_panel_close</mat-icon>
+          <mat-icon class="material-symbols-outlined">right_panel_close</mat-icon>
         }
         @case ('collapse') {
-            <mat-icon class="material-symbols-outlined">left_panel_close</mat-icon>
+          <mat-icon class="material-symbols-outlined">left_panel_close</mat-icon>
+        }
+        @case ('close') {
+          <mat-icon class="material-symbols-outlined">close</mat-icon>
+        }
+        @case ('menu') {
+          <mat-icon class="material-symbols-outlined">right_panel_close</mat-icon>
         }
       }
       </button>
@@ -27,28 +33,28 @@
       <a href="/" class="flex items-center gap-3 text-primary">
         <img src="/logo.png" alt="Barrow Hub logo" class="h-10 w-10 rounded-md object-cover" />
         <div class="flex flex-col">
-          <span class="text-base font-semibold leading-tight md:text-lg">Barrow Hub</span>
-          <span class="text-xs text-muted md:text-sm">Library platform</span>
+          <span class="text-base font-semibold leading-tight md:text-lg">BarrowHub</span>
+          <span class="text-xs text-muted md:text-sm">ระบบยืม-คืนเอกสาร</span>
         </div>
       </a>
     </div>
 
     <div class="flex items-center gap-2" id="header-actions">
       <app-theme-toggle id="theme-toggle-component"></app-theme-toggle>
-      <button
+      <!-- <button
         type="button"
         id="btn-quick-actions"
         class="hidden items-center rounded-md border border-subtle px-3 py-2 text-sm font-medium text-muted transition hover:bg-surface-hover hover:text-[var(--color-text-primary)] md:inline-flex"
       >
         Quick actions
-      </button>
-      <button
+      </button> -->
+      <!-- <button
         type="button"
         id="btn-new-request"
         class="inline-flex items-center rounded-md bg-[var(--color-primary)] px-3 py-2 text-sm font-medium text-[var(--color-on-primary)] shadow-sm transition hover:bg-[var(--color-primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-info)]"
       >
         New request
-      </button>
+      </button> -->
     </div>
   </div>
 </header>

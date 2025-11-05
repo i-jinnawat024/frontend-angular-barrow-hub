@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, input, output } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
-type SidebarIcon = 'dashboard' | 'registry' | 'borrow' | 'return' | 'report';
+type SidebarIcon = 'dashboard' | 'registry' | 'borrow' | 'return' | 'report' | 'staff' | 'registry-book';
 
 interface SidebarNavItem {
   label: string;
@@ -21,7 +22,7 @@ interface SidebarNavGroup {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink, RouterLinkActive, MatIconModule],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })
@@ -69,14 +70,14 @@ export class SidebarComponent {
         {
           label: 'รายการเล่มทะเบียน',
           route: '/registry-books',
-          icon: 'registry',
+          icon: 'registry-book',
           description: 'จัดการทะเบียนเล่ม',
           exact: true
         },
         {
           label: 'รายชื่อเจ้าหน้าที่',
           route: '/staff',
-          icon: 'borrow',
+          icon: 'staff',
           description: 'จัดการเจ้าหน้าที่',
           exact: false
         }
