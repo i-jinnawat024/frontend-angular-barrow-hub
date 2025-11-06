@@ -71,7 +71,8 @@ export class DashboardService {
   private staff: Staff[] = [
     {
       id: '1',
-      name: 'สมชาย ใจดี',
+      firstName: 'สมชาย',
+      lastName: 'ใจดี',
       email: 'somchai@example.com',
       position: 'ผู้จัดการ',
       department: 'ฝ่ายบริหาร',
@@ -79,7 +80,8 @@ export class DashboardService {
     },
     {
       id: '2',
-      name: 'สมหญิง รักงาน',
+      firstName: 'สมหญิง',
+      lastName: 'รักงาน',
       email: 'somying@example.com',
       position: 'เจ้าหน้าที่เอกสาร',
       department: 'ฝ่ายเอกสาร',
@@ -87,7 +89,8 @@ export class DashboardService {
     },
     {
       id: '3',
-      name: 'วิชัย เก่งมาก',
+      firstName: 'วิชัย',
+      lastName: 'เก่งมาก',
       email: 'wichai@example.com',
       position: 'นักวิเคราะห์',
       department: 'ฝ่ายแผนงาน',
@@ -95,7 +98,8 @@ export class DashboardService {
     },
     {
       id: '4',
-      name: 'มาลี สวยงาม',
+      firstName: 'มาลี',
+      lastName: 'สวยงาม',
       email: 'malee@example.com',
       position: 'เจ้าหน้าที่ประสานงาน',
       department: 'ฝ่ายประสานงาน',
@@ -103,7 +107,8 @@ export class DashboardService {
     },
     {
       id: '5',
-      name: 'ประเสริฐ ดีมาก',
+      firstName: 'ประเสริฐ',
+      lastName: 'ดีมาก',
       email: 'prasert@example.com',
       position: 'ผู้ช่วยผู้จัดการ',
       department: 'ฝ่ายบริหาร',

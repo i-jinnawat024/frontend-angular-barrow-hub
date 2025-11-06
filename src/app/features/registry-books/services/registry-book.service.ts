@@ -53,7 +53,7 @@ export class RegistryBookService {
       registryBook: this.registryBooks[1],
       borrowerName: 'สมชาย ใจดี',
       borrowedAt: new Date('2025-11-10T10:00:00'),
-      reason: 'ต้องใช้สำหรับการประชุม',
+      reason: '',
       status: 'active'
     }
   ];

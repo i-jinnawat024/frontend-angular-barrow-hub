@@ -6,11 +6,12 @@ import { RegistryBookService } from '../../services/registry-book.service';
 import { BorrowCreateDto } from '../../../../shared/models/borrow.model';
 import { RegistryBook } from '../../../../shared/models/registry-book.model';
 import { QrScannerComponent } from '../../../../shared/components/qr-scanner/qr-scanner.component';
+import { MatIconModule } from "@angular/material/icon";
 
 @Component({
   selector: 'app-borrow',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, QrScannerComponent],
+  imports: [CommonModule, ReactiveFormsModule, QrScannerComponent, MatIconModule],
   templateUrl: './borrow.page.html',
   styleUrl: './borrow.page.scss',
   providers: [DatePipe],

@@ -39,7 +39,7 @@ export class DashboardPage implements OnInit {
       label: 'ข้อมูลผู้ยืม',
       property: 'borrowerName',
       sortable: true,
-      accessor: (loan) => loan.borrower.name,
+      accessor: (loan) => loan.borrower.firstName + ' ' + loan.borrower.lastName,
     },
     {
       label: 'วันที่ยืม',
@@ -57,7 +57,7 @@ export class DashboardPage implements OnInit {
   private readonly searchAccessors: Array<(loan: Loan) => unknown> = [
     (loan) => loan.document.first_name + ' ' + loan.document.last_name,
     (loan) => loan.document.documentNumber,
-    (loan) => loan.borrower.name,
+    (loan) => loan.borrower.firstName + ' ' + loan.borrower.lastName,
     (loan) => loan.borrower.position,
     (loan) => loan.status,
   ];
