@@ -22,7 +22,8 @@ import { readTabularFile } from '../../../../shared/utils/csv-utils';
 
 interface StaffImportPreviewRow {
   rowNumber: number;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone?: string;
   position: string;
@@ -73,7 +74,7 @@ export class StaffListPage implements OnInit {
       label: 'ชื่อ-นามสกุล',
       property: 'name',
       sortable: true,
-      accessor: (member) => member.name,
+      accessor: (member) => member.firstName + ' ' + member.lastName,
     },
     {
       label: 'เบอร์โทร',
@@ -107,7 +108,7 @@ export class StaffListPage implements OnInit {
   ];
 
   private readonly searchAccessors: Array<(member: Staff) => unknown> = [
-    (member) => member.name,
+    (member) => member.firstName + ' ' + member.lastName,
     (member) => member.email,
     (member) => member.position,
     (member) => member.department ?? '',
@@ -265,7 +266,8 @@ export class StaffListPage implements OnInit {
 
     const result = this.staffService.importStaff(
       previewRows.map((row) => ({
-        name: row.name,
+        firstName: row.firstName,
+        lastName: row.lastName,
         email: row.email,
         phone: row.phone,
         position: row.position,
@@ -366,7 +368,8 @@ export class StaffListPage implements OnInit {
       seenEmails.add(normalizedEmail);
       previewRows.push({
         rowNumber,
-        name,
+        firstName: name.split(' ')[0],
+        lastName: name.split(' ')[1],
         email,
         phone: phone || undefined,
         position,

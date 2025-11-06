@@ -9,7 +9,8 @@ export class StaffService {
   private staff: Staff[] = [
     {
       id: '1',
-      name: 'สมชาย ใจดี',
+      firstName: 'สมชาย',
+      lastName: 'ใจดี',
       email: 'somchai@example.com',
       phone: '081-234-5678',
       position: 'ผู้จัดการ',
@@ -20,7 +21,8 @@ export class StaffService {
     },
     {
       id: '2',
-      name: 'สมหญิง รักงาน',
+      firstName: 'สมหญิง',
+      lastName: 'รักงาน',
       email: 'somying@example.com',
       phone: '082-345-6789',
       position: 'เจ้าหน้าที่เอกสาร',
@@ -31,7 +33,8 @@ export class StaffService {
     },
     {
       id: '3',
-      name: 'วิชัย เก่งมาก',
+      firstName: 'วิชัย',
+      lastName: 'เก่งมาก',
       email: 'wichai@example.com',
       phone: '083-456-7890',
       position: 'นักวิเคราะห์',
@@ -42,7 +45,8 @@ export class StaffService {
     },
     {
       id: '4',
-      name: 'มาลี สวยงาม',
+      firstName: 'มาลี',
+      lastName: 'สวยงาม',
       email: 'malee@example.com',
       phone: '084-567-8901',
       position: 'เจ้าหน้าที่ประสานงาน',
@@ -53,7 +57,8 @@ export class StaffService {
     },
     {
       id: '5',
-      name: 'ประเสริฐ ดีมาก',
+      firstName: 'ประเสริฐ',
+      lastName: 'ดีมาก',
       email: 'prasert@example.com',
       phone: '085-678-9012',
       position: 'ผู้ช่วยผู้จัดการ',
@@ -129,7 +134,8 @@ export class StaffService {
           typeof globalThis.crypto !== 'undefined' && 'randomUUID' in globalThis.crypto
             ? globalThis.crypto.randomUUID()
             : Date.now().toString(),
-        name: row.name.trim(),
+        firstName: row.firstName.trim(),
+        lastName: row.lastName.trim(),
         email: row.email.trim(),
         phone: row.phone?.trim(),
         position: row.position.trim(),

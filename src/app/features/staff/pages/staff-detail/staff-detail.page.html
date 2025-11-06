@@ -13,22 +13,18 @@
     <div class="flex items-center gap-3">
       <button
         type="button"
-        class="btn-secondary"
+        class="btn-secondary cursor-pointer"
         (click)="viewBorrowHistory()"
       >
-        <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-        </svg>
+        <mat-icon>dehaze</mat-icon>
         ดูประวัติการยืม
       </button>
       <button
         type="button"
-        class="btn-primary"
+        class="btn-primary cursor-pointer"
         (click)="editStaff()"
       >
-        <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-        </svg>
+       <mat-icon class="material-symbols-outlined text-white">edit_square</mat-icon>
         แก้ไขข้อมูล
       </button>
     </div>
@@ -39,11 +35,11 @@
       <div class="px-6 py-5 border-b border-subtle bg-surface-alt flex items-center">
         <div class="h-16 w-16 flex-shrink-0 rounded-full avatar-placeholder flex items-center justify-center">
           <span class="text-2xl font-medium text-secondary">
-            {{ staff.name.charAt(0) }}
+            {{ staff.firstName.charAt(0) }}
           </span>
         </div>
         <div class="ml-4">
-          <h1 class="text-2xl font-bold text-primary">{{ staff.name }}</h1>
+          <h1 class="text-2xl font-bold text-primary">{{ staff.firstName + ' ' + staff.lastName }}</h1>
           <p class="mt-1 text-sm text-muted">{{ staff.position }}</p>
         </div>
       </div>

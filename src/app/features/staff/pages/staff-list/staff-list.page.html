@@ -92,7 +92,7 @@
                 @for (preview of importPreviewSample(); track preview.rowNumber) {
                   <tr>
                     <td class="px-4 py-2">{{ preview.rowNumber }}</td>
-                    <td class="px-4 py-2 font-medium text-primary">{{ preview.name }}</td>
+                    <td class="px-4 py-2 font-medium text-primary">{{ preview.firstName + ' ' + preview.lastName }}</td>
                     <td class="px-4 py-2">{{ preview.email }}</td>
                     <td class="px-4 py-2">{{ preview.phone ?? '-' }}</td>
                     <td class="px-4 py-2">{{ preview.position }}</td>
@@ -207,11 +207,11 @@
                   class="h-10 w-10 flex-shrink-0 rounded-full avatar-placeholder flex items-center justify-center"
                 >
                   <span class="text-sm font-medium text-secondary">
-                    {{ member.name.charAt(0) }}
+                    {{ member.firstName.charAt(0) }}
                   </span>
                 </div>
                 <div class="ml-4">
-                  <div class="text-sm font-medium text-primary">{{ member.name }}</div>
+                  <div class="text-sm font-medium text-primary">{{ member.firstName + ' ' + member.lastName }}</div>
                 </div>
               </div>
             </td>

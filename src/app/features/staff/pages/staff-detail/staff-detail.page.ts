@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { StaffService } from '../../services/staff.service';
 import { Staff } from '../../../../shared/models/staff.model';
+import { MatIcon } from "@angular/material/icon";
 
 @Component({
   selector: 'app-staff-detail',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatIcon],
   templateUrl: './staff-detail.page.html',
   styleUrl: './staff-detail.page.scss'
 })
