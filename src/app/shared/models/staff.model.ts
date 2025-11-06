@@ -16,6 +16,7 @@ export interface StaffCreateDto {
   phone?: string;
   position: string;
   department?: string;
+  isActive?: boolean;
 }
 
 export interface StaffUpdateDto {

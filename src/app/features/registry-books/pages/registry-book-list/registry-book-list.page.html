@@ -5,18 +5,139 @@
       <h1 class="text-3xl font-bold text-primary">เล่มทะเบียน</h1>
       <p class="mt-2 text-secondary">จัดการรายการเล่มทะเบียนทั้งหมดในระบบ</p>
     </div>
-    <button
-      type="button"
-      class="btn-primary cursor-pointer"
-      mat-button
-      (click)="createRegistryBook()"
-    >
-      <mat-icon style="font-size: 18px; width: 18px; height: 18px">add</mat-icon>
-      @if (this.isDesktopView()) {
-        <span style="margin-left: 4px">เพิ่มเล่มทะเบียน</span>
-      }
-    </button>
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        class="btn-primary cursor-pointer"
+        mat-button
+        (click)="createRegistryBook()"
+      >
+        <mat-icon style="font-size: 18px; width: 18px; height: 18px">add</mat-icon>
+        @if (this.isDesktopView()) {
+          <span style="margin-left: 4px">เพิ่มเล่มทะเบียน</span>
+        }
+      </button>
+      <a
+        class="btn-secondary inline-flex items-center gap-1 cursor-pointer"
+        mat-button
+        [attr.href]="templateDownloadUrl"
+        [attr.download]="'registry-books-template.xlsx'"
+      >
+        <mat-icon style="font-size: 18px; width: 18px; height: 18px">download</mat-icon>
+        @if (this.isDesktopView()) {
+          <span>ดาวน์โหลด Template</span>
+        }
+      </a>
+      <button
+        type="button"
+        class="btn-secondary inline-flex items-center gap-1 cursor-pointer"
+        mat-button
+        (click)="openImportDialog()"
+      >
+        <mat-icon style="font-size: 18px; width: 18px; height: 18px">upload_file</mat-icon>
+        @if (this.isDesktopView()) {
+          <span>นำเข้าจากไฟล์</span>
+        }
+      </button>
+      <input
+        #registryImportInput
+        type="file"
+        accept=".xlsx,.csv"
+        class="hidden"
+        (change)="onImportFileSelected($event)"
+      />
+    </div>
   </div>
+
+  @if (hasImportPreview() || hasImportErrors() || isImporting()) {
+    <div class="mb-6 rounded-lg border border-dashed border-primary bg-surface-alt px-6 py-5">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="text-lg font-semibold text-primary">ตรวจสอบข้อมูลก่อนนำเข้า</h2>
+          <p class="text-sm text-secondary">
+            ไฟล์: {{ importFileName() ?? 'ไม่ได้เลือกไฟล์' }}
+          </p>
+        </div>
+        @if (hasImportPreview()) {
+          <div class="text-sm text-secondary">
+            พร้อมนำเข้า {{ importPreview().length }} รายการ
+          </div>
+        }
+      </div>
+
+      @if (isImporting()) {
+        <p class="mt-4 text-sm text-secondary">กำลังอ่านไฟล์ กรุณารอสักครู่...</p>
+      } @else {
+        @if (hasImportErrors()) {
+          <div class="mt-4 alert-warning rounded-md px-4 py-3 text-sm">
+            <p class="font-medium">พบข้อผิดพลาดในไฟล์นำเข้า</p>
+            <ul class="mt-2 list-disc space-y-1 ps-5">
+              @for (error of importErrors(); track error) {
+                <li>{{ error }}</li>
+              }
+            </ul>
+          </div>
+        }
+
+        @if (hasImportPreview()) {
+          <div class="mt-4 overflow-x-auto">
+            <table class="min-w-full divide-y divide-subtle text-left text-sm">
+              <thead class="bg-table-header text-xs uppercase text-secondary">
+                <tr>
+                  <th class="px-4 py-2">แถวที่</th>
+                  <th class="px-4 py-2">เลขเล่มทะเบียน</th>
+                  <th class="px-4 py-2">ชื่อเล่มทะเบียน</th>
+                  <th class="px-4 py-2">รายละเอียด</th>
+                  <th class="px-4 py-2">สถานะ</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-subtle bg-surface text-secondary">
+                @for (preview of importPreviewSample(); track preview.rowNumber) {
+                  <tr>
+                    <td class="px-4 py-2">{{ preview.rowNumber }}</td>
+                    <td class="px-4 py-2 font-medium text-primary">{{ preview.bookNumber }}</td>
+                    <td class="px-4 py-2">{{ preview.name }}</td>
+                    <td class="px-4 py-2">{{ preview.description ?? '-' }}</td>
+                    <td class="px-4 py-2">
+                      @switch (preview.status) {
+                        @case ('active') { พร้อมใช้งาน }
+                        @case ('borrowed') { กำลังยืม }
+                        @case ('archived') { เก็บถาวร }
+                        @case ('inactive') { ปิดใช้งาน }
+                        @default { - }
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            @if (importPreviewRemaining() > 0) {
+              <p class="mt-2 text-xs text-secondary">
+                แสดงตัวอย่าง {{ importPreviewSample().length }} รายการแรก และมีอีก
+                {{ importPreviewRemaining() }} รายการรอนำเข้า
+              </p>
+            }
+          </div>
+
+          <div class="mt-4 flex flex-col gap-2 text-sm text-secondary sm:flex-row sm:items-center sm:justify-between">
+            <p>
+              คอลัมน์ที่รองรับ: เลขเล่มทะเบียน, ชื่อเล่มทะเบียน, รายละเอียด (ถ้ามี), สถานะ (ถ้ามี) หรือดาวน์โหลดไฟล์ Template (.xlsx) เพื่ออ้างอิงรูปแบบ
+            </p>
+            <div class="flex gap-2">
+              <button type="button" class="btn-secondary" (click)="cancelImportPreview()">
+                ยกเลิก
+              </button>
+              <button type="button" class="btn-primary" (click)="confirmImportPreview()">
+                ยืนยันการนำเข้า
+              </button>
+            </div>
+          </div>
+        } @else if (!hasImportErrors()) {
+          <p class="mt-4 text-sm text-secondary">ยังไม่มีข้อมูลที่สามารถนำเข้าได้</p>
+        }
+      }
+    </div>
+  }
 
   <!-- Registry Books Table -->
   <div class="bg-surface rounded-lg shadow border border-subtle overflow-hidden mt-4">

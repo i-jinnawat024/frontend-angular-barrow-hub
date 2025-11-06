@@ -80,7 +80,7 @@ export class StaffService {
     const newStaff: Staff = {
       id: Date.now().toString(),
       ...dto,
-      isActive: true,
+      isActive: dto.isActive ?? true,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -106,6 +106,48 @@ export class StaffService {
     
     this.staff.splice(index, 1);
     return true;
+  }
+
+  importStaff(
+    rows: Array<StaffCreateDto>,
+  ): { imported: number; skipped: number; duplicateEmails: string[] } {
+    let imported = 0;
+    const duplicateEmails: string[] = [];
+
+    for (const row of rows) {
+      const normalizedEmail = row.email.trim().toLowerCase();
+      if (
+        !normalizedEmail ||
+        this.staff.some((member) => member.email.trim().toLowerCase() === normalizedEmail)
+      ) {
+        duplicateEmails.push(row.email);
+        continue;
+      }
+
+      const newStaff: Staff = {
+        id:
+          typeof globalThis.crypto !== 'undefined' && 'randomUUID' in globalThis.crypto
+            ? globalThis.crypto.randomUUID()
+            : Date.now().toString(),
+        name: row.name.trim(),
+        email: row.email.trim(),
+        phone: row.phone?.trim(),
+        position: row.position.trim(),
+        department: row.department?.trim(),
+        isActive: row.isActive ?? true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      this.staff.push(newStaff);
+      imported += 1;
+    }
+
+    return {
+      imported,
+      skipped: rows.length - imported,
+      duplicateEmails,
+    };
   }
 }
 

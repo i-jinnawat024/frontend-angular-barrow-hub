@@ -73,7 +73,7 @@ export class RegistryBookService {
     const newBook: RegistryBook = {
       id: Date.now().toString(),
       ...dto,
-      status: 'active',
+      status: dto.status ?? 'active',
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -99,6 +99,47 @@ export class RegistryBookService {
     
     this.registryBooks.splice(index, 1);
     return true;
+  }
+
+  importRegistryBooks(
+    rows: Array<RegistryBookCreateDto>,
+  ): { imported: number; skipped: number; duplicateBookNumbers: string[] } {
+    let imported = 0;
+    const duplicateBookNumbers: string[] = [];
+
+    for (const row of rows) {
+      const normalizedBookNumber = row.bookNumber.trim().toLowerCase();
+      if (
+        !normalizedBookNumber ||
+        this.registryBooks.some(
+          (book) => book.bookNumber.trim().toLowerCase() === normalizedBookNumber,
+        )
+      ) {
+        duplicateBookNumbers.push(row.bookNumber);
+        continue;
+      }
+
+      const newBook: RegistryBook = {
+        id:
+          typeof globalThis.crypto !== 'undefined' && 'randomUUID' in globalThis.crypto
+            ? globalThis.crypto.randomUUID()
+            : Date.now().toString(),
+        bookNumber: row.bookNumber.trim(),
+        name: row.name.trim(),
+        description: row.description?.trim() ?? undefined,
+        status: row.status ?? 'active',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      this.registryBooks.push(newBook);
+      imported += 1;
+    }
+
+    return {
+      imported,
+      skipped: rows.length - imported,
+      duplicateBookNumbers,
+    };
   }
 
   // Borrow methods

@@ -163,6 +163,12 @@ body {
     cursor: not-allowed;
   }
 
+  .alert-warning {
+    border: 1px solid var(--color-warning-strong);
+    background-color: var(--color-warning-container);
+    color: var(--color-warning-strong);
+  }
+
   .form-label {
     @apply block text-sm font-medium mb-2;
     color: var(--color-text-secondary);
