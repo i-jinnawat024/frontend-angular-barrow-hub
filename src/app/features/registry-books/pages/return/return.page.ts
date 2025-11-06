@@ -1,6 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { MatSelectChange } from '@angular/material/select';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { RegistryBookService } from '../../services/registry-book.service';
 import { ReturnCreateDto } from '../../../../shared/models/return.model';
@@ -13,21 +22,26 @@ import { QrScannerComponent } from '../../../../shared/components/qr-scanner/qr-
   imports: [CommonModule, ReactiveFormsModule, QrScannerComponent],
   templateUrl: './return.page.html',
   styleUrl: './return.page.scss',
-  providers: [DatePipe]
 })
 export class ReturnPage implements OnInit {
   form: FormGroup;
   activeBorrows: Borrow[] = [];
+  uniqueBorrowers: string[] = [];
   showScanner = false;
-
+  currentStep: 1 | 2 = 1;
+  selectedBorrowersControl = new FormControl<string[]>([], { nonNullable: true });
+  private readonly selectedBorrowIdsControl: FormControl<string[]>;
   constructor(
-    private fb: FormBuilder,
-    private registryBookService: RegistryBookService,
-    private router: Router,
-    private datePipe: DatePipe
+    private readonly fb: FormBuilder,
+    private readonly registryBookService: RegistryBookService,
+    private readonly router: Router,
   ) {
+    this.selectedBorrowIdsControl = this.fb.nonNullable.control<string[]>([], {
+      validators: [this.atLeastOneSelectionValidator()],
+    });
+
     this.form = this.fb.group({
-      borrowId: ['', [Validators.required]]
+      selectedBorrowIds: this.selectedBorrowIdsControl,
     });
   }
 
@@ -35,27 +49,216 @@ export class ReturnPage implements OnInit {
     this.loadActiveBorrows();
   }
 
+  get selectedBorrowIds(): string[] {
+    return this.selectedBorrowIdsControl.value ?? [];
+  }
+
+  get selectedBorrows(): Borrow[] {
+    const ids = new Set(this.selectedBorrowIds);
+    return this.activeBorrows.filter((borrow) => ids.has(borrow.id));
+  }
+
+  get selectedBorrowNumbers(): string {
+    return this.selectedBorrows.map((borrow) => borrow.registryBook.bookNumber).join(', ');
+  }
+
+  get selectedBorrowers(): string[] {
+    return this.selectedBorrowersControl.value ?? [];
+  }
+
+  private atLeastOneSelectionValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value as string[] | null;
+      return value && value.length > 0 ? null : { requiredSelection: true };
+    };
+  }
+
+  private updateSelectedBorrowIds(ids: string[], markTouched = true): void {
+    this.selectedBorrowIdsControl.setValue(ids);
+    if (markTouched) {
+      this.selectedBorrowIdsControl.markAsTouched();
+    }
+    this.selectedBorrowIdsControl.updateValueAndValidity({ emitEvent: false });
+  }
+
   loadActiveBorrows(): void {
-    this.activeBorrows = this.registryBookService.getActiveBorrows();
+    this.activeBorrows = this.registryBookService
+      .getActiveBorrows()
+      .slice()
+      .sort((a, b) => b.borrowedAt.getTime() - a.borrowedAt.getTime());
+
+    const borrowerSet = new Set(this.activeBorrows.map((borrow) => borrow.borrowerName));
+    this.uniqueBorrowers = Array.from(borrowerSet).sort();
+
+    const availableIds = new Set(this.activeBorrows.map((borrow) => borrow.id));
+    const filtered = this.selectedBorrowIds.filter((id) => availableIds.has(id));
+    if (filtered.length !== this.selectedBorrowIds.length) {
+      this.updateSelectedBorrowIds(filtered, false);
+    }
+
+    // Update selected borrowers based on current selection
+    const selectedBorrowerNames = [
+      ...new Set(
+        this.selectedBorrows.map((borrow) => borrow.borrowerName)
+      ),
+    ];
+    this.selectedBorrowersControl.setValue(selectedBorrowerNames);
+  }
+
+  getBorrowsByBorrower(borrower: string): Borrow[] {
+    return this.activeBorrows.filter((borrow) => borrow.borrowerName === borrower);
+  }
+
+  getFilteredBorrows(): Borrow[] {
+    const selectedBorrowerSet = new Set(this.selectedBorrowers);
+    return this.activeBorrows.filter((borrow) => selectedBorrowerSet.has(borrow.borrowerName));
+  }
+
+  isBorrowSelected(borrowId: string): boolean {
+    return this.selectedBorrowIds.includes(borrowId);
+  }
+
+  isBorrowerSelected(borrower: string): boolean {
+    return this.selectedBorrowers.includes(borrower);
+  }
+
+  getBorrowCountByBorrower(borrower: string): number {
+    return this.getBorrowsByBorrower(borrower).length;
+  }
+
+  getSelectedCountByBorrower(borrower: string): number {
+    const borrowerBorrows = this.getBorrowsByBorrower(borrower);
+    return borrowerBorrows.filter((borrow) => this.selectedBorrowIds.includes(borrow.id)).length;
+  }
+
+  getTotalBorrowsCount(): number {
+    const selectedBorrowerSet = new Set(this.selectedBorrowers);
+    return this.activeBorrows.filter((borrow) => selectedBorrowerSet.has(borrow.borrowerName)).length;
+  }
+
+  getBorrowDurationDays(borrow: Borrow): number {
+    const now = new Date();
+    const diffTime = now.getTime() - borrow.borrowedAt.getTime();
+    return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+  }
+
+  onBorrowersSelectionChange(event: MatSelectChange): void {
+    const selected = event.value as string[];
+    const previous = this.selectedBorrowers;
+    const deselected = previous.filter((b) => !selected.includes(b));
+
+    for (const borrower of deselected) {
+      const borrowerBorrows = this.getBorrowsByBorrower(borrower);
+      const selectedIds = new Set(this.selectedBorrowIds);
+      borrowerBorrows.forEach((borrow) => selectedIds.delete(borrow.id));
+      this.updateSelectedBorrowIds(Array.from(selectedIds));
+    }
+  }
+
+  onBorrowerSelectionChange(borrower: string, checked: boolean): void {
+    const current = this.selectedBorrowersControl.value ?? [];
+    let newSelected: string[];
+
+    if (checked) {
+      newSelected = [...current, borrower];
+    } else {
+      newSelected = current.filter((b) => b !== borrower);
+      // Remove all borrows from this borrower
+      const borrowerBorrows = this.getBorrowsByBorrower(borrower);
+      const selectedIds = new Set(this.selectedBorrowIds);
+      borrowerBorrows.forEach((borrow) => selectedIds.delete(borrow.id));
+      this.updateSelectedBorrowIds(Array.from(selectedIds));
+    }
+
+    this.selectedBorrowersControl.setValue(newSelected);
+  }
+
+  selectAllBorrowers(): void {
+    this.selectedBorrowersControl.setValue([...this.uniqueBorrowers]);
+  }
+
+  clearBorrowerSelection(): void {
+    this.selectedBorrowersControl.setValue([]);
+    this.updateSelectedBorrowIds([]);
+  }
+
+  onBorrowSelectionChange(borrowId: string, checked: boolean): void {
+    const selected = new Set(this.selectedBorrowIds);
+    if (checked) {
+      selected.add(borrowId);
+    } else {
+      selected.delete(borrowId);
+    }
+    this.updateSelectedBorrowIds(Array.from(selected));
+
+    // Update selected borrowers if needed
+    const borrow = this.activeBorrows.find((b) => b.id === borrowId);
+    if (borrow && !checked) {
+      const borrowerBorrows = this.getBorrowsByBorrower(borrow.borrowerName);
+      const selectedInBorrower = borrowerBorrows.some((b) => selected.has(b.id));
+      if (!selectedInBorrower) {
+        const current = this.selectedBorrowersControl.value ?? [];
+        const newSelected = current.filter((b) => b !== borrow.borrowerName);
+        this.selectedBorrowersControl.setValue(newSelected);
+      }
+    }
+  }
+
+  selectAllBorrows(): void {
+    if (!this.activeBorrows.length) {
+      this.updateSelectedBorrowIds([], false);
+      return;
+    }
+
+    this.selectedBorrowersControl.setValue(this.uniqueBorrowers);
+    const allIds = this.activeBorrows.map((borrow) => borrow.id);
+    this.updateSelectedBorrowIds(allIds);
+  }
+
+  clearSelection(): void {
+    this.updateSelectedBorrowIds([]);
+    this.selectedBorrowersControl.setValue([]);
+  }
+
+  clearBorrowSelection(): void {
+    this.updateSelectedBorrowIds([]);
+  }
+
+  goToStep1(): void {
+    this.currentStep = 1;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  goToStep2(): void {
+    if (!this.selectedBorrowers.length) {
+      alert('กรุณาเลือกผู้ยืมอย่างน้อย 1 คน');
+      return;
+    }
+    this.currentStep = 2;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   onSubmit(): void {
-    if (this.form.valid) {
-      const formValue = this.form.value;
-      const returnDto: ReturnCreateDto = {
-        borrowId: formValue.borrowId,
-        returnedAt: new Date()
-      };
+    if (!this.selectedBorrowIds.length) {
+      this.selectedBorrowIdsControl.markAsTouched();
+      this.selectedBorrowIdsControl.updateValueAndValidity();
+      return;
+    }
 
-      try {
-        const returnRecord = this.registryBookService.createReturn(returnDto);
-        if (returnRecord) {
-          alert('คืนเล่มทะเบียนสำเร็จ');
-          this.router.navigate(['/registry-books']);
-        }
-      } catch (error: any) {
-        alert('เกิดข้อผิดพลาด: ' + error.message);
+    const returnedAt = new Date();
+    const returnDtos: ReturnCreateDto[] = this.selectedBorrowIds.map((borrowId) => ({
+      borrowId,
+      returnedAt: new Date(returnedAt),
+    }));
+
+    try {
+      const createdReturns = this.registryBookService.createBulkReturns(returnDtos);
+      if (createdReturns.length) {
+        alert(`คืนเล่มทะเบียนจำนวน ${createdReturns.length} เล่มสำเร็จแล้ว`);
+        this.router.navigate(['/registry-books']);
       }
+    } catch (error: any) {
+      alert('ไม่สามารถบันทึกการคืนได้: ' + (error?.message ?? 'ไม่ทราบสาเหตุ'));
     }
   }
 
@@ -63,34 +266,30 @@ export class ReturnPage implements OnInit {
     this.router.navigate(['/registry-books']);
   }
 
-  getSelectedBorrow(): Borrow | undefined {
-    const borrowId = this.form.get('borrowId')?.value;
-    return this.activeBorrows.find(b => b.id === borrowId);
-  }
-
   openScanner(): void {
     this.showScanner = true;
   }
 
   onScanSuccess(decodedText: string): void {
-    // Find active borrow by book ID from scanned QR code
-    const borrow = this.activeBorrows.find(b => b.registryBook.id === decodedText);
-    if (borrow) {
-      this.form.patchValue({
-        borrowId: borrow.id
-      });
-      this.showScanner = false;
+    const borrow = this.registryBookService.getBorrowByBookId(decodedText);
+    if (borrow && borrow.status === 'active') {
+      const selected = new Set(this.selectedBorrowIds);
+      selected.add(borrow.id);
+      this.updateSelectedBorrowIds(Array.from(selected));
+      const current = this.selectedBorrowersControl.value ?? [];
+      if (!current.includes(borrow.borrowerName)) {
+        this.selectedBorrowersControl.setValue([...current, borrow.borrowerName]);
+      }
     } else {
-      alert('ไม่พบการยืมที่เกี่ยวข้องกับเล่มทะเบียนนี้');
+      alert('QR ไม่ตรงกับรายการยืมที่ยังเปิดอยู่');
     }
   }
 
   onScanError(error: string): void {
-    alert('เกิดข้อผิดพลาดในการสแกน: ' + error);
+    alert('เกิดข้อผิดพลาดจากการสแกน: ' + error);
   }
 
   onScannerClose(): void {
     this.showScanner = false;
   }
 }
-
