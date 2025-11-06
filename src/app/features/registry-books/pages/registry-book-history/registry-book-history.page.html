@@ -1,0 +1,83 @@
+<div class="container mx-auto px-4 py-8 max-w-5xl">
+  <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+    <button
+      type="button"
+      class="inline-flex items-center text-sm font-medium text-secondary hover:text-[var(--color-text-primary)]"
+      (click)="goBack()"
+    >
+      <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      ย้อนกลับ
+    </button>
+
+    <div class="text-right">
+      <h1 class="text-2xl font-bold text-primary">ประวัติการยืมเล่มทะเบียน</h1>
+      <p class="mt-1 text-sm text-muted">
+        เลขทะเบียน: <span class="font-medium text-primary">{{ registryBook?.bookNumber }}</span>
+      </p>
+      <p class="text-sm text-muted">
+        ชื่อเอกสาร: <span class="font-medium text-primary">{{ registryBook?.name }}</span>
+      </p>
+    </div>
+  </div>
+
+  @if (borrowHistory.length > 0) {
+    <div class="bg-surface rounded-lg border border-subtle shadow">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-subtle text-sm">
+          <thead class="bg-surface-alt text-left text-muted uppercase tracking-wide text-xs">
+            <tr>
+              <th scope="col" class="px-6 py-3 font-medium">เจ้าหน้าที่</th>
+              <th scope="col" class="px-6 py-3 font-medium">วันที่ยืม</th>
+              <th scope="col" class="px-6 py-3 font-medium">สถานะ</th>
+              <th scope="col" class="px-6 py-3 font-medium">หมายเหตุ</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-subtle text-primary">
+            @for (borrow of borrowHistory; track borrow.id) {
+              <tr>
+                <td class="px-6 py-4 align-top">
+                  <div class="font-medium text-primary">{{ borrow.borrowerName }}</div>
+                  <div class="text-xs text-muted">รหัสยืม: {{ borrow.id }}</div>
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <div>{{ borrow.borrowedAt | date: 'dd/MM/yyyy HH:mm' }}</div>
+                  @if (borrow.status === 'returned' && borrow.returnedAt) {
+                    <div class="text-xs text-muted">
+                      คืนเมื่อ {{ borrow.returnedAt | date: 'dd/MM/yyyy HH:mm' }}
+                    </div>
+                  }
+                </td>
+                <td class="px-6 py-4 align-top">
+                  @switch (borrow.status) {
+                    @case ('returned') {
+                      <span class="badge badge-success">คืนแล้ว</span>
+                    }
+                    @case ('active') {
+                      <span class="badge badge-warning">กำลังยืม</span>
+                    }
+                    @default {
+                      <span class="badge badge-neutral">ไม่ทราบสถานะ</span>
+                    }
+                  }
+                </td>
+                <td class="px-6 py-4 align-top text-muted">
+                  {{ borrow.reason || '-' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  } @else {
+    <div class="bg-surface rounded-lg border border-subtle px-6 py-12 text-center text-muted shadow">
+      <svg class="mx-auto mb-4 h-12 w-12 text-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6l4 2"></path>
+      </svg>
+      <p class="text-lg font-medium text-primary">ยังไม่มีประวัติการยืมสำหรับเล่มนี้</p>
+      <p class="mt-2 text-sm">เมื่อมีการยืม ระบบจะแสดงข้อมูลให้โดยอัตโนมัติ</p>
+    </div>
+  }
+</div>

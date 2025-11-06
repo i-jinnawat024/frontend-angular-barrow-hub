@@ -216,5 +216,21 @@ export class RegistryBookService {
       borrow.registryBook.id === bookId && borrow.status === 'active'
     );
   }
+
+  getBorrowHistoryByStaffName(staffName: string): Borrow[] {
+    return this.borrows
+      .filter((borrow) => borrow.borrowerName === staffName)
+      .sort(
+        (a, b) => b.borrowedAt.getTime() - a.borrowedAt.getTime(),
+      );
+  }
+
+  getBorrowHistoryByBookId(bookId: string): Borrow[] {
+    return this.borrows
+      .filter((borrow) => borrow.registryBook.id === bookId)
+      .sort(
+        (a, b) => b.borrowedAt.getTime() - a.borrowedAt.getTime(),
+      );
+  }
 }
 
