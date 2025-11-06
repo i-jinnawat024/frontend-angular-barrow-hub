@@ -28,6 +28,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/registry-books/pages/registry-book-form/registry-book-form.page').then(m => m.RegistryBookFormPage)
   },
   {
+    path: 'registry-books/:id/history',
+    loadComponent: () => import('./features/registry-books/pages/registry-book-history/registry-book-history.page').then(m => m.RegistryBookHistoryPage)
+  },
+  {
     path: 'registry-books/:id',
     loadComponent: () => import('./features/registry-books/pages/registry-book-detail/registry-book-detail.page').then(m => m.RegistryBookDetailPage)
   },
@@ -46,6 +50,10 @@ export const routes: Routes = [
   {
     path: 'staff/:id/edit',
     loadComponent: () => import('./features/staff/pages/staff-form/staff-form.page').then(m => m.StaffFormPage)
+  },
+  {
+    path: 'staff/:id/history',
+    loadComponent: () => import('./features/staff/pages/staff-history/staff-history.page').then(m => m.StaffHistoryPage)
   },
   {
     path: 'staff/:id',

@@ -87,6 +87,16 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
     this.router.navigate(['/registry-books']);
   }
 
+  viewBorrowHistory(): void {
+    if (this.registryBook) {
+      this.router.navigate([
+        '/registry-books',
+        this.registryBook.id,
+        'history',
+      ]);
+    }
+  }
+
   printQrCode(): void {
     if (!this.registryBook || !this.qrCodeDataUrl) {
       return;
@@ -204,4 +214,5 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
       printWindow.close();
     }, 250);
   }
+
 }

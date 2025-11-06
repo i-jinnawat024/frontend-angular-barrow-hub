@@ -41,5 +41,11 @@ export class StaffDetailPage implements OnInit {
   goBack(): void {
     this.router.navigate(['/staff']);
   }
+
+  viewBorrowHistory(): void {
+    if (this.staff) {
+      this.router.navigate(['/staff', this.staff.id, 'history']);
+    }
+  }
 }
 
