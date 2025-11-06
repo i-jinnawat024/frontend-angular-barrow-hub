@@ -4,11 +4,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { RegistryBookService } from '../../services/registry-book.service';
 import { RegistryBook } from '../../../../shared/models/registry-book.model';
 import { QrBarcodeService } from '../../../../shared/services/qr-barcode.service';
+import { MatIcon } from "@angular/material/icon";
 
 @Component({
   selector: 'app-registry-book-detail',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatIcon],
   templateUrl: './registry-book-detail.page.html',
   styleUrl: './registry-book-detail.page.scss',
 })

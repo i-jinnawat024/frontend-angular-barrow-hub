@@ -53,12 +53,18 @@ export class RegistryBookService {
       registryBook: this.registryBooks[1],
       borrowerName: 'สมชาย ใจดี',
       borrowedAt: new Date('2025-11-10T10:00:00'),
-      reason: 'ต้องใช้สำหรับการประชุม',
+      reason: '',
       status: 'active'
     }
   ];
 
   private returns: Return[] = [];
+
+  private generateId(): string {
+    return typeof globalThis.crypto !== 'undefined' && 'randomUUID' in globalThis.crypto
+      ? globalThis.crypto.randomUUID()
+      : `${Date.now()}-${Math.floor(Math.random() * 10_000)}`;
+  }
 
   // Registry Books methods
   getRegistryBooks() {
@@ -156,26 +162,53 @@ export class RegistryBookService {
   }
 
   createBorrow(dto: BorrowCreateDto): Borrow {
-    const registryBook = this.getRegistryBookById(dto.registryBookId);
-    if (!registryBook) {
-      throw new Error('Registry book not found');
+    return this.createBulkBorrows([dto])[0];
+  }
+
+  createBulkBorrows(dtos: BorrowCreateDto[]): Borrow[] {
+    if (!dtos.length) {
+      throw new Error('ไม่ได้ระบุรายการยืม');
     }
 
-    const newBorrow: Borrow = {
-      id: Date.now().toString(),
-      registryBook,
-      borrowerName: dto.borrowerName,
-      borrowedAt: dto.borrowedAt,
-      reason: dto.reason,
-      status: 'active'
-    };
+    const seenBookIds = new Set<string>();
+    const registryBooks = dtos.map((dto) => {
+      if (seenBookIds.has(dto.registryBookId)) {
+        throw new Error('พบเล่มทะเบียนซ้ำในคำร้อง');
+      }
+      seenBookIds.add(dto.registryBookId);
 
-    this.borrows.push(newBorrow);
-    
-    // Update registry book status
-    this.updateRegistryBook(dto.registryBookId, { status: 'borrowed' });
+      const registryBook = this.getRegistryBookById(dto.registryBookId);
+      if (!registryBook) {
+        throw new Error(`ไม่พบเล่มทะเบียนรหัส ${dto.registryBookId}`);
+      }
 
-    return newBorrow;
+      if (registryBook.status !== 'active') {
+        throw new Error(`เล่มทะเบียน ${registryBook.bookNumber} ไม่พร้อมให้ยืม`);
+      }
+
+      return registryBook;
+    });
+
+    const createdBorrows: Borrow[] = [];
+
+    dtos.forEach((dto, index) => {
+      const registryBook = registryBooks[index];
+
+      const newBorrow: Borrow = {
+        id: this.generateId(),
+        registryBook,
+        borrowerName: dto.borrowerName,
+        borrowedAt: dto.borrowedAt,
+        reason: dto.reason,
+        status: 'active'
+      };
+
+      this.borrows.push(newBorrow);
+      this.updateRegistryBook(registryBook.id, { status: 'borrowed' });
+      createdBorrows.push(newBorrow);
+    });
+
+    return createdBorrows;
   }
 
   // Return methods
@@ -184,31 +217,55 @@ export class RegistryBookService {
   }
 
   createReturn(dto: ReturnCreateDto): Return {
-    const borrow = this.getBorrowById(dto.borrowId);
-    if (!borrow) {
-      throw new Error('Borrow record not found');
+    return this.createBulkReturns([dto])[0];
+  }
+
+  createBulkReturns(dtos: ReturnCreateDto[]): Return[] {
+    if (!dtos.length) {
+      throw new Error('ไม่ได้ระบุรายการคืน');
     }
 
-    if (borrow.status === 'returned') {
-      throw new Error('Registry book already returned');
-    }
+    const seenBorrowIds = new Set<string>();
+    const borrowsToReturn = dtos.map((dto) => {
+      if (seenBorrowIds.has(dto.borrowId)) {
+        throw new Error('พบรายการยืมซ้ำในคำร้อง');
+      }
+      seenBorrowIds.add(dto.borrowId);
 
-    const newReturn: Return = {
-      id: Date.now().toString(),
-      borrow,
-      returnedAt: dto.returnedAt
-    };
+      const borrow = this.getBorrowById(dto.borrowId);
+      if (!borrow) {
+        throw new Error(`ไม่พบรายการยืมรหัส ${dto.borrowId}`);
+      }
 
-    this.returns.push(newReturn);
+      if (borrow.status === 'returned') {
+        throw new Error(`เล่มทะเบียน ${borrow.registryBook.bookNumber} ถูกคืนไปแล้ว`);
+      }
 
-    // Update borrow status
-    borrow.status = 'returned';
-    borrow.returnedAt = dto.returnedAt;
+      return borrow;
+    });
 
-    // Update registry book status
-    this.updateRegistryBook(borrow.registryBook.id, { status: 'active' });
+    const createdReturns: Return[] = [];
 
-    return newReturn;
+    borrowsToReturn.forEach((borrow, index) => {
+      const dto = dtos[index];
+
+      const newReturn: Return = {
+        id: this.generateId(),
+        borrow,
+        returnedAt: dto.returnedAt
+      };
+
+      this.returns.push(newReturn);
+
+      borrow.status = 'returned';
+      borrow.returnedAt = dto.returnedAt;
+
+      this.updateRegistryBook(borrow.registryBook.id, { status: 'active' });
+
+      createdReturns.push(newReturn);
+    });
+
+    return createdReturns;
   }
 
   getBorrowByBookId(bookId: string): Borrow | undefined {

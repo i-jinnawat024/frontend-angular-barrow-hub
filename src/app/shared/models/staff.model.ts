@@ -1,6 +1,7 @@
 export interface Staff {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone?: string;
   position: string;
@@ -11,7 +12,8 @@ export interface Staff {
 }
 
 export interface StaffCreateDto {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone?: string;
   position: string;
@@ -20,7 +22,8 @@ export interface StaffCreateDto {
 }
 
 export interface StaffUpdateDto {
-  name?: string;
+  firstName?: string;
+  lastName?: string;
   email?: string;
   phone?: string;
   position?: string;

@@ -49,7 +49,8 @@ export class StaffFormPage implements OnInit {
     const staff = this.staffService.getStaffById(this.staffId);
     if (staff) {
       this.form.patchValue({
-        name: staff.name,
+        firstName: staff.firstName,
+        lastName: staff.lastName,
         email: staff.email,
         phone: staff.phone || '',
         position: staff.position,

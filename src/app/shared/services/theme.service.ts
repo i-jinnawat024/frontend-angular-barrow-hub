@@ -18,12 +18,17 @@ export class ThemeService {
     if (this.isBrowser()) {
       const storedPreference = window.localStorage.getItem(this.storageKey) as ThemeMode | null;
 
+      let initialTheme: ThemeMode;
       if (storedPreference === 'light' || storedPreference === 'dark') {
-        this.themePreference.set(storedPreference);
+        initialTheme = storedPreference;
       } else {
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        this.themePreference.set(prefersDark ? 'dark' : 'light');
+        initialTheme = prefersDark ? 'dark' : 'light';
       }
+      
+      this.themePreference.set(initialTheme);
+      // Apply theme immediately on initialization
+      this.applyTheme(initialTheme);
     }
 
     effect(() => {
