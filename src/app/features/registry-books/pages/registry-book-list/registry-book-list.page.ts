@@ -1,4 +1,12 @@
-import { Component, HostListener, OnInit, computed, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  OnInit,
+  ViewChild,
+  computed,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,6 +19,17 @@ import {
   defaultSortState,
   toSearchableString,
 } from '../../../../shared/utils/table-utils';
+import { readTabularFile } from '../../../../shared/utils/csv-utils';
+
+type RegistryBookStatus = RegistryBook['status'];
+
+interface RegistryBookImportPreviewRow {
+  rowNumber: number;
+  bookNumber: string;
+  name: string;
+  description?: string;
+  status: RegistryBookStatus;
+}
 
 @Component({
   selector: 'app-registry-book-list',
@@ -25,6 +44,24 @@ export class RegistryBookListPage implements OnInit {
   protected readonly sortState = signal<SortState>({ ...defaultSortState });
   private readonly isDesktopScreen = signal(this.checkIsDesktop());
   protected readonly isDesktopView = computed(() => this.isDesktopScreen());
+  protected readonly importPreview = signal<RegistryBookImportPreviewRow[]>([]);
+  protected readonly importErrors = signal<string[]>([]);
+  protected readonly importFileName = signal<string | null>(null);
+  protected readonly isImporting = signal(false);
+  protected readonly hasImportPreview = computed(
+    () => this.importPreview().length > 0,
+  );
+  protected readonly hasImportErrors = computed(
+    () => this.importErrors().length > 0,
+  );
+  protected readonly importPreviewSample = computed(() =>
+    this.importPreview().slice(0, 10),
+  );
+  protected readonly importPreviewRemaining = computed(() => {
+    const total = this.importPreview().length;
+    return total > 10 ? total - 10 : 0;
+  });
+  protected readonly templateDownloadUrl = '/samples/registry-books-template.xlsx';
 
   protected readonly columns: Array<{
     label: string;
@@ -106,6 +143,8 @@ export class RegistryBookListPage implements OnInit {
     private readonly router: Router,
   ) {}
 
+  @ViewChild('registryImportInput') private registryImportInput?: ElementRef<HTMLInputElement>;
+
   ngOnInit(): void {
     this.loadRegistryBooks();
   }
@@ -171,5 +210,198 @@ export class RegistryBookListPage implements OnInit {
   protected isSortedDescending(property: string): boolean {
     const sort = this.sortState();
     return sort.active === property && sort.direction === 'desc';
+  }
+
+  protected openImportDialog(): void {
+    if (this.registryImportInput) {
+      this.registryImportInput.nativeElement.value = '';
+      this.registryImportInput.nativeElement.click();
+    }
+  }
+
+  protected async onImportFileSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    this.importFileName.set(file.name);
+    this.importErrors.set([]);
+    this.importPreview.set([]);
+
+    this.isImporting.set(true);
+
+    try {
+      const { rows: rawRows, errors: readErrors } = await readTabularFile(file);
+      const { rows, errors } = this.parseRegistryBookImport(rawRows);
+      this.importPreview.set(rows);
+      this.importErrors.set([...readErrors, ...errors]);
+    } catch (error) {
+      console.error(error);
+      this.importPreview.set([]);
+      this.importErrors.set(['ไม่สามารถอ่านไฟล์สำหรับนำเข้าได้ กรุณาลองใหม่อีกครั้ง']);
+    } finally {
+      this.isImporting.set(false);
+      if (this.registryImportInput) {
+        this.registryImportInput.nativeElement.value = '';
+      }
+    }
+  }
+
+  protected cancelImportPreview(): void {
+    this.resetImportState();
+  }
+
+  protected confirmImportPreview(): void {
+    const previewRows = this.importPreview();
+    if (previewRows.length === 0) {
+      return;
+    }
+
+    const result = this.registryBookService.importRegistryBooks(
+      previewRows.map((row) => ({
+        bookNumber: row.bookNumber,
+        name: row.name,
+        description: row.description,
+        status: row.status,
+      })),
+    );
+
+    this.loadRegistryBooks();
+    this.resetImportState();
+
+    let message = `นำเข้าเล่มทะเบียนสำเร็จ ${result.imported} รายการ`;
+    if (result.duplicateBookNumbers.length > 0) {
+      const duplicated = Array.from(new Set(result.duplicateBookNumbers))
+        .filter((value) => value.trim().length > 0)
+        .join(', ');
+      message += `\nรายการที่ข้ามเนื่องจากข้อมูลซ้ำ: ${duplicated}`;
+    }
+
+    window.alert(message);
+  }
+
+  private parseRegistryBookImport(
+    rows: string[][],
+  ): { rows: RegistryBookImportPreviewRow[]; errors: string[] } {
+    if (rows.length === 0) {
+      return {
+        rows: [],
+        errors: ['ไฟล์ไม่มีข้อมูล กรุณาตรวจสอบไฟล์ Template ก่อนอัปโหลด'],
+      };
+    }
+
+    const headers = rows[0].map((cell) =>
+      this.normalizeHeader(String(cell ?? '')),
+    );
+    const bookNumberIndex = this.findHeaderIndex(headers, [
+      'เลขเล่มทะเบียน',
+      'หมายเลขเล่มทะเบียน',
+      'รหัสเล่มทะเบียน',
+    ]);
+    const nameIndex = this.findHeaderIndex(headers, ['ชื่อเล่มทะเบียน', 'ชื่อเล่มทะเบียน/ทะเบียน']);
+    const descriptionIndex = this.findHeaderIndex(headers, ['รายละเอียด', 'คำอธิบาย']);
+    const statusIndex = this.findHeaderIndex(headers, ['สถานะ']);
+
+    const errors: string[] = [];
+
+    if (bookNumberIndex === -1 || nameIndex === -1) {
+      errors.push('ไม่พบคอลัมน์ "เลขเล่มทะเบียน" หรือ "ชื่อเล่มทะเบียน" ในไฟล์');
+      return { rows: [], errors };
+    }
+
+    const previewRows: RegistryBookImportPreviewRow[] = [];
+    const seenBookNumbers = new Set<string>();
+
+    for (let index = 1; index < rows.length; index += 1) {
+      const row = rows[index];
+      const rowNumber = index + 1;
+
+      if (!row || row.every((cell) => String(cell ?? '').trim() === '')) {
+        continue;
+      }
+
+      const bookNumber = String(row[bookNumberIndex] ?? '').trim();
+      const name = String(row[nameIndex] ?? '').trim();
+      const description =
+        descriptionIndex !== -1 ? String(row[descriptionIndex] ?? '').trim() : '';
+      const statusRaw =
+        statusIndex !== -1 ? String(row[statusIndex] ?? '').trim() : '';
+
+      if (!bookNumber || !name) {
+        errors.push(`แถวที่ ${rowNumber}: ต้องระบุเลขเล่มทะเบียนและชื่อเล่มทะเบียน`);
+        continue;
+      }
+
+      const normalizedKey = bookNumber.toLowerCase();
+      if (seenBookNumbers.has(normalizedKey)) {
+        errors.push(`แถวที่ ${rowNumber}: เลขเล่มทะเบียน "${bookNumber}" ซ้ำกับข้อมูลก่อนหน้าในไฟล์`);
+        continue;
+      }
+
+      let status: RegistryBookStatus = 'active';
+      if (statusRaw) {
+        const normalizedStatus = this.normalizeRegistryBookStatus(statusRaw);
+        if (!normalizedStatus) {
+          errors.push(
+            `แถวที่ ${rowNumber}: ไม่สามารถตีความสถานะ "${statusRaw}" ได้ กรุณาใช้คำว่า พร้อมใช้งาน, กำลังยืม, เก็บถาวร หรือ ปิดใช้งาน`,
+          );
+          continue;
+        }
+        status = normalizedStatus;
+      }
+
+      seenBookNumbers.add(normalizedKey);
+      previewRows.push({
+        rowNumber,
+        bookNumber,
+        name,
+        description: description || undefined,
+        status,
+      });
+    }
+
+    if (previewRows.length === 0 && errors.length === 0) {
+      errors.push('ไม่พบข้อมูลที่สามารถนำเข้าได้');
+    }
+
+    return { rows: previewRows, errors };
+  }
+
+  private normalizeHeader(header: string): string {
+    return header.replace(/\s+/g, '').replace(/\uFEFF/g, '').toLowerCase();
+  }
+
+  private findHeaderIndex(headers: string[], expectedHeaders: string[]): number {
+    return headers.findIndex((header) => expectedHeaders.includes(header));
+  }
+
+  private normalizeRegistryBookStatus(value: string): RegistryBookStatus | null {
+    const normalized = value.trim().toLowerCase();
+    const statusMap: Record<string, RegistryBookStatus> = {
+      พร้อมใช้งาน: 'active',
+      ใช้งาน: 'active',
+      ว่าง: 'active',
+      active: 'active',
+      กำลังยืม: 'borrowed',
+      ยืม: 'borrowed',
+      borrowed: 'borrowed',
+      เก็บถาวร: 'archived',
+      archived: 'archived',
+      ปิดใช้งาน: 'inactive',
+      ไม่ใช้งาน: 'inactive',
+      inactive: 'inactive',
+    };
+
+    return statusMap[normalized] ?? null;
+  }
+
+  private resetImportState(): void {
+    this.importPreview.set([]);
+    this.importErrors.set([]);
+    this.importFileName.set(null);
+    this.isImporting.set(false);
   }
 }
