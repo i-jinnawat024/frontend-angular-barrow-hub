@@ -35,13 +35,13 @@ export class ReportPage implements OnInit {
     accessor?: (borrow: Borrow) => unknown;
   }> = [
     {
-      label: 'เลขทะเบียน',
+      label: 'เลขเล่มทะเบียน',
       property: 'bookNumber',
       sortable: true,
       accessor: (borrow) => borrow.registryBook.bookNumber,
     },
     {
-      label: 'ชื่อหนังสือ',
+      label: 'ชื่อ-นามสกุล',
       property: 'title',
       sortable: true,
       accessor: (borrow) => borrow.registryBook.name,
@@ -68,7 +68,7 @@ export class ReportPage implements OnInit {
       label: 'เหตุผล',
       property: 'reason',
       sortable: true,
-      accessor: (borrow) => borrow.reason ?? '',
+      accessor: (borrow) => borrow.reason ?? '-',
     },
     {
       label: 'สถานะ',

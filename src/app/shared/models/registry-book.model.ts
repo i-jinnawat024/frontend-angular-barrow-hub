@@ -12,6 +12,7 @@ export interface RegistryBookCreateDto {
   bookNumber: string;
   name: string;
   description?: string;
+  status?: RegistryBook['status'];
 }
 
 export interface RegistryBookUpdateDto {

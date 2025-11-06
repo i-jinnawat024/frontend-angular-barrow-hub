@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  OnInit,
+  ViewChild,
+  computed,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,6 +18,17 @@ import {
   defaultSortState,
   toSearchableString,
 } from '../../../../shared/utils/table-utils';
+import { readTabularFile } from '../../../../shared/utils/csv-utils';
+
+interface StaffImportPreviewRow {
+  rowNumber: number;
+  name: string;
+  email: string;
+  phone?: string;
+  position: string;
+  department?: string;
+  isActive: boolean;
+}
 
 @Component({
   selector: 'app-staff-list',
@@ -23,6 +41,27 @@ export class StaffListPage implements OnInit {
   private readonly staffMembers = signal<Staff[]>([]);
   protected readonly searchTerm = signal('');
   protected readonly sortState = signal<SortState>({ ...defaultSortState });
+  protected readonly isDesktopView = computed(() => this.isDesktopScreen());
+  private readonly isDesktopScreen = signal(this.checkIsDesktop());
+  protected readonly importPreview = signal<StaffImportPreviewRow[]>([]);
+  protected readonly importErrors = signal<string[]>([]);
+  protected readonly importFileName = signal<string | null>(null);
+  protected readonly isImporting = signal(false);
+  protected readonly hasImportPreview = computed(
+    () => this.importPreview().length > 0,
+  );
+  protected readonly hasImportErrors = computed(
+    () => this.importErrors().length > 0,
+  );
+  protected readonly importPreviewSample = computed(() =>
+    this.importPreview().slice(0, 10),
+  );
+  protected readonly importPreviewRemaining = computed(() => {
+    const total = this.importPreview().length;
+    return total > 10 ? total - 10 : 0;
+  });
+  protected readonly templateDownloadUrl = '/samples/staff-template.xlsx';
+
 
   protected readonly columns: Array<{
     label: string;
@@ -37,23 +76,23 @@ export class StaffListPage implements OnInit {
       accessor: (member) => member.name,
     },
     {
-      label: 'อีเมล',
-      property: 'email',
-      sortable: true,
-      accessor: (member) => member.email,
+      label: 'เบอร์โทร',
+      property: 'phoneNumber',
+      sortable: false,
+      accessor: (member) => member.phone,
     },
-    {
-      label: 'ตำแหน่ง',
-      property: 'position',
-      sortable: true,
-      accessor: (member) => member.position,
-    },
-    {
-      label: 'หน่วยงาน',
-      property: 'department',
-      sortable: true,
-      accessor: (member) => member.department ?? '',
-    },
+    // {
+    //   label: 'ตำแหน่ง',
+    //   property: 'position',
+    //   sortable: true,
+    //   accessor: (member) => member.position,
+    // },
+    // {
+    //   label: 'หน่วยงาน',
+    //   property: 'department',
+    //   sortable: true,
+    //   accessor: (member) => member.department ?? '',
+    // },
     {
       label: 'สถานะ',
       property: 'isActive',
@@ -61,7 +100,7 @@ export class StaffListPage implements OnInit {
       accessor: (member) => (member.isActive ? 'active' : 'inactive'),
     },
     {
-      label: 'การจัดการ',
+      label: 'จัดการ',
       property: 'actions',
       sortable: false,
     },
@@ -115,6 +154,8 @@ export class StaffListPage implements OnInit {
     private readonly staffService: StaffService,
     private readonly router: Router,
   ) {}
+
+  @ViewChild('staffImportInput') private staffImportInput?: ElementRef<HTMLInputElement>;
 
   ngOnInit(): void {
     this.loadStaff();
@@ -172,5 +213,209 @@ export class StaffListPage implements OnInit {
   protected isSortedDescending(property: string): boolean {
     const sort = this.sortState();
     return sort.active === property && sort.direction === 'desc';
+  }
+
+  protected openImportDialog(): void {
+    if (this.staffImportInput) {
+      this.staffImportInput.nativeElement.value = '';
+      this.staffImportInput.nativeElement.click();
+    }
+  }
+
+  protected async onImportFileSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    this.importFileName.set(file.name);
+    this.importErrors.set([]);
+    this.importPreview.set([]);
+
+    this.isImporting.set(true);
+
+    try {
+      const { rows: rawRows, errors: readErrors } = await readTabularFile(file);
+      const { rows, errors } = this.parseStaffImport(rawRows);
+      this.importPreview.set(rows);
+      this.importErrors.set([...readErrors, ...errors]);
+    } catch (error) {
+      console.error(error);
+      this.importPreview.set([]);
+      this.importErrors.set(['ไม่สามารถอ่านไฟล์สำหรับนำเข้าได้ กรุณาลองใหม่อีกครั้ง']);
+    } finally {
+      this.isImporting.set(false);
+      if (this.staffImportInput) {
+        this.staffImportInput.nativeElement.value = '';
+      }
+    }
+  }
+
+  protected cancelImportPreview(): void {
+    this.resetImportState();
+  }
+
+  protected confirmImportPreview(): void {
+    const previewRows = this.importPreview();
+    if (previewRows.length === 0) {
+      return;
+    }
+
+    const result = this.staffService.importStaff(
+      previewRows.map((row) => ({
+        name: row.name,
+        email: row.email,
+        phone: row.phone,
+        position: row.position,
+        department: row.department,
+        isActive: row.isActive,
+      })),
+    );
+
+    this.loadStaff();
+    this.resetImportState();
+
+    let message = `นำเข้าข้อมูลบุคลากรสำเร็จ ${result.imported} รายการ`;
+    if (result.duplicateEmails.length > 0) {
+      const duplicated = Array.from(new Set(result.duplicateEmails))
+        .filter((value) => value.trim().length > 0)
+        .join(', ');
+      message += `\nรายการที่ข้ามเนื่องจากอีเมลซ้ำ: ${duplicated}`;
+    }
+
+    window.alert(message);
+  }
+
+  private parseStaffImport(
+    rows: string[][],
+  ): { rows: StaffImportPreviewRow[]; errors: string[] } {
+    if (rows.length === 0) {
+      return {
+        rows: [],
+        errors: ['ไฟล์ไม่มีข้อมูล กรุณาตรวจสอบไฟล์ Template ก่อนอัปโหลด'],
+      };
+    }
+
+    const headers = rows[0].map((cell) =>
+      this.normalizeHeader(String(cell ?? '')),
+    );
+    const nameIndex = this.findHeaderIndex(headers, ['ชื่อ-นามสกุล', 'ชื่อและนามสกุล']);
+    const emailIndex = this.findHeaderIndex(headers, ['อีเมล', 'อีเมล์', 'email']);
+    const phoneIndex = this.findHeaderIndex(headers, ['เบอร์โทร', 'เบอร์โทรศัพท์', 'โทรศัพท์']);
+    const positionIndex = this.findHeaderIndex(headers, ['ตำแหน่ง']);
+    const departmentIndex = this.findHeaderIndex(headers, ['หน่วยงาน', 'แผนก']);
+    const statusIndex = this.findHeaderIndex(headers, ['สถานะ']);
+
+    const errors: string[] = [];
+
+    if (nameIndex === -1 || emailIndex === -1 || positionIndex === -1) {
+      errors.push('ไม่พบคอลัมน์ "ชื่อ-นามสกุล", "อีเมล" หรือ "ตำแหน่ง" ในไฟล์');
+      return { rows: [], errors };
+    }
+
+    const previewRows: StaffImportPreviewRow[] = [];
+    const seenEmails = new Set<string>();
+
+    for (let index = 1; index < rows.length; index += 1) {
+      const row = rows[index];
+      const rowNumber = index + 1;
+
+      if (!row || row.every((cell) => String(cell ?? '').trim() === '')) {
+        continue;
+      }
+
+      const name = String(row[nameIndex] ?? '').trim();
+      const email = String(row[emailIndex] ?? '').trim();
+      const phone = phoneIndex !== -1 ? String(row[phoneIndex] ?? '').trim() : '';
+      const position = String(row[positionIndex] ?? '').trim();
+      const department =
+        departmentIndex !== -1 ? String(row[departmentIndex] ?? '').trim() : '';
+      const statusRaw =
+        statusIndex !== -1 ? String(row[statusIndex] ?? '').trim() : '';
+
+      if (!name || !email || !position) {
+        errors.push(`แถวที่ ${rowNumber}: ต้องระบุชื่อ-นามสกุล, อีเมล และตำแหน่ง`);
+        continue;
+      }
+
+      if (!this.isValidEmail(email)) {
+        errors.push(`แถวที่ ${rowNumber}: อีเมล "${email}" ไม่ถูกต้อง`);
+        continue;
+      }
+
+      const normalizedEmail = email.toLowerCase();
+      if (seenEmails.has(normalizedEmail)) {
+        errors.push(`แถวที่ ${rowNumber}: อีเมล "${email}" ซ้ำกับข้อมูลก่อนหน้าในไฟล์`);
+        continue;
+      }
+
+      let isActive = true;
+      if (statusRaw) {
+        const statusValue = this.normalizeStaffStatus(statusRaw);
+        if (statusValue === null) {
+          errors.push(
+            `แถวที่ ${rowNumber}: ไม่สามารถตีความสถานะ "${statusRaw}" ได้ กรุณาใช้คำว่า เปิดใช้งาน หรือ ปิดใช้งาน`,
+          );
+          continue;
+        }
+        isActive = statusValue;
+      }
+
+      seenEmails.add(normalizedEmail);
+      previewRows.push({
+        rowNumber,
+        name,
+        email,
+        phone: phone || undefined,
+        position,
+        department: department || undefined,
+        isActive,
+      });
+    }
+
+    if (previewRows.length === 0 && errors.length === 0) {
+      errors.push('ไม่พบข้อมูลที่สามารถนำเข้าได้');
+    }
+
+    return { rows: previewRows, errors };
+  }
+
+  private normalizeHeader(header: string): string {
+    return header.replace(/\s+/g, '').replace(/\uFEFF/g, '').toLowerCase();
+  }
+
+  private findHeaderIndex(headers: string[], expectedHeaders: string[]): number {
+    return headers.findIndex((header) => expectedHeaders.includes(header));
+  }
+
+  private normalizeStaffStatus(value: string): boolean | null {
+    const normalized = value.trim().toLowerCase();
+    const trueValues = ['เปิดใช้งาน', 'ใช้งาน', 'ใช้งานอยู่', 'พร้อมใช้งาน', 'active', 'true', '1', 'yes'];
+    const falseValues = ['ปิดใช้งาน', 'ไม่ใช้งาน', 'หยุดใช้', 'inactive', 'false', '0', 'no'];
+
+    if (trueValues.includes(normalized)) {
+      return true;
+    }
+    if (falseValues.includes(normalized)) {
+      return false;
+    }
+    return null;
+  }
+
+  private isValidEmail(email: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  private resetImportState(): void {
+    this.importPreview.set([]);
+    this.importErrors.set([]);
+    this.importFileName.set(null);
+    this.isImporting.set(false);
+  }
+
+  private checkIsDesktop(): boolean {
+    return typeof window !== 'undefined' && window.innerWidth >= 768;
   }
 }

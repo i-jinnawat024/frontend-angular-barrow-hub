@@ -33,7 +33,7 @@ export class DashboardPage implements OnInit {
       label: 'ข้อมูลเล่มทะเบียน',
       property: 'documentTitle',
       sortable: true,
-      accessor: (loan) => loan.document.title,
+      accessor: (loan) => loan.document.first_name + ' ' + loan.document.last_name,
     },
     {
       label: 'ข้อมูลผู้ยืม',
@@ -55,7 +55,7 @@ export class DashboardPage implements OnInit {
   ];
 
   private readonly searchAccessors: Array<(loan: Loan) => unknown> = [
-    (loan) => loan.document.title,
+    (loan) => loan.document.first_name + ' ' + loan.document.last_name,
     (loan) => loan.document.documentNumber,
     (loan) => loan.borrower.name,
     (loan) => loan.borrower.position,

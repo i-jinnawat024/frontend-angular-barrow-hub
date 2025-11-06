@@ -15,7 +15,7 @@ import { QrBarcodeService } from '../../../../shared/services/qr-barcode.service
 export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy {
   registryBook: RegistryBook | undefined;
   qrCodeDataUrl: string | null = null;
-
+  
   constructor(
     private readonly registryBookService: RegistryBookService,
     private readonly router: Router,
@@ -87,6 +87,16 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
     this.router.navigate(['/registry-books']);
   }
 
+  viewBorrowHistory(): void {
+    if (this.registryBook) {
+      this.router.navigate([
+        '/registry-books',
+        this.registryBook.id,
+        'history',
+      ]);
+    }
+  }
+
   printQrCode(): void {
     if (!this.registryBook || !this.qrCodeDataUrl) {
       return;
@@ -124,7 +134,7 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
         </head>
         <body>
           <div class="qr-container">
-            <div class="qr-title">QR Code - ทะเบียนหนังสือ</div>
+            <div class="qr-title">QR Code - เล่มทะเบียน</div>
             <div class="qr-book-number">${this.registryBook.bookNumber}</div>
             <div class="qr-code">
               <img src="${this.qrCodeDataUrl}" alt="QR Code" style="width: 256px; height: 256px;" />
@@ -187,7 +197,7 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
         </head>
         <body>
           <div class="barcode-container">
-            <div class="barcode-title">Barcode - ทะเบียนหนังสือ</div>
+            <div class="barcode-title">Barcode - เล่มทะเบียน</div>
             <div class="barcode-book-number">${this.registryBook.bookNumber}</div>
             <div class="barcode-code">
               <svg xmlns="http://www.w3.org/2000/svg">${svgContent}</svg>
@@ -204,4 +214,5 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
       printWindow.close();
     }, 250);
   }
+
 }

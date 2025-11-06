@@ -2,54 +2,172 @@
   <!-- Header -->
   <div class="mb-4 flex items-center justify-between">
     <div>
-      <h1 class="text-3xl font-bold text-primary">ทะเบียนหนังสือ</h1>
-      <p class="mt-2 text-secondary">จัดการรายการทะเบียนหนังสือทั้งหมดในระบบ</p>
+      <h1 class="text-3xl font-bold text-primary">เล่มทะเบียน</h1>
+      <p class="mt-2 text-secondary">จัดการรายการเล่มทะเบียนทั้งหมดในระบบ</p>
     </div>
-    <button
-      type="button"
-      class="btn-primary cursor-pointer"
-      mat-button
-      (click)="createRegistryBook()"
-      style="font-size: 14px; padding: 4px 12px"
-    >
-      <mat-icon style="font-size: 18px; width: 18px; height: 18px">add</mat-icon>
-      @if (this.isDesktopView()) {
-        <span style="margin-left: 4px">เพิ่มทะเบียนหนังสือ</span>
-      }
-    </button>
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        class="btn-primary cursor-pointer"
+        mat-button
+        (click)="createRegistryBook()"
+      >
+        <mat-icon style="font-size: 18px; width: 18px; height: 18px">add</mat-icon>
+        @if (this.isDesktopView()) {
+          <span style="margin-left: 4px">เพิ่มเล่มทะเบียน</span>
+        }
+      </button>
+      <a
+        class="btn-secondary inline-flex items-center gap-1 cursor-pointer"
+        mat-button
+        [attr.href]="templateDownloadUrl"
+        [attr.download]="'registry-books-template.xlsx'"
+      >
+        <mat-icon style="font-size: 18px; width: 18px; height: 18px">download</mat-icon>
+        @if (this.isDesktopView()) {
+          <span>ดาวน์โหลด Template</span>
+        }
+      </a>
+      <button
+        type="button"
+        class="btn-secondary inline-flex items-center gap-1 cursor-pointer"
+        mat-button
+        (click)="openImportDialog()"
+      >
+        <mat-icon style="font-size: 18px; width: 18px; height: 18px">upload_file</mat-icon>
+        @if (this.isDesktopView()) {
+          <span>นำเข้าจากไฟล์</span>
+        }
+      </button>
+      <input
+        #registryImportInput
+        type="file"
+        accept=".xlsx,.csv"
+        class="hidden"
+        (change)="onImportFileSelected($event)"
+      />
+    </div>
   </div>
 
-  <!-- Filters -->
-  <div class="bg-surface rounded-lg border border-subtle shadow-sm p-4">
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div class="relative w-full sm:w-80">
-        <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
-          <mat-icon class="text-secondary text-base">search</mat-icon>
+  @if (hasImportPreview() || hasImportErrors() || isImporting()) {
+    <div class="mb-6 rounded-lg border border-dashed border-primary bg-surface-alt px-6 py-5">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="text-lg font-semibold text-primary">ตรวจสอบข้อมูลก่อนนำเข้า</h2>
+          <p class="text-sm text-secondary">
+            ไฟล์: {{ importFileName() ?? 'ไม่ได้เลือกไฟล์' }}
+          </p>
         </div>
-        <input
-          type="search"
-          class="form-control w-full ps-10 pe-10"
-          placeholder="ค้นหา"
-          autocomplete="off"
-          [value]="searchTerm()"
-          (input)="onSearchTermChange($event)"
-        />
-        @if (hasSearchTerm()) {
-          <button
-            type="button"
-            class="table-search-clear"
-            (click)="clearSearch()"
-            aria-label="ล้างการค้นหา"
-          >
-            <mat-icon class="text-secondary text-base">close</mat-icon>
-          </button>
+        @if (hasImportPreview()) {
+          <div class="text-sm text-secondary">
+            พร้อมนำเข้า {{ importPreview().length }} รายการ
+          </div>
         }
       </div>
+
+      @if (isImporting()) {
+        <p class="mt-4 text-sm text-secondary">กำลังอ่านไฟล์ กรุณารอสักครู่...</p>
+      } @else {
+        @if (hasImportErrors()) {
+          <div class="mt-4 alert-warning rounded-md px-4 py-3 text-sm">
+            <p class="font-medium">พบข้อผิดพลาดในไฟล์นำเข้า</p>
+            <ul class="mt-2 list-disc space-y-1 ps-5">
+              @for (error of importErrors(); track error) {
+                <li>{{ error }}</li>
+              }
+            </ul>
+          </div>
+        }
+
+        @if (hasImportPreview()) {
+          <div class="mt-4 overflow-x-auto">
+            <table class="min-w-full divide-y divide-subtle text-left text-sm">
+              <thead class="bg-table-header text-xs uppercase text-secondary">
+                <tr>
+                  <th class="px-4 py-2">แถวที่</th>
+                  <th class="px-4 py-2">เลขเล่มทะเบียน</th>
+                  <th class="px-4 py-2">ชื่อเล่มทะเบียน</th>
+                  <th class="px-4 py-2">รายละเอียด</th>
+                  <th class="px-4 py-2">สถานะ</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-subtle bg-surface text-secondary">
+                @for (preview of importPreviewSample(); track preview.rowNumber) {
+                  <tr>
+                    <td class="px-4 py-2">{{ preview.rowNumber }}</td>
+                    <td class="px-4 py-2 font-medium text-primary">{{ preview.bookNumber }}</td>
+                    <td class="px-4 py-2">{{ preview.name }}</td>
+                    <td class="px-4 py-2">{{ preview.description ?? '-' }}</td>
+                    <td class="px-4 py-2">
+                      @switch (preview.status) {
+                        @case ('active') { พร้อมใช้งาน }
+                        @case ('borrowed') { กำลังยืม }
+                        @case ('archived') { เก็บถาวร }
+                        @case ('inactive') { ปิดใช้งาน }
+                        @default { - }
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            @if (importPreviewRemaining() > 0) {
+              <p class="mt-2 text-xs text-secondary">
+                แสดงตัวอย่าง {{ importPreviewSample().length }} รายการแรก และมีอีก
+                {{ importPreviewRemaining() }} รายการรอนำเข้า
+              </p>
+            }
+          </div>
+
+          <div class="mt-4 flex flex-col gap-2 text-sm text-secondary sm:flex-row sm:items-center sm:justify-between">
+            <p>
+              คอลัมน์ที่รองรับ: เลขเล่มทะเบียน, ชื่อเล่มทะเบียน, รายละเอียด (ถ้ามี), สถานะ (ถ้ามี) หรือดาวน์โหลดไฟล์ Template (.xlsx) เพื่ออ้างอิงรูปแบบ
+            </p>
+            <div class="flex gap-2">
+              <button type="button" class="btn-secondary" (click)="cancelImportPreview()">
+                ยกเลิก
+              </button>
+              <button type="button" class="btn-primary" (click)="confirmImportPreview()">
+                ยืนยันการนำเข้า
+              </button>
+            </div>
+          </div>
+        } @else if (!hasImportErrors()) {
+          <p class="mt-4 text-sm text-secondary">ยังไม่มีข้อมูลที่สามารถนำเข้าได้</p>
+        }
+      }
     </div>
-  </div>
+  }
 
   <!-- Registry Books Table -->
   <div class="bg-surface rounded-lg shadow border border-subtle overflow-hidden mt-4">
+       <div class="border-b border-subtle bg-surface-alt px-4 py-4">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div class="relative w-full sm:w-80">
+          <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+            <mat-icon class="text-secondary text-base">search</mat-icon>
+          </div>
+          <input
+            type="search"
+            class="form-control w-full ps-10 pe-10"
+            placeholder="ค้นหาเล่มทะเบียน"
+            autocomplete="off"
+            [value]="searchTerm()"
+            (input)="onSearchTermChange($event)"
+          />
+          @if (hasSearchTerm()) {
+            <button
+              type="button"
+              class="table-search-clear"
+              (click)="clearSearch()"
+              aria-label="ล้างการค้นหา"
+            >
+              <mat-icon class="text-secondary text-base">close</mat-icon>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
     <div class="overflow-x-auto">
       @if (filteredRegistryBooks().length > 0) {
         <table class="w-full text-sm text-left rtl:text-right text-secondary">
@@ -177,8 +295,8 @@
               d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
             ></path>
           </svg>
-          <h3 class="mt-2 text-sm font-medium text-primary">ยังไม่มีทะเบียนหนังสือ</h3>
-          <p class="mt-1 text-sm text-muted">เพิ่มทะเบียนหนังสือเล่มแรกเพื่อเริ่มจัดการข้อมูล</p>
+          <h3 class="mt-2 text-sm font-medium text-primary">ยังไม่มีเล่มทะเบียน</h3>
+          <p class="mt-1 text-sm text-muted">เพิ่มเล่มทะเบียนแรกเพื่อเริ่มจัดการข้อมูล</p>
         </div>
       } @else {
         <div class="p-12 text-center">

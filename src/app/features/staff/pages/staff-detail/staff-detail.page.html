@@ -1,5 +1,4 @@
-﻿<div class="container mx-auto px-4 py-8 max-w-4xl">
-  <!-- Header -->
+<div class="container mx-auto px-4 py-8 max-w-4xl">
   <div class="mb-6 flex items-center justify-between">
     <button
       type="button"
@@ -9,97 +8,98 @@
       <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
       </svg>
-      กลับ
+      ย้อนกลับ
     </button>
-    <button
-      type="button"
-      class="btn-primary"
-      (click)="editStaff()"
-    >
-      <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-      </svg>
-      แก้ไข
-    </button>
+    <div class="flex items-center gap-3">
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="viewBorrowHistory()"
+      >
+        <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+        </svg>
+        ดูประวัติการยืม
+      </button>
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="editStaff()"
+      >
+        <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+        </svg>
+        แก้ไขข้อมูล
+      </button>
+    </div>
   </div>
 
   @if (staff) {
     <div class="bg-surface rounded-lg shadow border border-subtle overflow-hidden">
-      <!-- Header Section -->
-      <div class="px-6 py-5 border-b border-subtle bg-surface-alt">
-        <div class="flex items-center">
-          <div class="h-16 w-16 flex-shrink-0 rounded-full avatar-placeholder flex items-center justify-center">
-            <span class="text-2xl font-medium text-secondary">
-              {{ staff.name.charAt(0) }}
-            </span>
-          </div>
-          <div class="ml-4">
-            <h1 class="text-2xl font-bold text-primary">{{ staff.name }}</h1>
-            <p class="mt-1 text-sm text-muted">{{ staff.position }}</p>
-          </div>
+      <div class="px-6 py-5 border-b border-subtle bg-surface-alt flex items-center">
+        <div class="h-16 w-16 flex-shrink-0 rounded-full avatar-placeholder flex items-center justify-center">
+          <span class="text-2xl font-medium text-secondary">
+            {{ staff.name.charAt(0) }}
+          </span>
+        </div>
+        <div class="ml-4">
+          <h1 class="text-2xl font-bold text-primary">{{ staff.name }}</h1>
+          <p class="mt-1 text-sm text-muted">{{ staff.position }}</p>
         </div>
       </div>
 
-      <!-- Content Section -->
       <div class="px-6 py-5">
         <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <!-- Email -->
           <div>
             <dt class="text-sm font-medium text-muted">อีเมล</dt>
             <dd class="mt-1 text-sm text-primary">{{ staff.email }}</dd>
           </div>
 
-          <!-- Phone -->
           <div>
             <dt class="text-sm font-medium text-muted">เบอร์โทรศัพท์</dt>
             <dd class="mt-1 text-sm text-primary">{{ staff.phone || '-' }}</dd>
           </div>
 
-          <!-- Position -->
           <div>
             <dt class="text-sm font-medium text-muted">ตำแหน่ง</dt>
             <dd class="mt-1 text-sm text-primary">{{ staff.position }}</dd>
           </div>
 
-          <!-- Department -->
           <div>
             <dt class="text-sm font-medium text-muted">แผนก</dt>
             <dd class="mt-1 text-sm text-primary">{{ staff.department || '-' }}</dd>
           </div>
 
-          <!-- Status -->
           <div>
             <dt class="text-sm font-medium text-muted">สถานะ</dt>
             <dd class="mt-1">
               @if (staff.isActive) {
-                <span class="badge badge-success">
-                  ใช้งาน
-                </span>
+                <span class="badge badge-success">ใช้งานอยู่</span>
               } @else {
-                <span class="badge badge-neutral">
-                  ไม่ใช้งาน
-                </span>
+                <span class="badge badge-neutral">ปิดใช้งาน</span>
               }
             </dd>
           </div>
 
-          <!-- Created At -->
           <div>
             <dt class="text-sm font-medium text-muted">วันที่สร้าง</dt>
             <dd class="mt-1 text-sm text-primary">
-              {{ staff.createdAt | date:'dd/MM/yyyy HH:mm' }}
+              {{ staff.createdAt | date: 'dd/MM/yyyy HH:mm' }}
             </dd>
           </div>
 
-          <!-- Updated At -->
           <div>
-            <dt class="text-sm font-medium text-muted">วันที่อัพเดท</dt>
+            <dt class="text-sm font-medium text-muted">แก้ไขล่าสุด</dt>
             <dd class="mt-1 text-sm text-primary">
-              {{ staff.updatedAt | date:'dd/MM/yyyy HH:mm' }}
+              {{ staff.updatedAt | date: 'dd/MM/yyyy HH:mm' }}
             </dd>
           </div>
         </dl>
       </div>
+    </div>
+  } @else {
+    <div class="rounded-lg border border-dashed border-subtle px-6 py-12 text-center text-muted">
+      ไม่พบข้อมูลเจ้าหน้าที่
     </div>
   }
 </div>

@@ -11,7 +11,7 @@ export class RegistryBookService {
   private registryBooks: RegistryBook[] = [
     {
       id: '1',
-      bookNumber: 'RB-001',
+      bookNumber: 'BH-DOC-001',
       name: 'สมชาย ใจดี',
       description: 'เล่มทะเบียนสำหรับบันทึกเอกสารการประชุม',
       status: 'active',
@@ -20,7 +20,7 @@ export class RegistryBookService {
     },
     {
       id: '2',
-      bookNumber: 'RB-002',
+      bookNumber: 'BH-DOC-002',
       name: 'สมชาย ใจดี',
       description: 'เล่มทะเบียนสำหรับโครงการต่างๆ',
       status: 'borrowed',
@@ -29,7 +29,7 @@ export class RegistryBookService {
     },
     {
       id: '3',
-      bookNumber: 'RB-003',
+      bookNumber: 'BH-DOC-003',
       name: 'สมชาย ใจดี',
       description: 'เล่มทะเบียนสำหรับสัญญาต่างๆ',
       status: 'active',
@@ -38,7 +38,7 @@ export class RegistryBookService {
     },
     {
       id: '4',
-      bookNumber: 'RB-004',
+      bookNumber: 'BH-DOC-004',
       name: 'สมชาย ใจดี',
       description: 'เล่มทะเบียนสำหรับสัญญาต่างๆ',
       status: 'inactive',
@@ -73,7 +73,7 @@ export class RegistryBookService {
     const newBook: RegistryBook = {
       id: Date.now().toString(),
       ...dto,
-      status: 'active',
+      status: dto.status ?? 'active',
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -99,6 +99,47 @@ export class RegistryBookService {
     
     this.registryBooks.splice(index, 1);
     return true;
+  }
+
+  importRegistryBooks(
+    rows: Array<RegistryBookCreateDto>,
+  ): { imported: number; skipped: number; duplicateBookNumbers: string[] } {
+    let imported = 0;
+    const duplicateBookNumbers: string[] = [];
+
+    for (const row of rows) {
+      const normalizedBookNumber = row.bookNumber.trim().toLowerCase();
+      if (
+        !normalizedBookNumber ||
+        this.registryBooks.some(
+          (book) => book.bookNumber.trim().toLowerCase() === normalizedBookNumber,
+        )
+      ) {
+        duplicateBookNumbers.push(row.bookNumber);
+        continue;
+      }
+
+      const newBook: RegistryBook = {
+        id:
+          typeof globalThis.crypto !== 'undefined' && 'randomUUID' in globalThis.crypto
+            ? globalThis.crypto.randomUUID()
+            : Date.now().toString(),
+        bookNumber: row.bookNumber.trim(),
+        name: row.name.trim(),
+        description: row.description?.trim() ?? undefined,
+        status: row.status ?? 'active',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      this.registryBooks.push(newBook);
+      imported += 1;
+    }
+
+    return {
+      imported,
+      skipped: rows.length - imported,
+      duplicateBookNumbers,
+    };
   }
 
   // Borrow methods
@@ -174,6 +215,22 @@ export class RegistryBookService {
     return this.borrows.find(borrow => 
       borrow.registryBook.id === bookId && borrow.status === 'active'
     );
+  }
+
+  getBorrowHistoryByStaffName(staffName: string): Borrow[] {
+    return this.borrows
+      .filter((borrow) => borrow.borrowerName === staffName)
+      .sort(
+        (a, b) => b.borrowedAt.getTime() - a.borrowedAt.getTime(),
+      );
+  }
+
+  getBorrowHistoryByBookId(bookId: string): Borrow[] {
+    return this.borrows
+      .filter((borrow) => borrow.registryBook.id === bookId)
+      .sort(
+        (a, b) => b.borrowedAt.getTime() - a.borrowedAt.getTime(),
+      );
   }
 }
 

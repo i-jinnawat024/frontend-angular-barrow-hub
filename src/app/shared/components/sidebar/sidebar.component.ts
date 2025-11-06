@@ -75,10 +75,10 @@ export class SidebarComponent {
           exact: true
         },
         {
-          label: 'รายชื่อเจ้าหน้าที่',
+          label: 'รายชื่อบุคลากร',
           route: '/staff',
           icon: 'staff',
-          description: 'จัดการเจ้าหน้าที่',
+          description: 'จัดการบุคลากร',
           exact: false
         }
       ]
