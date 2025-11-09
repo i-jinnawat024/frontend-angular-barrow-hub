@@ -100,10 +100,10 @@
                     <td class="px-4 py-2">{{ preview.description ?? '-' }}</td>
                     <td class="px-4 py-2">
                       @switch (preview.status) {
-                        @case ('active') { พร้อมใช้งาน }
-                        @case ('borrowed') { กำลังยืม }
-                        @case ('archived') { เก็บถาวร }
-                        @case ('inactive') { ปิดใช้งาน }
+                        @case ('ACTIVE') { พร้อมใช้งาน }
+                        @case ('BORROWED') { กำลังยืม }
+                        @case ('ARCHIVED') { เก็บถาวร }
+                        @case ('INACTIVE') { ปิดใช้งาน }
                         @default { - }
                       }
                     </td>
@@ -210,20 +210,20 @@
             @for (book of filteredRegistryBooks(); track book.id) {
               <tr class="bg-surface transition hover:bg-surface-hover">
                 <th scope="row" class="px-6 py-4 font-medium text-secondary">
-                  {{ book.bookNumber }}
+                  {{ book.documentId }}
                 </th>
                 <td class="px-6 py-4">
-                  {{ book.name }}
+                  {{ book.firstName }} {{book.lastName}}
                 </td>
                 <td class="px-6 py-4">
                   @switch (book.status) {
-                    @case ('active') {
+                    @case ('ACTIVE') {
                       <span class="badge badge-success"> พร้อมใช้งาน </span>
                     }
-                    @case ('borrowed') {
+                    @case ('BORROWED') {
                       <span class="badge badge-warning"> กำลังยืม </span>
                     }
-                    @case ('archived') {
+                    @case ('ARCHIVED') {
                       <span class="badge badge-neutral"> เก็บถาวร </span>
                     }
                     @default {

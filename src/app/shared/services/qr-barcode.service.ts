@@ -9,10 +9,10 @@ export class QrBarcodeService {
   /**
    * Generate QR Code data URL from book ID
    */
-  async generateQRCode(bookId: string) {
+  async generateQRCode(documentId: number) {
     try {
       // Use book ID as the QR code data
-      return await QRCode.toDataURL(bookId, {
+      return await QRCode.toDataURL(documentId.toString(), {
         errorCorrectionLevel: 'M',
       type: 'image/png',
       margin: 1,
@@ -31,7 +31,7 @@ export class QrBarcodeService {
   /**
    * Generate Barcode SVG string from book number
    */
-  generateBarcode(bookNumber: string, elementId: string): void {
+  generateBarcode(documentId: number, elementId: string): void {
     try {
       // Get the target element
       const targetElement = document.getElementById(elementId);
@@ -48,7 +48,7 @@ export class QrBarcodeService {
       svg.setAttribute('id', 'barcode-' + elementId);
       
       // Generate barcode using JsBarcode
-      JsBarcode(svg, bookNumber, {
+      JsBarcode(svg, documentId.toString(), {
         format: 'CODE128',
         width: 2,
         height: 100,

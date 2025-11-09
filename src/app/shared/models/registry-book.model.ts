@@ -1,11 +1,12 @@
 export interface RegistryBook {
-  id: string;
-  bookNumber: string;
-  name: string;
-  description?: string;
-  status: 'active' | 'borrowed' | 'archived' |'inactive';
+  id: number;
+  documentId: number;
+  firstName: string;
+  lastName: string;
+  status: 'ACTIVE' |'INACTIVE'| 'BORROWED' |'ARCHIVED';
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt: Date| null;
+  deletedAt: Date| null;
 }
 
 export interface RegistryBookCreateDto {
@@ -16,9 +17,9 @@ export interface RegistryBookCreateDto {
 }
 
 export interface RegistryBookUpdateDto {
-  bookNumber?: string;
-  name?: string;
+  documentId?: number;
+  firstName?: string;
+  lastName?: string;
   description?: string;
-  status?: 'active' | 'borrowed' | 'archived' |'inactive';
+  status?: RegistryBook['status'];
 }
-

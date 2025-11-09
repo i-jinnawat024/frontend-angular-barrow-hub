@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import {
   AbstractControl,
@@ -16,13 +16,14 @@ import { BorrowCreateDto } from '../../../../shared/models/borrow.model';
 import { RegistryBook } from '../../../../shared/models/registry-book.model';
 import { QrScannerComponent } from '../../../../shared/components/qr-scanner/qr-scanner.component';
 import { MatIconModule } from "@angular/material/icon";
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-borrow',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, QrScannerComponent, MatIconModule],
   templateUrl: './borrow.page.html',
-  styleUrl: './borrow.page.scss',
+  styleUrls: ['./borrow.page.scss'],
   providers: [DatePipe],
 })
 export class BorrowPage implements OnInit {
@@ -30,9 +31,10 @@ export class BorrowPage implements OnInit {
   availableBooks: RegistryBook[] = [];
   showScanner = false;
   currentStep: 1 | 2 = 1;
-  scannedBookIds: Set<string> = new Set();
+  scannedBookIds: Set<number> = new Set();
+  private readonly destroyRef = inject(DestroyRef);
   
-  private readonly selectedBookIdsControl: FormControl<string[]>;
+  private readonly selectedBookIdsControl: FormControl<number[]>;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -42,7 +44,7 @@ export class BorrowPage implements OnInit {
   ) {
     const now = new Date();
 
-    this.selectedBookIdsControl = this.fb.nonNullable.control<string[]>([], {
+    this.selectedBookIdsControl = this.fb.nonNullable.control<number[]>([], {
       validators: [this.atLeastOneSelectionValidator()],
     });
 
@@ -62,7 +64,7 @@ export class BorrowPage implements OnInit {
     this.loadAvailableBooks();
   }
 
-  get selectedBookIds(): string[] {
+  get selectedBookIds(): number[] {
     return this.selectedBookIdsControl.value ?? [];
   }
 
@@ -72,7 +74,7 @@ export class BorrowPage implements OnInit {
   }
 
   get selectedBookNumbers(): string {
-    return this.selectedBooks.map((book) => book.bookNumber).join(', ');
+    return this.selectedBooks.map((book) => book.documentId).join(', ');
   }
 
   private atLeastOneSelectionValidator(): ValidatorFn {
@@ -82,7 +84,7 @@ export class BorrowPage implements OnInit {
     };
   }
 
-  private updateSelectedBookIds(ids: string[], markTouched = true): void {
+  private updateSelectedBookIds(ids: number[], markTouched = true): void {
     this.selectedBookIdsControl.setValue(ids);
     if (markTouched) {
       this.selectedBookIdsControl.markAsTouched();
@@ -91,22 +93,35 @@ export class BorrowPage implements OnInit {
   }
 
   loadAvailableBooks(): void {
-    this.availableBooks = this.registryBookService
+    this.registryBookService
       .getRegistryBooks()
-      .filter((book) => book.status === 'active');
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (books) => {
+          this.availableBooks = books.filter(
+            (book) => book.status === 'ACTIVE',
+          );
 
-    const availableIds = new Set(this.availableBooks.map((book) => book.id));
-    const filtered = this.selectedBookIds.filter((id) => availableIds.has(id));
-    if (filtered.length !== this.selectedBookIds.length) {
-      this.updateSelectedBookIds(filtered, false);
-    }
+          const availableIds = new Set(
+            this.availableBooks.map((book) => book.id),
+          );
+          const filtered = this.selectedBookIds.filter((id) =>
+            availableIds.has(id),
+          );
+          if (filtered.length !== this.selectedBookIds.length) {
+            this.updateSelectedBookIds(filtered, false);
+          }
+        },
+        error: (error) =>
+          console.error('Failed to load registry books', error),
+      });
   }
 
-  isBookSelected(bookId: string): boolean {
+  isBookSelected(bookId: number): boolean {
     return this.selectedBookIds.includes(bookId);
   }
 
-  onBookSelectionChange(bookId: string, checked: boolean): void {
+  onBookSelectionChange(bookId: number, checked: boolean): void {
     const selected = new Set(this.selectedBookIds);
     if (checked) {
       selected.add(bookId);
@@ -153,33 +168,35 @@ export class BorrowPage implements OnInit {
   }
 
   onScanSuccess(decodedText: string): void {
-    const book = this.registryBookService.getRegistryBookById(decodedText);
-    
-    if (!book) {
+    const normalizedId = decodedText.trim();
+    if (!normalizedId) {
       alert('ไม่พบเล่มทะเบียนที่ตรงกับ QR code นี้');
       return;
     }
 
-    if (book.status !== 'active') {
-      alert(`เล่มทะเบียน ${book.bookNumber} ไม่พร้อมให้ยืม (สถานะ: ${book.status})`);
-      return;
-    }
+    this.registryBookService
+      .getRegistryBookById(normalizedId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (book) => {
+          if (book.status !== 'ACTIVE') {
+            alert(`เล่มทะเบียน ${book.documentId} ไม่พร้อมให้ยืม (สถานะ: ${book.status})`);
+            return;
+          }
 
-    if (this.isBookSelected(book.id)) {
-      alert(`เล่มทะเบียน ${book.bookNumber} ถูกเลือกไว้แล้ว`);
-      return;
-    }
+          if (this.isBookSelected(book.id)) {
+            alert(`เล่มทะเบียน ${book.documentId} ถูกเลือกไปแล้ว`);
+            return;
+          }
 
-    // Add to scanned books tracking
-    this.scannedBookIds.add(book.id);
-    
-    // Add to selection
-    const selected = new Set(this.selectedBookIds);
-    selected.add(book.id);
-    this.updateSelectedBookIds(Array.from(selected));
-    
-    // Show success feedback
-    alert(`✓ เพิ่มเล่มทะเบียน ${book.bookNumber} แล้ว`);
+          this.scannedBookIds.add(book.id);
+          const selected = new Set(this.selectedBookIds);
+          selected.add(book.id);
+          this.updateSelectedBookIds(Array.from(selected));
+          alert(`✅ เพิ่มเล่มทะเบียน ${book.documentId} แล้ว`);
+        },
+        error: () => alert('ไม่พบเล่มทะเบียนที่ตรงกับ QR code นี้'),
+      });
   }
 
   onScanError(error: string): void {
@@ -196,7 +213,7 @@ export class BorrowPage implements OnInit {
     if (!this.form.valid || !this.selectedBookIds.length) {
       this.form.markAllAsTouched();
       this.selectedBookIdsControl.updateValueAndValidity();
-      alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+      alert('�,?�,��,,�,"�,��,?�,��,-�,?�,,�1%�,-�,��,1�,��1��,��1%�,,�,��,s�,-�1%�,���,T');
       return;
     }
 
@@ -218,24 +235,32 @@ export class BorrowPage implements OnInit {
       reason: formValue.reason || undefined,
     }));
 
-    try {
-      const borrows = this.registryBookService.createBulkBorrows(borrowDtos);
-      if (borrows.length) {
-        const scannedCount = this.selectedBookIds.filter(id => 
-          this.scannedBookIds.has(id)
-        ).length;
-        
-        let message = `ยืมเล่มทะเบียนจำนวน ${borrows.length} เล่มสำเร็จแล้ว`;
-        if (scannedCount > 0) {
-          message += ` (สแกน QR ${scannedCount} เล่ม)`;
-        }
-        
-        alert(message);
-        this.router.navigate(['/registry-books']);
-      }
-    } catch (error: any) {
-      alert('ไม่สามารถบันทึกการยืมได้: ' + (error?.message ?? 'ไม่ทราบสาเหตุ'));
-    }
+    this.registryBookService
+      .createBulkBorrows(borrowDtos)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (borrows) => {
+          if (!borrows.length) {
+            return;
+          }
+
+          const scannedCount = this.selectedBookIds.filter((id) =>
+            this.scannedBookIds.has(id),
+          ).length;
+
+          let message = `�,��,��,��1?�,��1^�,��,-�,��1?�,s�,�,��,T�,^�,3�,T�,���,T ${borrows.length} �1?�,��1^�,��,��,3�1?�,��1O.,^�1?�,��1%�,���`;
+          if (scannedCount > 0) {
+            message += ` (�,��1?�,?�,T QR ${scannedCount} �1?�,��1^�,�)`;
+          }
+
+          alert(message);
+          this.router.navigate(['/registry-books']);
+        },
+        error: (error) => {
+          console.error('Failed to create borrow records', error);
+          alert('ไม่สามารถบันทึกการยืมได้ กรุณาลองใหม่อีกครั้ง');
+        },
+      });
   }
 
   cancel(): void {
@@ -248,4 +273,5 @@ export class BorrowPage implements OnInit {
     }
     this.router.navigate(['/registry-books']);
   }
+
 }

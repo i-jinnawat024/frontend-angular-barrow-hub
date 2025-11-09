@@ -1,14 +1,18 @@
 import {
   Component,
+  DestroyRef,
   ElementRef,
   OnInit,
   ViewChild,
   computed,
+  inject,
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
 import { StaffService } from '../../services/staff.service';
 import { Staff } from '../../../../shared/models/staff.model';
 import {
@@ -62,6 +66,7 @@ export class StaffListPage implements OnInit {
     return total > 10 ? total - 10 : 0;
   });
   protected readonly templateDownloadUrl = '/samples/staff-template.xlsx';
+  private readonly destroyRef = inject(DestroyRef);
 
 
   protected readonly columns: Array<{
@@ -163,16 +168,31 @@ export class StaffListPage implements OnInit {
   }
 
   loadStaff(): void {
-    this.staffMembers.set(this.staffService.getStaff());
+    this.staffService
+      .getStaff()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (staff) => this.staffMembers.set(staff),
+        error: (error) =>
+          console.error('Failed to load staff list from API', error),
+      });
   }
 
   deleteStaff(id: string): void {
-    if (confirm('ต้องการลบบุคลากรรายการนี้หรือไม่?')) {
-      const success = this.staffService.deleteStaff(id);
-      if (success) {
-        this.loadStaff();
-      }
+    if (!confirm('ต้องการลบบุคลากรรายการนี้หรือไม่?')) {
+      return;
     }
+
+    this.staffService
+      .deleteStaff(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.loadStaff(),
+        error: (error) => {
+          console.error('Failed to delete staff member', error);
+          window.alert('ไม่สามารถลบบุคลากรได้ กรุณาลองใหม่อีกครั้ง');
+        },
+      });
   }
 
   viewDetails(id: string): void {
@@ -264,30 +284,44 @@ export class StaffListPage implements OnInit {
       return;
     }
 
-    const result = this.staffService.importStaff(
-      previewRows.map((row) => ({
-        firstName: row.firstName,
-        lastName: row.lastName,
-        email: row.email,
-        phone: row.phone,
-        position: row.position,
-        department: row.department,
-        isActive: row.isActive,
-      })),
-    );
+    this.isImporting.set(true);
 
-    this.loadStaff();
-    this.resetImportState();
+    const payload = previewRows.map((row) => ({
+      firstName: row.firstName,
+      lastName: row.lastName,
+      email: row.email,
+      phone: row.phone,
+      position: row.position,
+      department: row.department,
+      isActive: row.isActive,
+    }));
 
-    let message = `นำเข้าข้อมูลบุคลากรสำเร็จ ${result.imported} รายการ`;
-    if (result.duplicateEmails.length > 0) {
-      const duplicated = Array.from(new Set(result.duplicateEmails))
-        .filter((value) => value.trim().length > 0)
-        .join(', ');
-      message += `\nรายการที่ข้ามเนื่องจากอีเมลซ้ำ: ${duplicated}`;
-    }
+    this.staffService
+      .importStaff(payload)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (result) => {
+          this.loadStaff();
+          this.resetImportState();
 
-    window.alert(message);
+          let message = `�,T�,3�1?�,,�1%�,��,,�1%�,-�,��,1�,��,s�,,�,,�,��,��,?�,��,��,3�1?�,��1؅,^ ${result.imported} �,��,��,��,?�,��,�`;
+          if (result.duplicateEmails.length > 0) {
+            const duplicated = Array.from(new Set(result.duplicateEmails))
+              .filter((value) => value.trim().length > 0)
+              .join(', ');
+            message += `
+�,��,��,��,?�,��,��,-�,�1^�,,�1%�,��,��1?�,T�,��1^�,-�,؅,^�,��,?�,-�,�1?�,��,��,<�1%�,3: ${duplicated}`;
+          }
+
+          window.alert(message);
+          this.isImporting.set(false);
+        },
+        error: (error) => {
+          console.error('Failed to import staff data', error);
+          window.alert('ไม่สามารถนำเข้าข้อมูลบุคลากรได้ กรุณาลองใหม่อีกครั้ง');
+          this.isImporting.set(false);
+        },
+      });
   }
 
   private parseStaffImport(

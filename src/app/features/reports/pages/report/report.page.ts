@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,6 +11,7 @@ import {
   defaultSortState,
   toSearchableString,
 } from '../../../../shared/utils/table-utils';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-report',
@@ -27,6 +28,7 @@ export class ReportPage implements OnInit {
   protected readonly sortState = signal<SortState>({ ...defaultSortState });
   selectedMonth = 0;
   selectedYear = 0;
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly columns: Array<{
     label: string;
@@ -38,13 +40,13 @@ export class ReportPage implements OnInit {
       label: 'เลขเล่มทะเบียน',
       property: 'bookNumber',
       sortable: true,
-      accessor: (borrow) => borrow.registryBook.bookNumber,
+      accessor: (borrow) => borrow.registryBook.documentId,
     },
     {
       label: 'ชื่อ-นามสกุล',
       property: 'title',
       sortable: true,
-      accessor: (borrow) => borrow.registryBook.name,
+      accessor: (borrow) => `${borrow.registryBook.firstName} ${borrow.registryBook.lastName}`,
     },
     {
       label: 'ผู้ยืม',
@@ -79,8 +81,8 @@ export class ReportPage implements OnInit {
   ];
 
   private readonly searchAccessors: Array<(borrow: Borrow) => unknown> = [
-    (borrow) => borrow.registryBook.bookNumber,
-    (borrow) => borrow.registryBook.name,
+    (borrow) => borrow.registryBook.documentId,
+    (borrow) => `${borrow.registryBook.firstName} ${borrow.registryBook.lastName}`,
     (borrow) => borrow.borrowerName,
     (borrow) => borrow.reason ?? '',
     (borrow) => borrow.status,
@@ -136,18 +138,25 @@ export class ReportPage implements OnInit {
 
   ngOnInit(): void {
     this.loadReport();
-    this.form.valueChanges.subscribe(() => {
-      this.loadReport();
-    });
+    this.form.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.loadReport();
+      });
   }
 
   loadReport(): void {
     const formValue = this.form.value;
     this.selectedMonth = formValue.month;
     this.selectedYear = formValue.year;
-    this.borrows.set(
-      this.reportService.getBorrowsByMonth(formValue.year, formValue.month),
-    );
+    this.reportService
+      .getBorrowsByMonth(formValue.year, formValue.month)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (borrows) => this.borrows.set(borrows),
+        error: (error) =>
+          console.error('Failed to load borrowing report', error),
+      });
   }
 
   exportToCSV(): void {

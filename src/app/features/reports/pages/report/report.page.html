@@ -139,10 +139,10 @@
             @for (borrow of filteredBorrows(); track borrow.id) {
               <tr class="hover:bg-surface-hover">
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">
-                  {{ borrow.registryBook.bookNumber }}
+                  {{ borrow.registryBook.documentId }}
                 </td>
                 <td class="px-6 py-4 text-sm text-primary">
-                  {{ borrow.registryBook.name }}
+                  {{ borrow.registryBook.firstName }} {{ borrow.registryBook.lastName }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-primary">
                   {{ borrow.borrowerName }}

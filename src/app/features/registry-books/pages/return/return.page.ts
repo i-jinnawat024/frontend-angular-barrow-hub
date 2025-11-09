@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSelectChange } from '@angular/material/select';
 import {
@@ -15,6 +15,7 @@ import { RegistryBookService } from '../../services/registry-book.service';
 import { ReturnCreateDto } from '../../../../shared/models/return.model';
 import { Borrow } from '../../../../shared/models/borrow.model';
 import { QrScannerComponent } from '../../../../shared/components/qr-scanner/qr-scanner.component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-return',
@@ -31,6 +32,7 @@ export class ReturnPage implements OnInit {
   currentStep: 1 | 2 = 1;
   selectedBorrowersControl = new FormControl<string[]>([], { nonNullable: true });
   private readonly selectedBorrowIdsControl: FormControl<string[]>;
+  private readonly destroyRef = inject(DestroyRef);
   constructor(
     private readonly fb: FormBuilder,
     private readonly registryBookService: RegistryBookService,
@@ -59,7 +61,7 @@ export class ReturnPage implements OnInit {
   }
 
   get selectedBorrowNumbers(): string {
-    return this.selectedBorrows.map((borrow) => borrow.registryBook.bookNumber).join(', ');
+    return this.selectedBorrows.map((borrow) => borrow.registryBook.documentId).join(', ');
   }
 
   get selectedBorrowers(): string[] {
@@ -82,27 +84,40 @@ export class ReturnPage implements OnInit {
   }
 
   loadActiveBorrows(): void {
-    this.activeBorrows = this.registryBookService
+    this.registryBookService
       .getActiveBorrows()
-      .slice()
-      .sort((a, b) => b.borrowedAt.getTime() - a.borrowedAt.getTime());
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (borrows) => {
+          this.activeBorrows = borrows
+            .slice()
+            .sort((a, b) => b.borrowedAt.getTime() - a.borrowedAt.getTime());
 
-    const borrowerSet = new Set(this.activeBorrows.map((borrow) => borrow.borrowerName));
-    this.uniqueBorrowers = Array.from(borrowerSet).sort();
+          const borrowerSet = new Set(
+            this.activeBorrows.map((borrow) => borrow.borrowerName),
+          );
+          this.uniqueBorrowers = Array.from(borrowerSet).sort();
 
-    const availableIds = new Set(this.activeBorrows.map((borrow) => borrow.id));
-    const filtered = this.selectedBorrowIds.filter((id) => availableIds.has(id));
-    if (filtered.length !== this.selectedBorrowIds.length) {
-      this.updateSelectedBorrowIds(filtered, false);
-    }
+          const availableIds = new Set(
+            this.activeBorrows.map((borrow) => borrow.id),
+          );
+          const filtered = this.selectedBorrowIds.filter((id) =>
+            availableIds.has(id),
+          );
+          if (filtered.length !== this.selectedBorrowIds.length) {
+            this.updateSelectedBorrowIds(filtered, false);
+          }
 
-    // Update selected borrowers based on current selection
-    const selectedBorrowerNames = [
-      ...new Set(
-        this.selectedBorrows.map((borrow) => borrow.borrowerName)
-      ),
-    ];
-    this.selectedBorrowersControl.setValue(selectedBorrowerNames);
+          const selectedBorrowerNames = [
+            ...new Set(
+              this.selectedBorrows.map((borrow) => borrow.borrowerName),
+            ),
+          ];
+          this.selectedBorrowersControl.setValue(selectedBorrowerNames);
+        },
+        error: (error) =>
+          console.error('Failed to load active borrows', error),
+      });
   }
 
   getBorrowsByBorrower(borrower: string): Borrow[] {
@@ -251,15 +266,23 @@ export class ReturnPage implements OnInit {
       returnedAt: new Date(returnedAt),
     }));
 
-    try {
-      const createdReturns = this.registryBookService.createBulkReturns(returnDtos);
-      if (createdReturns.length) {
-        alert(`คืนเล่มทะเบียนจำนวน ${createdReturns.length} เล่มสำเร็จแล้ว`);
-        this.router.navigate(['/registry-books']);
-      }
-    } catch (error: any) {
-      alert('ไม่สามารถบันทึกการคืนได้: ' + (error?.message ?? 'ไม่ทราบสาเหตุ'));
-    }
+    this.registryBookService
+      .createBulkReturns(returnDtos)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (createdReturns) => {
+          if (!createdReturns.length) {
+            return;
+          }
+
+          alert(`�,,�,��,T�1?�,��1^�,��,-�,��1?�,s�,�,��,T�,^�,3�,T�,���,T ${createdReturns.length} �1?�,��1^�,��,��,3�1?�,��1O.,^�1?�,��1%�,���`);
+          this.router.navigate(['/registry-books']);
+        },
+        error: (error) => {
+          console.error('Failed to create return records', error);
+          alert('ไม่สามารถบันทึกการคืนเอกสารได้ กรุณาลองใหม่อีกครั้ง');
+        },
+      });
   }
 
   cancel(): void {
@@ -271,18 +294,35 @@ export class ReturnPage implements OnInit {
   }
 
   onScanSuccess(decodedText: string): void {
-    const borrow = this.registryBookService.getBorrowByBookId(decodedText);
-    if (borrow && borrow.status === 'active') {
-      const selected = new Set(this.selectedBorrowIds);
-      selected.add(borrow.id);
-      this.updateSelectedBorrowIds(Array.from(selected));
-      const current = this.selectedBorrowersControl.value ?? [];
-      if (!current.includes(borrow.borrowerName)) {
-        this.selectedBorrowersControl.setValue([...current, borrow.borrowerName]);
-      }
-    } else {
-      alert('QR ไม่ตรงกับรายการยืมที่ยังเปิดอยู่');
+    const normalizedId = decodedText.trim();
+    if (!normalizedId) {
+      alert('QR นี้ไม่ตรงกับข้อมูลการยืมที่ยังไม่คืน');
+      return;
     }
+
+    this.registryBookService
+      .getBorrowByBookId(normalizedId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (borrow) => {
+          if (!borrow || borrow.status !== 'active') {
+            alert('QR นี้ไม่ตรงกับข้อมูลการยืมที่ยังไม่คืน');
+            return;
+          }
+
+          const selected = new Set(this.selectedBorrowIds);
+          selected.add(borrow.id);
+          this.updateSelectedBorrowIds(Array.from(selected));
+          const current = this.selectedBorrowersControl.value ?? [];
+          if (!current.includes(borrow.borrowerName)) {
+            this.selectedBorrowersControl.setValue([
+              ...current,
+              borrow.borrowerName,
+            ]);
+          }
+        },
+        error: () => alert('QR นี้ไม่ตรงกับข้อมูลการยืมที่ยังไม่คืน'),
+      });
   }
 
   onScanError(error: string): void {

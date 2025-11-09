@@ -1,10 +1,13 @@
-import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RegistryBookService } from '../../services/registry-book.service';
 import { RegistryBook } from '../../../../shared/models/registry-book.model';
 import { QrBarcodeService } from '../../../../shared/services/qr-barcode.service';
 import { MatIcon } from "@angular/material/icon";
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { EMPTY } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-registry-book-detail',
@@ -16,6 +19,8 @@ import { MatIcon } from "@angular/material/icon";
 export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy {
   registryBook: RegistryBook | undefined;
   qrCodeDataUrl: string | null = null;
+  private readonly destroyRef = inject(DestroyRef);
+  private hasViewInitialized = false;
   
   constructor(
     private readonly registryBookService: RegistryBookService,
@@ -25,27 +30,37 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
   ) {}
 
   ngOnInit(): void {
-    this.route.params.subscribe((params) => {
-      const id = params['id'];
-      if (id) {
-        this.registryBook = this.registryBookService.getRegistryBookById(id);
-        if (!this.registryBook) {
-          this.router.navigate(['/registry-books']);
-        } else {
-          this.generateQrCode();
-        }
-      }
-    });
+    this.route.paramMap
+      .pipe(
+        switchMap((params) => {
+          const id = params.get('id');
+          if (!id) {
+            this.router.navigate(['/registry-books']);
+            return EMPTY;
+          }
+          return this.registryBookService.getRegistryBookById(id);
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (book) => this.handleRegistryBook(book),
+        error: () => this.router.navigate(['/registry-books']),
+      });
   }
 
   ngAfterViewInit(): void {
-    if (this.registryBook) {
-      setTimeout(() => this.generateBarcode(), 200);
-    }
+    this.hasViewInitialized = true;
+    this.tryGenerateBarcode();
   }
 
   ngOnDestroy(): void {
     // reserved for subscriptions or listeners
+  }
+
+  private handleRegistryBook(book: RegistryBook): void {
+    this.registryBook = book;
+    this.generateQrCode();
+    this.tryGenerateBarcode();
   }
 
   async generateQrCode(): Promise<void> {
@@ -68,14 +83,22 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
     }
 
     try {
-      const barcodeId = `barcode-${this.registryBook.id}`;
+      const barcodeId = `barcode-${this.registryBook.documentId}`;
       this.qrBarcodeService.generateBarcode(
-        this.registryBook.bookNumber,
+        this.registryBook.documentId,
         barcodeId,
       );
     } catch (error) {
       console.error('Error generating barcode:', error);
     }
+  }
+
+  private tryGenerateBarcode(): void {
+    if (!this.hasViewInitialized || !this.registryBook) {
+      return;
+    }
+
+    setTimeout(() => this.generateBarcode(), 200);
   }
 
   editRegistryBook(): void {
@@ -113,7 +136,7 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
       <html>
         <head>
           <meta charset="utf-8" />
-          <title>QR Code - ${this.registryBook.bookNumber}</title>
+          <title>QR Code - ${this.registryBook.documentId}</title>
           <style>
             body {
               margin: 0;
@@ -136,11 +159,11 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
         <body>
           <div class="qr-container">
             <div class="qr-title">QR Code - เล่มทะเบียน</div>
-            <div class="qr-book-number">${this.registryBook.bookNumber}</div>
+            <div class="qr-book-number">${this.registryBook.documentId}</div>
             <div class="qr-code">
               <img src="${this.qrCodeDataUrl}" alt="QR Code" style="width: 256px; height: 256px;" />
             </div>
-            <div class="qr-info">${this.registryBook.name}</div>
+            <div class="qr-info">${this.registryBook.firstName} ${this.registryBook.lastName}</div>
           </div>
         </body>
       </html>
@@ -176,7 +199,7 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
       <html>
         <head>
           <meta charset="utf-8" />
-          <title>Barcode - ${this.registryBook.bookNumber}</title>
+          <title>Barcode - ${this.registryBook.documentId}</title>
           <style>
             body {
               margin: 0;
@@ -199,11 +222,11 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
         <body>
           <div class="barcode-container">
             <div class="barcode-title">Barcode - เล่มทะเบียน</div>
-            <div class="barcode-book-number">${this.registryBook.bookNumber}</div>
+            <div class="barcode-book-number">${this.registryBook.documentId}</div>
             <div class="barcode-code">
               <svg xmlns="http://www.w3.org/2000/svg">${svgContent}</svg>
             </div>
-            <div class="barcode-info">${this.registryBook.name}</div>
+            <div class="barcode-info">${this.registryBook.firstName} ${this.registryBook.lastName}</div>
           </div>
         </body>
       </html>

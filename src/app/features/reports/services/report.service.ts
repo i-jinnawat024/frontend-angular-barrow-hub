@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { RegistryBookService } from '../../registry-books/services/registry-book.service';
 import { Borrow } from '../../../shared/models/borrow.model';
 
@@ -8,16 +10,18 @@ import { Borrow } from '../../../shared/models/borrow.model';
 export class ReportService {
   constructor(private readonly registryBookService: RegistryBookService) {}
 
-  getBorrowsByMonth(year: number, month: number): Borrow[] {
-    const allBorrows = this.registryBookService.getBorrows();
-
-    return allBorrows.filter((borrow) => {
-      const borrowDate = new Date(borrow.borrowedAt);
-      return (
-        borrowDate.getFullYear() === year &&
-        borrowDate.getMonth() === month - 1
-      );
-    });
+  getBorrowsByMonth(year: number, month: number): Observable<Borrow[]> {
+    return this.registryBookService.getBorrows().pipe(
+      map((borrows) =>
+        borrows.filter((borrow) => {
+          const borrowDate = new Date(borrow.borrowedAt);
+          return (
+            borrowDate.getFullYear() === year &&
+            borrowDate.getMonth() === month - 1
+          );
+        }),
+      ),
+    );
   }
 
   exportToCSV(borrows: Borrow[], year: number, month: number): void {
@@ -34,8 +38,8 @@ export class ReportService {
     const rows = borrows.map((borrow) => {
       const borrowDate = new Date(borrow.borrowedAt);
       return [
-        borrow.registryBook.bookNumber,
-        borrow.registryBook.name,
+        borrow.registryBook.documentId,
+        `${borrow.registryBook.firstName} ${borrow.registryBook.lastName}`,
         borrow.borrowerName,
         borrowDate.toLocaleDateString('th-TH'),
         borrowDate.toLocaleTimeString('th-TH', {
@@ -77,8 +81,8 @@ export class ReportService {
       totalBorrows: borrows.length,
       borrows: borrows.map((borrow) => ({
         id: borrow.id,
-        bookNumber: borrow.registryBook.bookNumber,
-        name: borrow.registryBook.name,
+        documentId: borrow.registryBook.documentId,
+        name: `${borrow.registryBook.firstName} ${borrow.registryBook.lastName}`,
         borrowerName: borrow.borrowerName,
         borrowedAt: borrow.borrowedAt,
         reason: borrow.reason,
