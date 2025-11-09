@@ -4,19 +4,23 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RegistryBookService } from '../../services/document.service';
-import { Document, RegistryBookCreateDto, RegistryBookUpdateDto } from '../../../../shared/models/registry-book.model';
+import {
+  Document,
+  RegistryBookCreateDto,
+  RegistryBookUpdateDto,
+} from '../../../../shared/models/registry-book.model';
 
 @Component({
   selector: 'app-registry-book-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './registry-book-form.page.html',
-  styleUrl: './registry-book-form.page.scss'
+  styleUrl: './registry-book-form.page.scss',
 })
 export class RegistryBookFormPage implements OnInit {
   form: FormGroup;
   isEditMode = false;
-  bookId: string | null = null;
+  id: string | null = null;
   private readonly destroyRef = inject(DestroyRef);
 
   constructor(
@@ -26,39 +30,45 @@ export class RegistryBookFormPage implements OnInit {
     private route: ActivatedRoute
   ) {
     this.form = this.fb.group({
-      bookNumber: ['', [Validators.required]],
-      title: ['', [Validators.required]],
-      description: ['']
+      documentId: ['', [Validators.required]],
+      firstName: ['', [Validators.required]],
+      lastName: ['', [Validators.required]],
+      status: [''],
     });
   }
 
   ngOnInit(): void {
-    this.route.paramMap
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((params) => {
-        const id = params.get('id');
-        this.bookId = id;
-        this.isEditMode = Boolean(id);
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      const id = params.get('id');
+      this.id = id;
+      this.isEditMode = Boolean(id);
 
-        if (this.isEditMode) {
-          this.loadRegistryBook();
-        } else {
-          this.form.reset({
-            bookNumber: '',
-            title: '',
-            description: '',
-          });
-        }
-      });
+      if (this.isEditMode) {
+        this.loadRegistryBook();
+      } else {
+        this.form.reset({
+          documentId: '',
+          title: '',
+          description: '',
+        });
+      }
+    });
+    if (this.isEditMode) {
+      this.form.get('status')?.addValidators(Validators.required);
+    } else {
+      this.form.get('status')?.clearValidators();
+    }
+
+    this.form.get('status')?.updateValueAndValidity();
   }
 
   loadRegistryBook(): void {
-    if (!this.bookId) {
+    if (!this.id) {
       return;
     }
 
     this.registryBookService
-      .getRegistryBookById(this.bookId)
+      .getRegistryBookById(this.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (book) => this.patchForm(book),
@@ -74,10 +84,10 @@ export class RegistryBookFormPage implements OnInit {
 
     const dto = this.mapFormToDto();
 
-    if (this.isEditMode && this.bookId) {
-      const updateDto: RegistryBookUpdateDto = { ...dto };
+    if (this.isEditMode && this.id) {
+      const updateDto: RegistryBookUpdateDto = { ...dto, id: Number(this.id) };
       this.registryBookService
-        .updateRegistryBook(this.bookId, updateDto)
+        .updateRegistryBook(this.id, updateDto)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => this.router.navigate(['/registry-books']),
@@ -102,28 +112,36 @@ export class RegistryBookFormPage implements OnInit {
 
   private mapFormToDto(): RegistryBookCreateDto {
     const value = this.form.value as {
-      bookNumber: string;
-      title: string;
-      description?: string | null;
+      documentId: number;
+      firstName: string;
+      lastName: string;
+      status: Document['status'];
     };
-
+    if (this.isEditMode) {
+      return {
+        documentId: value.documentId,
+        firstName: value.firstName,
+        lastName: value.lastName,
+        status: value.status,
+      };
+    }
     return {
-      bookNumber: (value.bookNumber ?? '').trim(),
-      name: (value.title ?? '').trim(),
-      description: value.description?.trim() || undefined,
+      documentId: value.documentId,
+      firstName: value.firstName,
+      lastName: value.lastName,
     };
   }
 
   private patchForm(document: Document): void {
     this.form.patchValue({
-      bookNumber: document.documentId,
-      title: document.firstName + ' ' + document.lastName,
-      description: '-',
+      documentId: document.documentId,
+      firstName: document.firstName,
+      lastName: document.lastName,
+      status: document.status,
     });
   }
 
   cancel(): void {
-    this.router.navigate(['/registry-books']);
+    this.router.navigate([`/registry-books`]);
   }
 }
-

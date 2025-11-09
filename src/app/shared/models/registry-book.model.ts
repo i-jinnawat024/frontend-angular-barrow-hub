@@ -10,16 +10,16 @@ export interface Document {
 }
 
 export interface RegistryBookCreateDto {
-  bookNumber: string;
-  name: string;
-  description?: string;
+  documentId: number;
+  firstName: string;
+  lastName: string;
   status?: Document['status'];
 }
 
 export interface RegistryBookUpdateDto {
+  id:number
   documentId?: number;
   firstName?: string;
   lastName?: string;
-  description?: string;
   status?: Document['status'];
 }

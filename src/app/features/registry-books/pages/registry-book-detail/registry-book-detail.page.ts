@@ -17,7 +17,7 @@ import { switchMap } from 'rxjs/operators';
   styleUrl: './registry-book-detail.page.scss',
 })
 export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy {
-  registryBook: Document | undefined;
+  document: Document | undefined;
   qrCodeDataUrl: string | null = null;
   private readonly destroyRef = inject(DestroyRef);
   private hasViewInitialized = false;
@@ -58,19 +58,19 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
   }
 
   private handleRegistryBook(book: Document): void {
-    this.registryBook = book;
+    this.document = book;
     this.generateQrCode();
     this.tryGenerateBarcode();
   }
 
   async generateQrCode(): Promise<void> {
-    if (!this.registryBook) {
+    if (!this.document) {
       return;
     }
 
     try {
       this.qrCodeDataUrl = await this.qrBarcodeService.generateQRCode(
-        this.registryBook.id,
+        this.document.id,
       );
     } catch (error) {
       console.error('Error generating QR code:', error);
@@ -78,14 +78,14 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
   }
 
   generateBarcode(): void {
-    if (!this.registryBook) {
+    if (!this.document) {
       return;
     }
 
     try {
-      const barcodeId = `barcode-${this.registryBook.documentId}`;
+      const barcodeId = `barcode-${this.document.documentId}`;
       this.qrBarcodeService.generateBarcode(
-        this.registryBook.documentId,
+        this.document.documentId,
         barcodeId,
       );
     } catch (error) {
@@ -94,16 +94,16 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
   }
 
   private tryGenerateBarcode(): void {
-    if (!this.hasViewInitialized || !this.registryBook) {
+    if (!this.hasViewInitialized || !this.document) {
       return;
     }
 
     setTimeout(() => this.generateBarcode(), 200);
   }
 
-  editRegistryBook(): void {
-    if (this.registryBook) {
-      this.router.navigate(['/registry-books', this.registryBook.id, 'edit']);
+  editDocument(): void {
+    if (this.document) {
+      this.router.navigate(['/registry-books', this.document.id, 'edit']);
     }
   }
 
@@ -112,17 +112,17 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
   }
 
   viewBorrowHistory(): void {
-    if (this.registryBook) {
+    if (this.document) {
       this.router.navigate([
         '/registry-books',
-        this.registryBook.id,
+        this.document.id,
         'history',
       ]);
     }
   }
 
   printQrCode(): void {
-    if (!this.registryBook || !this.qrCodeDataUrl) {
+    if (!this.document || !this.qrCodeDataUrl) {
       return;
     }
 
@@ -136,7 +136,7 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
       <html>
         <head>
           <meta charset="utf-8" />
-          <title>QR Code - ${this.registryBook.documentId}</title>
+          <title>QR Code - ${this.document.documentId}</title>
           <style>
             body {
               margin: 0;
@@ -159,11 +159,11 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
         <body>
           <div class="qr-container">
             <div class="qr-title">QR Code - เล่มทะเบียน</div>
-            <div class="qr-book-number">${this.registryBook.documentId}</div>
+            <div class="qr-book-number">${this.document.documentId}</div>
             <div class="qr-code">
               <img src="${this.qrCodeDataUrl}" alt="QR Code" style="width: 256px; height: 256px;" />
             </div>
-            <div class="qr-info">${this.registryBook.firstName} ${this.registryBook.lastName}</div>
+            <div class="qr-info">${this.document.firstName} ${this.document.lastName}</div>
           </div>
         </body>
       </html>
@@ -177,12 +177,12 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
   }
 
   printBarcode(): void {
-    if (!this.registryBook) {
+    if (!this.document) {
       return;
     }
 
     const barcodeElement = document.getElementById(
-      `barcode-${this.registryBook.id}`,
+      `barcode-${this.document.id}`,
     );
     if (!barcodeElement) {
       return;
@@ -199,7 +199,7 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
       <html>
         <head>
           <meta charset="utf-8" />
-          <title>Barcode - ${this.registryBook.documentId}</title>
+          <title>Barcode - ${this.document.documentId}</title>
           <style>
             body {
               margin: 0;
@@ -222,11 +222,11 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
         <body>
           <div class="barcode-container">
             <div class="barcode-title">Barcode - เล่มทะเบียน</div>
-            <div class="barcode-book-number">${this.registryBook.documentId}</div>
+            <div class="barcode-book-number">${this.document.documentId}</div>
             <div class="barcode-code">
               <svg xmlns="http://www.w3.org/2000/svg">${svgContent}</svg>
             </div>
-            <div class="barcode-info">${this.registryBook.firstName} ${this.registryBook.lastName}</div>
+            <div class="barcode-info">${this.document.firstName} ${this.document.lastName}</div>
           </div>
         </body>
       </html>

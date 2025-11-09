@@ -95,8 +95,8 @@
                 @for (preview of importPreviewSample(); track preview.rowNumber) {
                   <tr>
                     <td class="px-4 py-2">{{ preview.rowNumber }}</td>
-                    <td class="px-4 py-2 font-medium text-primary">{{ preview.bookNumber }}</td>
-                    <td class="px-4 py-2">{{ preview.name }}</td>
+                    <td class="px-4 py-2 font-medium text-primary">{{ preview.documentId }}</td>
+                    <td class="px-4 py-2">{{ preview.firstName }} {{ preview.lastName }}</td>
                     <td class="px-4 py-2">{{ preview.description ?? '-' }}</td>
                     <td class="px-4 py-2">
                       @switch (preview.status) {

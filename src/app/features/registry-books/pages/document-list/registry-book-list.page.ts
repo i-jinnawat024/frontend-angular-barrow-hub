@@ -23,13 +23,16 @@ import {
 } from '../../../../shared/utils/table-utils';
 import { readTabularFile } from '../../../../shared/utils/csv-utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { first } from 'rxjs';
 
 type RegistryBookStatus = Document['status'];
 
 interface RegistryBookImportPreviewRow {
+  id: number;
   rowNumber: number;
-  bookNumber: string;
-  name: string;
+  documentId: number;
+  firstName:string,
+  lastName:string,
   description?: string;
   status: RegistryBookStatus;
 }
@@ -282,8 +285,10 @@ export class RegistryBookListPage implements OnInit {
     this.isImporting.set(true);
 
     const payload = previewRows.map((row) => ({
-      bookNumber: row.bookNumber,
-      name: row.name,
+      id: row.id,
+      documentId: row.documentId,
+      firstName: row.firstName,
+      lastName: row.lastName,
       description: row.description,
       status: row.status,
     }));
@@ -329,7 +334,7 @@ export class RegistryBookListPage implements OnInit {
     const headers = rows[0].map((cell) =>
       this.normalizeHeader(String(cell ?? '')),
     );
-    const bookNumberIndex = this.findHeaderIndex(headers, [
+    const documentIdIndex = this.findHeaderIndex(headers, [
       'เลขเล่มทะเบียน',
       'หมายเลขเล่มทะเบียน',
       'รหัสเล่มทะเบียน',
@@ -340,13 +345,13 @@ export class RegistryBookListPage implements OnInit {
 
     const errors: string[] = [];
 
-    if (bookNumberIndex === -1 || nameIndex === -1) {
+    if (documentIdIndex === -1 || nameIndex === -1) {
       errors.push('ไม่พบคอลัมน์ "เลขเล่มทะเบียน" หรือ "ชื่อเล่มทะเบียน" ในไฟล์');
       return { rows: [], errors };
     }
 
     const previewRows: RegistryBookImportPreviewRow[] = [];
-    const seenBookNumbers = new Set<string>();
+    const seenBookNumbers = new Set<number>();
 
     for (let index = 1; index < rows.length; index += 1) {
       const row = rows[index];
@@ -356,21 +361,21 @@ export class RegistryBookListPage implements OnInit {
         continue;
       }
 
-      const bookNumber = String(row[bookNumberIndex] ?? '').trim();
+      const documentId = (row[documentIdIndex] ?? '').trim();
       const name = String(row[nameIndex] ?? '').trim();
       const description =
         descriptionIndex !== -1 ? String(row[descriptionIndex] ?? '').trim() : '';
       const statusRaw =
         statusIndex !== -1 ? String(row[statusIndex] ?? '').trim() : '';
 
-      if (!bookNumber || !name) {
+      if (!documentId || !name) {
         errors.push(`แถวที่ ${rowNumber}: ต้องระบุเลขเล่มทะเบียนและชื่อเล่มทะเบียน`);
         continue;
       }
 
-      const normalizedKey = bookNumber.toLowerCase();
+      const normalizedKey = Number(documentId);
       if (seenBookNumbers.has(normalizedKey)) {
-        errors.push(`แถวที่ ${rowNumber}: เลขเล่มทะเบียน "${bookNumber}" ซ้ำกับข้อมูลก่อนหน้าในไฟล์`);
+        errors.push(`แถวที่ ${rowNumber}: เลขเล่มทะเบียน "${documentId}" ซ้ำกับข้อมูลก่อนหน้าในไฟล์`);
         continue;
       }
 
@@ -388,9 +393,11 @@ export class RegistryBookListPage implements OnInit {
 
       seenBookNumbers.add(normalizedKey);
       previewRows.push({
+        id: 0,
         rowNumber,
-        bookNumber,
-        name,
+        documentId: Number(documentId),
+        firstName: name.split(' ')[0],
+        lastName: name.split(' ')[1],
         description: description || undefined,
         status,
       });

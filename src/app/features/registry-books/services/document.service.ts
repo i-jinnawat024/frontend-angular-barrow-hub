@@ -40,27 +40,27 @@ export interface RegistryBookImportResult {
   providedIn: 'root',
 })
 export class RegistryBookService {
-  private readonly registryBooksUrl = `${environment.apiBaseUrl}/documents/document-list`;
+  private readonly documentUrl = `${environment.apiBaseUrl}/documents`;
   private readonly borrowsUrl = `${environment.apiBaseUrl}/borrows`;
   private readonly returnsUrl = `${environment.apiBaseUrl}/returns`;
 
   constructor(private readonly http: HttpClient) {}
 
   getRegistryBooks(): Observable<Document[]> {
-    return this.http.get<RegistryBookApiResponse[]>(this.registryBooksUrl).pipe(
+    return this.http.get<RegistryBookApiResponse[]>(`${this.documentUrl}/document-list`).pipe(
       map((books) => books.map((book) => this.mapDocument(book))),
     );
   }
 
   getRegistryBookById(id: string): Observable<Document> {
     return this.http
-      .get<RegistryBookApiResponse>(`${this.registryBooksUrl}/${id}`)
+      .get<RegistryBookApiResponse>(`${this.documentUrl}?id=${id}`)
       .pipe(map((book) => this.mapDocument(book)));
   }
 
   createRegistryBook(dto: RegistryBookCreateDto): Observable<Document> {
     return this.http
-      .post<RegistryBookApiResponse>(this.registryBooksUrl, dto)
+      .post<RegistryBookApiResponse>(this.documentUrl, dto)
       .pipe(map((book) => this.mapDocument(book)));
   }
 
@@ -69,19 +69,19 @@ export class RegistryBookService {
     dto: RegistryBookUpdateDto,
   ): Observable<Document> {
     return this.http
-      .put<RegistryBookApiResponse>(`${this.registryBooksUrl}/${id}`, dto)
+      .put<RegistryBookApiResponse>(`${this.documentUrl}?id=${id}`, dto)
       .pipe(map((book) => this.mapDocument(book)));
   }
 
   deleteRegistryBook(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.registryBooksUrl}/${id}`);
+    return this.http.delete<void>(`${this.documentUrl}/${id}`);
   }
 
   importRegistryBooks(
     rows: RegistryBookCreateDto[],
   ): Observable<RegistryBookImportResult> {
     return this.http.post<RegistryBookImportResult>(
-      `${this.registryBooksUrl}/import`,
+      `${this.documentUrl}/import`,
       { registryBooks: rows },
     );
   }
