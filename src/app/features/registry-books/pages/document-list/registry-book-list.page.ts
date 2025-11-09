@@ -12,8 +12,8 @@ import {
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { RegistryBookService } from '../../services/registry-book.service';
-import { RegistryBook } from '../../../../shared/models/registry-book.model';
+import { RegistryBookService } from '../../services/document.service';
+import { Document } from '../../../../shared/models/registry-book.model';
 import {
   SortState,
   compareValues,
@@ -24,7 +24,7 @@ import {
 import { readTabularFile } from '../../../../shared/utils/csv-utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-type RegistryBookStatus = RegistryBook['status'];
+type RegistryBookStatus = Document['status'];
 
 interface RegistryBookImportPreviewRow {
   rowNumber: number;
@@ -42,7 +42,7 @@ interface RegistryBookImportPreviewRow {
   styleUrl: './registry-book-list.page.scss',
 })
 export class RegistryBookListPage implements OnInit {
-  private readonly registryBooks = signal<RegistryBook[]>([]);
+  private readonly registryBooks = signal<Document[]>([]);
   protected readonly searchTerm = signal('');
   protected readonly sortState = signal<SortState>({ ...defaultSortState });
   private readonly isDesktopScreen = signal(this.checkIsDesktop());
@@ -71,7 +71,7 @@ export class RegistryBookListPage implements OnInit {
     label: string;
     property: string;
     sortable: boolean;
-    accessor?: (book: RegistryBook) => unknown;
+    accessor?: (book: Document) => unknown;
   }> = [
     {
       label: 'เลขทะเบียน',
@@ -98,7 +98,7 @@ export class RegistryBookListPage implements OnInit {
     },
   ];
 
-  private readonly searchAccessors: Array<(book: RegistryBook) => unknown> = [
+  private readonly searchAccessors: Array<(book: Document) => unknown> = [
     (book) => book.documentId,
     (book) => `${book.firstName} ${book.lastName}`,
     (book) => book.status,
@@ -374,7 +374,7 @@ export class RegistryBookListPage implements OnInit {
         continue;
       }
 
-      let status: RegistryBook['status'] = 'ACTIVE';
+      let status: Document['status'] = 'ACTIVE';
       if (statusRaw) {
         const normalizedStatus = this.normalizeRegistryBookStatus(statusRaw);
         if (!normalizedStatus) {

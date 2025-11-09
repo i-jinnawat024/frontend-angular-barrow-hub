@@ -40,13 +40,13 @@ export class ReportPage implements OnInit {
       label: 'เลขเล่มทะเบียน',
       property: 'bookNumber',
       sortable: true,
-      accessor: (borrow) => borrow.registryBook.documentId,
+      accessor: (borrow) => borrow.document.documentId,
     },
     {
       label: 'ชื่อ-นามสกุล',
       property: 'title',
       sortable: true,
-      accessor: (borrow) => `${borrow.registryBook.firstName} ${borrow.registryBook.lastName}`,
+      accessor: (borrow) => `${borrow.document.firstName} ${borrow.document.lastName}`,
     },
     {
       label: 'ผู้ยืม',
@@ -81,8 +81,8 @@ export class ReportPage implements OnInit {
   ];
 
   private readonly searchAccessors: Array<(borrow: Borrow) => unknown> = [
-    (borrow) => borrow.registryBook.documentId,
-    (borrow) => `${borrow.registryBook.firstName} ${borrow.registryBook.lastName}`,
+    (borrow) => borrow.document.documentId,
+    (borrow) => `${borrow.document.firstName} ${borrow.document.lastName}`,
     (borrow) => borrow.borrowerName,
     (borrow) => borrow.reason ?? '',
     (borrow) => borrow.status,

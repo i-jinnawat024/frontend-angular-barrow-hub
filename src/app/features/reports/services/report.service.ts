@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { RegistryBookService } from '../../registry-books/services/registry-book.service';
+import { RegistryBookService } from '../../registry-books/services/document.service';
 import { Borrow } from '../../../shared/models/borrow.model';
 
 @Injectable({
@@ -38,8 +38,8 @@ export class ReportService {
     const rows = borrows.map((borrow) => {
       const borrowDate = new Date(borrow.borrowedAt);
       return [
-        borrow.registryBook.documentId,
-        `${borrow.registryBook.firstName} ${borrow.registryBook.lastName}`,
+        borrow.document.documentId,
+        `${borrow.document.firstName} ${borrow.document.lastName}`,
         borrow.borrowerName,
         borrowDate.toLocaleDateString('th-TH'),
         borrowDate.toLocaleTimeString('th-TH', {
@@ -81,8 +81,8 @@ export class ReportService {
       totalBorrows: borrows.length,
       borrows: borrows.map((borrow) => ({
         id: borrow.id,
-        documentId: borrow.registryBook.documentId,
-        name: `${borrow.registryBook.firstName} ${borrow.registryBook.lastName}`,
+        documentId: borrow.document.documentId,
+        name: `${borrow.document.firstName} ${borrow.document.lastName}`,
         borrowerName: borrow.borrowerName,
         borrowedAt: borrow.borrowedAt,
         reason: borrow.reason,

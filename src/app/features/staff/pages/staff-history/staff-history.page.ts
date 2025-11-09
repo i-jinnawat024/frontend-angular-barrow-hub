@@ -2,7 +2,7 @@ import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { StaffService } from '../../services/staff.service';
-import { RegistryBookService } from '../../../registry-books/services/registry-book.service';
+import { RegistryBookService } from '../../../registry-books/services/document.service';
 import { Staff } from '../../../../shared/models/staff.model';
 import { Borrow } from '../../../../shared/models/borrow.model';
 import { MatIcon } from "@angular/material/icon";

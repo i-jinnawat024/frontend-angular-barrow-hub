@@ -1,8 +1,8 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { RegistryBookService } from '../../services/registry-book.service';
-import { RegistryBook } from '../../../../shared/models/registry-book.model';
+import { RegistryBookService } from '../../services/document.service';
+import { Document } from '../../../../shared/models/registry-book.model';
 import { QrBarcodeService } from '../../../../shared/services/qr-barcode.service';
 import { MatIcon } from "@angular/material/icon";
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -17,7 +17,7 @@ import { switchMap } from 'rxjs/operators';
   styleUrl: './registry-book-detail.page.scss',
 })
 export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy {
-  registryBook: RegistryBook | undefined;
+  registryBook: Document | undefined;
   qrCodeDataUrl: string | null = null;
   private readonly destroyRef = inject(DestroyRef);
   private hasViewInitialized = false;
@@ -57,7 +57,7 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
     // reserved for subscriptions or listeners
   }
 
-  private handleRegistryBook(book: RegistryBook): void {
+  private handleRegistryBook(book: Document): void {
     this.registryBook = book;
     this.generateQrCode();
     this.tryGenerateBarcode();

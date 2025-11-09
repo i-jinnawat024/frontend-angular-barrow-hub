@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RegistryBookService } from '../../services/registry-book.service';
-import { RegistryBook, RegistryBookCreateDto, RegistryBookUpdateDto } from '../../../../shared/models/registry-book.model';
+import { RegistryBookService } from '../../services/document.service';
+import { Document, RegistryBookCreateDto, RegistryBookUpdateDto } from '../../../../shared/models/registry-book.model';
 
 @Component({
   selector: 'app-registry-book-form',
@@ -114,7 +114,7 @@ export class RegistryBookFormPage implements OnInit {
     };
   }
 
-  private patchForm(document: RegistryBook): void {
+  private patchForm(document: Document): void {
     this.form.patchValue({
       bookNumber: document.documentId,
       title: document.firstName + ' ' + document.lastName,

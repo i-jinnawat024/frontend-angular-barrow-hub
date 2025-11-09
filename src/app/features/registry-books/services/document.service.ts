@@ -6,23 +6,23 @@ import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { Borrow, BorrowCreateDto } from '../../../shared/models/borrow.model';
 import {
-  RegistryBook,
+  Document,
   RegistryBookCreateDto,
   RegistryBookUpdateDto,
 } from '../../../shared/models/registry-book.model';
 import { Return, ReturnCreateDto } from '../../../shared/models/return.model';
 
 interface RegistryBookApiResponse
-  extends Omit<RegistryBook, 'createdAt' | 'updatedAt'> {
+  extends Omit<Document, 'createdAt' | 'updatedAt'> {
   createdAt: string;
   updatedAt: string;
 }
 
 interface BorrowApiResponse
-  extends Omit<Borrow, 'borrowedAt' | 'returnedAt' | 'registryBook'> {
+  extends Omit<Borrow, 'borrowedAt' | 'returnedAt' | 'document'> {
   borrowedAt: string;
   returnedAt?: string | null;
-  registryBook: RegistryBookApiResponse;
+  document: RegistryBookApiResponse;
 }
 
 interface ReturnApiResponse extends Omit<Return, 'returnedAt' | 'borrow'> {
@@ -46,31 +46,31 @@ export class RegistryBookService {
 
   constructor(private readonly http: HttpClient) {}
 
-  getRegistryBooks(): Observable<RegistryBook[]> {
+  getRegistryBooks(): Observable<Document[]> {
     return this.http.get<RegistryBookApiResponse[]>(this.registryBooksUrl).pipe(
-      map((books) => books.map((book) => this.mapRegistryBook(book))),
+      map((books) => books.map((book) => this.mapDocument(book))),
     );
   }
 
-  getRegistryBookById(id: string): Observable<RegistryBook> {
+  getRegistryBookById(id: string): Observable<Document> {
     return this.http
       .get<RegistryBookApiResponse>(`${this.registryBooksUrl}/${id}`)
-      .pipe(map((book) => this.mapRegistryBook(book)));
+      .pipe(map((book) => this.mapDocument(book)));
   }
 
-  createRegistryBook(dto: RegistryBookCreateDto): Observable<RegistryBook> {
+  createRegistryBook(dto: RegistryBookCreateDto): Observable<Document> {
     return this.http
       .post<RegistryBookApiResponse>(this.registryBooksUrl, dto)
-      .pipe(map((book) => this.mapRegistryBook(book)));
+      .pipe(map((book) => this.mapDocument(book)));
   }
 
   updateRegistryBook(
     id: string,
     dto: RegistryBookUpdateDto,
-  ): Observable<RegistryBook> {
+  ): Observable<Document> {
     return this.http
       .put<RegistryBookApiResponse>(`${this.registryBooksUrl}/${id}`, dto)
-      .pipe(map((book) => this.mapRegistryBook(book)));
+      .pipe(map((book) => this.mapDocument(book)));
   }
 
   deleteRegistryBook(id: number): Observable<void> {
@@ -175,7 +175,7 @@ export class RegistryBookService {
       .pipe(map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow))));
   }
 
-  private mapRegistryBook(book: RegistryBookApiResponse): RegistryBook {
+  private mapDocument(book: RegistryBookApiResponse): Document {
     return {
       ...book,
       createdAt: new Date(book.createdAt),
@@ -186,7 +186,7 @@ export class RegistryBookService {
   private mapBorrow(borrow: BorrowApiResponse): Borrow {
     return {
       ...borrow,
-      registryBook: this.mapRegistryBook(borrow.registryBook),
+      document: this.mapDocument(borrow.document),
       borrowedAt: new Date(borrow.borrowedAt),
       returnedAt: borrow.returnedAt ? new Date(borrow.returnedAt) : undefined,
     };

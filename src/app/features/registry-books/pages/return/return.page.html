@@ -232,7 +232,7 @@
                     <!-- Book Number - Mobile only -->
                     <div class="sm:hidden">
                       <div class="text-sm font-semibold text-primary font-mono">
-                        {{ borrow.registryBook.documentId }}
+                        {{ borrow.document.documentId }}
                       </div>
                     </div>
                   </div>
@@ -240,14 +240,14 @@
                   <!-- Book Number - Desktop -->
                   <div class="hidden sm:block">
                     <div class="text-sm font-semibold text-primary font-mono">
-                      {{ borrow.registryBook.documentId }}
+                      {{ borrow.document.documentId }}
                     </div>
                   </div>
 
                   <!-- Book Details -->
                   <div class="sm:col-span-1 min-w-0">
                     <div class="text-sm font-medium text-primary line-clamp-2">
-                      {{ borrow.registryBook.firstName }} {{ borrow.registryBook.lastName }}
+                      {{ borrow.document.firstName }} {{ borrow.document.lastName }}
                     </div>
                     @if (borrow.reason) {
                     <div class="mt-1 text-xs text-secondary">

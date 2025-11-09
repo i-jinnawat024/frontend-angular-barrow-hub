@@ -11,7 +11,7 @@ import {
   ValidatorFn,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { RegistryBookService } from '../../services/registry-book.service';
+import { RegistryBookService } from '../../services/document.service';
 import { ReturnCreateDto } from '../../../../shared/models/return.model';
 import { Borrow } from '../../../../shared/models/borrow.model';
 import { QrScannerComponent } from '../../../../shared/components/qr-scanner/qr-scanner.component';
@@ -61,7 +61,7 @@ export class ReturnPage implements OnInit {
   }
 
   get selectedBorrowNumbers(): string {
-    return this.selectedBorrows.map((borrow) => borrow.registryBook.documentId).join(', ');
+    return this.selectedBorrows.map((borrow) => borrow.document.documentId).join(', ');
   }
 
   get selectedBorrowers(): string[] {

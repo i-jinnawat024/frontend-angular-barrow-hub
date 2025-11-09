@@ -1,8 +1,8 @@
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { RegistryBookService } from '../../services/registry-book.service';
-import { RegistryBook } from '../../../../shared/models/registry-book.model';
+import { RegistryBookService } from '../../services/document.service';
+import { Document } from '../../../../shared/models/registry-book.model';
 import { Borrow } from '../../../../shared/models/borrow.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EMPTY } from 'rxjs';
@@ -16,7 +16,7 @@ import { switchMap } from 'rxjs/operators';
   styleUrl: './registry-book-history.page.scss',
 })
 export class RegistryBookHistoryPage implements OnInit {
-  registryBook: RegistryBook | undefined;
+  document: Document | undefined;
   borrowHistory: Borrow[] = [];
   private readonly destroyRef = inject(DestroyRef);
 
@@ -38,8 +38,8 @@ export class RegistryBookHistoryPage implements OnInit {
 
           return this.registryBookService.getRegistryBookById(id).pipe(
             switchMap((book) => {
-              this.registryBook = book;
-              return this.registryBookService.getBorrowHistoryByBookId(book.id);
+              this.document = book;
+              return this.registryBookService.getBorrowHistoryByBookId(book.documentId);
             }),
           );
         }),
@@ -52,8 +52,8 @@ export class RegistryBookHistoryPage implements OnInit {
   }
 
   goBack(): void {
-    if (this.registryBook) {
-      this.router.navigate(['/registry-books', this.registryBook.id]);
+    if (this.document) {
+      this.router.navigate(['/registry-books', this.document.documentId]);
     } else {
       this.router.navigate(['/registry-books']);
     }

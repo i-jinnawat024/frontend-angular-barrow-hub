@@ -8,7 +8,7 @@ export const routes: Routes = [
   },
   {
     path: 'registry-books',
-    loadComponent: () => import('./features/registry-books/pages/registry-book-list/registry-book-list.page').then(m => m.RegistryBookListPage)
+    loadComponent: () => import('./features/registry-books/pages/document-list/registry-book-list.page').then(m => m.RegistryBookListPage)
   },
   // ต้องใส่ routes ที่เจาะจงก่อน routes ที่มี parameter
   {

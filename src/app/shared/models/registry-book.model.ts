@@ -1,4 +1,4 @@
-export interface RegistryBook {
+export interface Document {
   id: number;
   documentId: number;
   firstName: string;
@@ -13,7 +13,7 @@ export interface RegistryBookCreateDto {
   bookNumber: string;
   name: string;
   description?: string;
-  status?: RegistryBook['status'];
+  status?: Document['status'];
 }
 
 export interface RegistryBookUpdateDto {
@@ -21,5 +21,5 @@ export interface RegistryBookUpdateDto {
   firstName?: string;
   lastName?: string;
   description?: string;
-  status?: RegistryBook['status'];
+  status?: Document['status'];
 }

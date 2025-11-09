@@ -11,9 +11,9 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { RegistryBookService } from '../../services/registry-book.service';
+import { RegistryBookService } from '../../services/document.service';
 import { BorrowCreateDto } from '../../../../shared/models/borrow.model';
-import { RegistryBook } from '../../../../shared/models/registry-book.model';
+import { Document } from '../../../../shared/models/registry-book.model';
 import { QrScannerComponent } from '../../../../shared/components/qr-scanner/qr-scanner.component';
 import { MatIconModule } from "@angular/material/icon";
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -28,7 +28,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 })
 export class BorrowPage implements OnInit {
   form: FormGroup;
-  availableBooks: RegistryBook[] = [];
+  availableBooks: Document[] = [];
   showScanner = false;
   currentStep: 1 | 2 = 1;
   scannedBookIds: Set<number> = new Set();
@@ -68,7 +68,7 @@ export class BorrowPage implements OnInit {
     return this.selectedBookIdsControl.value ?? [];
   }
 
-  get selectedBooks(): RegistryBook[] {
+  get selectedBooks(): Document[] {
     const ids = new Set(this.selectedBookIds);
     return this.availableBooks.filter((book) => ids.has(book.id));
   }

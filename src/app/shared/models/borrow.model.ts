@@ -1,8 +1,8 @@
-import { RegistryBook } from './registry-book.model';
+import { Document } from './registry-book.model';
 
 export interface Borrow {
   id: string;
-  registryBook: RegistryBook;
+  document: Document;
   borrowerName: string;
   borrowedAt: Date;
   reason?: string;
