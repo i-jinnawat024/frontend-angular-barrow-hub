@@ -1,159 +1,75 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+import { environment } from '../../../../environments/environment';
 import { Staff, StaffCreateDto, StaffUpdateDto } from '../../../shared/models/staff.model';
 
+interface StaffApiResponse extends Omit<Staff, 'createdAt' | 'updatedAt'> {
+  createdAt?: string | null;
+  updatedAt?: string | null;
+}
+
+export interface StaffImportResult {
+  imported: number;
+  skipped: number;
+  duplicateEmails: string[];
+}
+
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class StaffService {
-  // Mock data
-  private staff: Staff[] = [
-    {
-      id: '1',
-      firstName: 'สมชาย',
-      lastName: 'ใจดี',
-      email: 'somchai@example.com',
-      phone: '081-234-5678',
-      position: 'ผู้จัดการ',
-      department: 'ฝ่ายบริหาร',
-      isActive: true,
-      createdAt: new Date('2024-01-15'),
-      updatedAt: new Date('2024-01-15')
-    },
-    {
-      id: '2',
-      firstName: 'สมหญิง',
-      lastName: 'รักงาน',
-      email: 'somying@example.com',
-      phone: '082-345-6789',
-      position: 'เจ้าหน้าที่เอกสาร',
-      department: 'ฝ่ายเอกสาร',
-      isActive: true,
-      createdAt: new Date('2024-02-01'),
-      updatedAt: new Date('2024-02-01')
-    },
-    {
-      id: '3',
-      firstName: 'วิชัย',
-      lastName: 'เก่งมาก',
-      email: 'wichai@example.com',
-      phone: '083-456-7890',
-      position: 'นักวิเคราะห์',
-      department: 'ฝ่ายแผนงาน',
-      isActive: true,
-      createdAt: new Date('2024-02-10'),
-      updatedAt: new Date('2024-02-10')
-    },
-    {
-      id: '4',
-      firstName: 'มาลี',
-      lastName: 'สวยงาม',
-      email: 'malee@example.com',
-      phone: '084-567-8901',
-      position: 'เจ้าหน้าที่ประสานงาน',
-      department: 'ฝ่ายประสานงาน',
-      isActive: true,
-      createdAt: new Date('2024-03-01'),
-      updatedAt: new Date('2024-03-01')
-    },
-    {
-      id: '5',
-      firstName: 'ประเสริฐ',
-      lastName: 'ดีมาก',
-      email: 'prasert@example.com',
-      phone: '085-678-9012',
-      position: 'ผู้ช่วยผู้จัดการ',
-      department: 'ฝ่ายบริหาร',
-      isActive: false,
-      createdAt: new Date('2024-03-15'),
-      updatedAt: new Date('2024-03-20')
-    }
-  ];
+  private readonly staffUrl = `${environment.apiBaseUrl}/staff`;
 
-  getStaff(): Staff[] {
-    return this.staff;
+  constructor(private readonly http: HttpClient) {}
+
+  getStaff(): Observable<Staff[]> {
+    return this.http.get<StaffApiResponse[]>(this.staffUrl).pipe(
+      map((staff) => staff.map((member) => this.mapStaff(member))),
+    );
   }
 
-  getActiveStaff(): Staff[] {
-    return this.staff.filter(s => s.isActive);
+  getActiveStaff(): Observable<Staff[]> {
+    return this.getStaff().pipe(
+      map((staff) => staff.filter((member) => member.isActive)),
+    );
   }
 
-  getStaffById(id: string): Staff | undefined {
-    return this.staff.find(s => s.id === id);
+  getStaffById(id: string): Observable<Staff> {
+    return this.http
+      .get<StaffApiResponse>(`${this.staffUrl}/${id}`)
+      .pipe(map((member) => this.mapStaff(member)));
   }
 
-  createStaff(dto: StaffCreateDto): Staff {
-    const newStaff: Staff = {
-      id: Date.now().toString(),
-      ...dto,
-      isActive: dto.isActive ?? true,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    this.staff.push(newStaff);
-    return newStaff;
+  createStaff(dto: StaffCreateDto): Observable<Staff> {
+    return this.http
+      .post<StaffApiResponse>(this.staffUrl, dto)
+      .pipe(map((member) => this.mapStaff(member)));
   }
 
-  updateStaff(id: string, dto: StaffUpdateDto): Staff | null {
-    const index = this.staff.findIndex(s => s.id === id);
-    if (index === -1) return null;
-
-    this.staff[index] = {
-      ...this.staff[index],
-      ...dto,
-      updatedAt: new Date()
-    };
-    return this.staff[index];
+  updateStaff(id: string, dto: StaffUpdateDto): Observable<Staff> {
+    return this.http
+      .put<StaffApiResponse>(`${this.staffUrl}/${id}`, dto)
+      .pipe(map((member) => this.mapStaff(member)));
   }
 
-  deleteStaff(id: string): boolean {
-    const index = this.staff.findIndex(s => s.id === id);
-    if (index === -1) return false;
-    
-    this.staff.splice(index, 1);
-    return true;
+  deleteStaff(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.staffUrl}/${id}`);
   }
 
-  importStaff(
-    rows: Array<StaffCreateDto>,
-  ): { imported: number; skipped: number; duplicateEmails: string[] } {
-    let imported = 0;
-    const duplicateEmails: string[] = [];
+  importStaff(rows: StaffCreateDto[]): Observable<StaffImportResult> {
+    return this.http.post<StaffImportResult>(`${this.staffUrl}/import`, {
+      staff: rows,
+    });
+  }
 
-    for (const row of rows) {
-      const normalizedEmail = row.email.trim().toLowerCase();
-      if (
-        !normalizedEmail ||
-        this.staff.some((member) => member.email.trim().toLowerCase() === normalizedEmail)
-      ) {
-        duplicateEmails.push(row.email);
-        continue;
-      }
-
-      const newStaff: Staff = {
-        id:
-          typeof globalThis.crypto !== 'undefined' && 'randomUUID' in globalThis.crypto
-            ? globalThis.crypto.randomUUID()
-            : Date.now().toString(),
-        firstName: row.firstName.trim(),
-        lastName: row.lastName.trim(),
-        email: row.email.trim(),
-        phone: row.phone?.trim(),
-        position: row.position.trim(),
-        department: row.department?.trim(),
-        isActive: row.isActive ?? true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      this.staff.push(newStaff);
-      imported += 1;
-    }
-
+  private mapStaff(member: StaffApiResponse): Staff {
     return {
-      imported,
-      skipped: rows.length - imported,
-      duplicateEmails,
+      ...member,
+      createdAt: member.createdAt ? new Date(member.createdAt) : undefined,
+      updatedAt: member.updatedAt ? new Date(member.updatedAt) : undefined,
     };
   }
 }
-

@@ -1,4 +1,4 @@
-import { RegistryBook } from './registry-book.model';
+import { IDocument } from './document.model';
 import { Borrow } from './borrow.model';
 import { Staff } from './staff.model';
 
@@ -10,13 +10,13 @@ export interface BorrowReport {
   recentBorrows: Borrow[];
 }
 
-export interface RegistryBookReport {
-  totalBooks: number;
-  availableBooks: number;
-  borrowedBooks: number;
-  archivedBooks: number;
-  popularBooks: Array<{
-    book: RegistryBook;
+export interface DocumentReport {
+  totalDocuments: number;
+  availableDocuments: number;
+  borrowedDocuments: number;
+  archivedDocuments: number;
+  popularDocuments: Array<{
+    document: IDocument;
     borrowCount: number;
   }>;
 }
@@ -33,7 +33,7 @@ export interface StaffReport {
 
 export interface OverallReport {
   borrowReport: BorrowReport;
-  registryBookReport: RegistryBookReport;
+  documentReport: DocumentReport;
   staffReport: StaffReport;
 }
 
