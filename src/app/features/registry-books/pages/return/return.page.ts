@@ -91,10 +91,10 @@ export class ReturnPage implements OnInit {
         next: (borrows) => {
           this.activeBorrows = borrows
             .slice()
-            .sort((a, b) => b.borrowedAt.getTime() - a.borrowedAt.getTime());
+            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
           const borrowerSet = new Set(
-            this.activeBorrows.map((borrow) => borrow.borrowerName),
+            this.activeBorrows.map((borrow) => borrow.document.firstName),
           );
           this.uniqueBorrowers = Array.from(borrowerSet).sort();
 
@@ -110,7 +110,7 @@ export class ReturnPage implements OnInit {
 
           const selectedBorrowerNames = [
             ...new Set(
-              this.selectedBorrows.map((borrow) => borrow.borrowerName),
+              this.selectedBorrows.map((borrow) => borrow.document.firstName),
             ),
           ];
           this.selectedBorrowersControl.setValue(selectedBorrowerNames);
@@ -121,12 +121,12 @@ export class ReturnPage implements OnInit {
   }
 
   getBorrowsByBorrower(borrower: string): Borrow[] {
-    return this.activeBorrows.filter((borrow) => borrow.borrowerName === borrower);
+    return this.activeBorrows.filter((borrow) => borrow.document.firstName === borrower);
   }
 
   getFilteredBorrows(): Borrow[] {
     const selectedBorrowerSet = new Set(this.selectedBorrowers);
-    return this.activeBorrows.filter((borrow) => selectedBorrowerSet.has(borrow.borrowerName));
+    return this.activeBorrows.filter((borrow) => selectedBorrowerSet.has(borrow.document.firstName));
   }
 
   isBorrowSelected(borrowId: string): boolean {
@@ -148,12 +148,12 @@ export class ReturnPage implements OnInit {
 
   getTotalBorrowsCount(): number {
     const selectedBorrowerSet = new Set(this.selectedBorrowers);
-    return this.activeBorrows.filter((borrow) => selectedBorrowerSet.has(borrow.borrowerName)).length;
+    return this.activeBorrows.filter((borrow) => selectedBorrowerSet.has(borrow.document.firstName)).length;
   }
 
   getBorrowDurationDays(borrow: Borrow): number {
     const now = new Date();
-    const diffTime = now.getTime() - borrow.borrowedAt.getTime();
+    const diffTime = now.getTime() - borrow.document.createdAt.getTime();
     return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
   }
 
@@ -209,11 +209,11 @@ export class ReturnPage implements OnInit {
     // Update selected borrowers if needed
     const borrow = this.activeBorrows.find((b) => b.id === borrowId);
     if (borrow && !checked) {
-      const borrowerBorrows = this.getBorrowsByBorrower(borrow.borrowerName);
+      const borrowerBorrows = this.getBorrowsByBorrower(borrow.document.firstName);
       const selectedInBorrower = borrowerBorrows.some((b) => selected.has(b.id));
       if (!selectedInBorrower) {
         const current = this.selectedBorrowersControl.value ?? [];
-        const newSelected = current.filter((b) => b !== borrow.borrowerName);
+        const newSelected = current.filter((b) => b !== borrow.document.firstName);
         this.selectedBorrowersControl.setValue(newSelected);
       }
     }
@@ -305,7 +305,7 @@ export class ReturnPage implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (borrow) => {
-          if (!borrow || borrow.status !== 'active') {
+          if (!borrow || borrow.status !== 'BORROWED') {
             alert('QR นี้ไม่ตรงกับข้อมูลการยืมที่ยังไม่คืน');
             return;
           }
@@ -314,10 +314,10 @@ export class ReturnPage implements OnInit {
           selected.add(borrow.id);
           this.updateSelectedBorrowIds(Array.from(selected));
           const current = this.selectedBorrowersControl.value ?? [];
-          if (!current.includes(borrow.borrowerName)) {
+          if (!current.includes(borrow.document.firstName)) {
             this.selectedBorrowersControl.setValue([
               ...current,
-              borrow.borrowerName,
+              borrow.document.firstName,
             ]);
           }
         },

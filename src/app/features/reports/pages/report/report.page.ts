@@ -52,25 +52,19 @@ export class ReportPage implements OnInit {
       label: 'ผู้ยืม',
       property: 'borrowerName',
       sortable: true,
-      accessor: (borrow) => borrow.borrowerName,
+      accessor: (borrow) => borrow.document.firstName,
     },
     {
       label: 'วันที่ยืม',
       property: 'borrowedDate',
       sortable: true,
-      accessor: (borrow) => borrow.borrowedAt,
-    },
-    {
-      label: 'เวลาที่ยืม',
-      property: 'borrowedTime',
-      sortable: true,
-      accessor: (borrow) => borrow.borrowedAt,
+      accessor: (borrow) => borrow.createdAt,
     },
     {
       label: 'เหตุผล',
       property: 'reason',
       sortable: true,
-      accessor: (borrow) => borrow.reason ?? '-',
+      accessor: (borrow) => borrow.description ?? '-',
     },
     {
       label: 'สถานะ',
@@ -83,8 +77,8 @@ export class ReportPage implements OnInit {
   private readonly searchAccessors: Array<(borrow: Borrow) => unknown> = [
     (borrow) => borrow.document.documentId,
     (borrow) => `${borrow.document.firstName} ${borrow.document.lastName}`,
-    (borrow) => borrow.borrowerName,
-    (borrow) => borrow.reason ?? '',
+    (borrow) => borrow.document.firstName,
+    (borrow) => borrow.description ?? '',
     (borrow) => borrow.status,
   ];
 

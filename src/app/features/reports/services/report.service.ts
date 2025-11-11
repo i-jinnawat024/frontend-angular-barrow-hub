@@ -14,7 +14,7 @@ export class ReportService {
     return this.registryBookService.getBorrows().pipe(
       map((borrows) =>
         borrows.filter((borrow) => {
-          const borrowDate = new Date(borrow.borrowedAt);
+          const borrowDate = new Date(borrow.createdAt);
           return (
             borrowDate.getFullYear() === year &&
             borrowDate.getMonth() === month - 1
@@ -36,18 +36,11 @@ export class ReportService {
     ];
 
     const rows = borrows.map((borrow) => {
-      const borrowDate = new Date(borrow.borrowedAt);
       return [
         borrow.document.documentId,
         `${borrow.document.firstName} ${borrow.document.lastName}`,
-        borrow.borrowerName,
-        borrowDate.toLocaleDateString('th-TH'),
-        borrowDate.toLocaleTimeString('th-TH', {
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
-        borrow.reason || '-',
-        borrow.status === 'active' ? 'กำลังยืม' : 'คืนแล้ว',
+        borrow.description || '-',
+        borrow.status === 'BORROWED' ? 'กำลังยืม' : 'คืนแล้ว',
       ];
     });
 
@@ -83,9 +76,9 @@ export class ReportService {
         id: borrow.id,
         documentId: borrow.document.documentId,
         name: `${borrow.document.firstName} ${borrow.document.lastName}`,
-        borrowerName: borrow.borrowerName,
-        borrowedAt: borrow.borrowedAt,
-        reason: borrow.reason,
+        borrowerName: borrow.document.firstName,
+        createdAt: borrow.createdAt,
+        description: borrow.description,
         status: borrow.status,
       })),
     };

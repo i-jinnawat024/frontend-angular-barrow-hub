@@ -21,6 +21,7 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
   qrCodeDataUrl: string | null = null;
   private readonly destroyRef = inject(DestroyRef);
   private hasViewInitialized = false;
+  private id: number | null = null;
   
   constructor(
     private readonly registryBookService: RegistryBookService,
@@ -34,11 +35,12 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
       .pipe(
         switchMap((params) => {
           const id = params.get('id');
+          this.id = Number(id);
           if (!id) {
             this.router.navigate(['/registry-books']);
             return EMPTY;
           }
-          return this.registryBookService.getRegistryBookById(id);
+          return this.registryBookService.getRegistryBookById(this.id);
         }),
         takeUntilDestroyed(this.destroyRef),
       )

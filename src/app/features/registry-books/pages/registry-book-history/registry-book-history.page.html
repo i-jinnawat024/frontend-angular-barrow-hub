@@ -17,7 +17,7 @@
         เลขทะเบียน: <span class="font-medium text-primary">{{ document?.documentId }}</span>
       </p>
       <p class="text-sm text-muted">
-        ชื่อเอกสาร: <span class="font-medium text-primary">{{ document?.firstName }} {{ document?.lastName }}</span>
+        เล่มทะเบียน: <span class="font-medium text-primary">{{ document?.firstName }} {{ document?.lastName }}</span>
       </p>
     </div>
   </div>
@@ -28,7 +28,7 @@
         <table class="min-w-full divide-y divide-subtle text-sm">
           <thead class="bg-surface-alt text-left text-muted uppercase tracking-wide text-xs">
             <tr>
-              <th scope="col" class="px-6 py-3 font-medium">เจ้าหน้าที่</th>
+              <th scope="col" class="px-6 py-3 font-medium">ผู้ยืม</th>
               <th scope="col" class="px-6 py-3 font-medium">วันที่ยืม</th>
               <th scope="col" class="px-6 py-3 font-medium">สถานะ</th>
               <th scope="col" class="px-6 py-3 font-medium">หมายเหตุ</th>
@@ -38,23 +38,16 @@
             @for (borrow of borrowHistory; track borrow.id) {
               <tr>
                 <td class="px-6 py-4 align-top">
-                  <div class="font-medium text-primary">{{ borrow.borrowerName }}</div>
-                  <div class="text-xs text-muted">รหัสยืม: {{ borrow.id }}</div>
+                  <div class="font-medium text-primary">{{ borrow.name }}</div>
+                  <!-- <div class="text-xs text-muted">รหัสยืม: {{ borrow.id }}</div> -->
                 </td>
-                <td class="px-6 py-4 align-top">
-                  <div>{{ borrow.borrowedAt | date: 'dd/MM/yyyy HH:mm' }}</div>
-                  @if (borrow.status === 'returned' && borrow.returnedAt) {
-                    <div class="text-xs text-muted">
-                      คืนเมื่อ {{ borrow.returnedAt | date: 'dd/MM/yyyy HH:mm' }}
-                    </div>
-                  }
-                </td>
+                <td class="px-6 py-4 align-top">{{ borrow.createdAt | thaiDate:'medium' }}</td>
                 <td class="px-6 py-4 align-top">
                   @switch (borrow.status) {
-                    @case ('returned') {
+                    @case ('RETURNED') {
                       <span class="badge badge-success">คืนแล้ว</span>
                     }
-                    @case ('active') {
+                    @case ('BORROWED') {
                       <span class="badge badge-warning">กำลังยืม</span>
                     }
                     @default {
@@ -63,7 +56,7 @@
                   }
                 </td>
                 <td class="px-6 py-4 align-top text-muted">
-                  {{ borrow.reason || '-' }}
+                  {{ borrow.description || '-' }}
                 </td>
               </tr>
             }

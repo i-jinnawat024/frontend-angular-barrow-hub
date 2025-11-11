@@ -249,9 +249,9 @@
                     <div class="text-sm font-medium text-primary line-clamp-2">
                       {{ borrow.document.firstName }} {{ borrow.document.lastName }}
                     </div>
-                    @if (borrow.reason) {
+                    @if (borrow.description) {
                     <div class="mt-1 text-xs text-secondary">
-                      <span class="font-medium">หมายเหตุ:</span> {{ borrow.reason }}
+                      <span class="font-medium">หมายเหตุ:</span> {{ borrow.description }}
                     </div>
                     }
                   </div>
@@ -260,7 +260,7 @@
                   <div class="sm:col-span-1 text-xs text-secondary space-y-1">
                     <div class="flex items-center gap-1">
                       <span class="material-icons text-sm">event</span>
-                      <span>{{ borrow.borrowedAt | date : 'dd/MM/yy' }}</span>
+                      <span>{{ borrow.createdAt | date : 'dd/MM/yy' }}</span>
                     </div>
                     <div class="flex items-center gap-1">
                       <span class="material-icons text-sm">schedule</span>

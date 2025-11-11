@@ -68,7 +68,7 @@ export class RegistryBookFormPage implements OnInit {
     }
 
     this.registryBookService
-      .getRegistryBookById(this.id)
+      .getRegistryBookById(Number(this.id))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (book) => this.patchForm(book),

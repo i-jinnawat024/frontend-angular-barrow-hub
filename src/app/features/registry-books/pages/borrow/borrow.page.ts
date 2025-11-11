@@ -175,7 +175,7 @@ export class BorrowPage implements OnInit {
     }
 
     this.registryBookService
-      .getRegistryBookById(normalizedId)
+      .getRegistryBookById(Number(normalizedId))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (book) => {

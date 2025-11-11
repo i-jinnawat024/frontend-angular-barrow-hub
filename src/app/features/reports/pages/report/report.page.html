@@ -145,20 +145,20 @@
                   {{ borrow.document.firstName }} {{ borrow.document.lastName }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-primary">
-                  {{ borrow.borrowerName }}
+                  {{ borrow.document.firstName }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-muted">
-                  {{ borrow.borrowedAt | date: 'dd/MM/yyyy' }}
+                  {{ borrow.createdAt | date: 'dd/MM/yyyy' }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-muted">
-                  {{ borrow.borrowedAt | date: 'HH:mm' }}
+                  {{ borrow.createdAt | date: 'HH:mm' }}
                 </td>
                 <td class="px-6 py-4 text-sm text-muted">
                   <!-- {{ borrow.reason || '-' }} -->
                     -
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  @if (borrow.status === 'active') {
+                  @if (borrow.status === 'BORROWED') {
                     <span class="badge badge-warning"> กำลังยืม </span>
                   } @else {
                     <span class="badge badge-success"> คืนแล้ว </span>
