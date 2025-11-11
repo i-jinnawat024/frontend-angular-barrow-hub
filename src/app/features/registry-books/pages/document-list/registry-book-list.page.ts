@@ -1,17 +1,19 @@
 import {
   Component,
+  DestroyRef,
   ElementRef,
   HostListener,
   OnInit,
   ViewChild,
   computed,
+  inject,
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { RegistryBookService } from '../../services/registry-book.service';
-import { RegistryBook } from '../../../../shared/models/registry-book.model';
+import { RegistryBookService } from '../../services/document.service';
+import { Document } from '../../../../shared/models/registry-book.model';
 import {
   SortState,
   compareValues,
@@ -20,13 +22,17 @@ import {
   toSearchableString,
 } from '../../../../shared/utils/table-utils';
 import { readTabularFile } from '../../../../shared/utils/csv-utils';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { first } from 'rxjs';
 
-type RegistryBookStatus = RegistryBook['status'];
+type RegistryBookStatus = Document['status'];
 
 interface RegistryBookImportPreviewRow {
+  id: number;
   rowNumber: number;
-  bookNumber: string;
-  name: string;
+  documentId: number;
+  firstName:string,
+  lastName:string,
   description?: string;
   status: RegistryBookStatus;
 }
@@ -39,7 +45,7 @@ interface RegistryBookImportPreviewRow {
   styleUrl: './registry-book-list.page.scss',
 })
 export class RegistryBookListPage implements OnInit {
-  private readonly registryBooks = signal<RegistryBook[]>([]);
+  private readonly registryBooks = signal<Document[]>([]);
   protected readonly searchTerm = signal('');
   protected readonly sortState = signal<SortState>({ ...defaultSortState });
   private readonly isDesktopScreen = signal(this.checkIsDesktop());
@@ -62,24 +68,25 @@ export class RegistryBookListPage implements OnInit {
     return total > 10 ? total - 10 : 0;
   });
   protected readonly templateDownloadUrl = '/samples/registry-books-template.xlsx';
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly columns: Array<{
     label: string;
     property: string;
     sortable: boolean;
-    accessor?: (book: RegistryBook) => unknown;
+    accessor?: (book: Document) => unknown;
   }> = [
     {
       label: 'เลขทะเบียน',
       property: 'DocumnetNumber',
       sortable: true,
-      accessor: (book) => book.bookNumber,
+      accessor: (book) => book.documentId,
     },
     {
       label: 'ชื่อ-นามสกุล',
       property: 'name',
       sortable: true,
-      accessor: (book) => book.name,
+      accessor: (book) => `${book.firstName} ${book.lastName}`,
     },
     {
       label: 'สถานะ',
@@ -94,9 +101,9 @@ export class RegistryBookListPage implements OnInit {
     },
   ];
 
-  private readonly searchAccessors: Array<(book: RegistryBook) => unknown> = [
-    (book) => book.bookNumber,
-    (book) => book.name,
+  private readonly searchAccessors: Array<(book: Document) => unknown> = [
+    (book) => book.documentId,
+    (book) => `${book.firstName} ${book.lastName}`,
     (book) => book.status,
   ];
 
@@ -159,23 +166,38 @@ export class RegistryBookListPage implements OnInit {
   }
 
   loadRegistryBooks(): void {
-    this.registryBooks.set(this.registryBookService.getRegistryBooks());
+    this.registryBookService
+      .getRegistryBooks()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (books) => this.registryBooks.set(books),
+        error: (error) =>
+          console.error('Failed to load registry books', error),
+      });
   }
 
-  deleteRegistryBook(id: string): void {
-    if (confirm('ต้องการลบเล่มทะเบียนรายการนี้หรือไม่?')) {
-      const success = this.registryBookService.deleteRegistryBook(id);
-      if (success) {
-        this.loadRegistryBooks();
-      }
+  deleteRegistryBook(id: number): void {
+    if (!confirm('ต้องการลบเล่มทะเบียนรายการนี้หรือไม่?')) {
+      return;
     }
+
+    this.registryBookService
+      .deleteRegistryBook(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.loadRegistryBooks(),
+        error: (error) => {
+          console.error('Failed to delete registry book', error);
+          window.alert('ไม่สามารถลบทะเบียนเอกสารได้ กรุณาลองใหม่อีกครั้ง');
+        },
+      });
   }
 
-  viewDetails(id: string): void {
+  viewDetails(id: number): void {
     this.router.navigate(['/registry-books', id]);
   }
 
-  editRegistryBook(id: string): void {
+  editRegistryBook(id: number): void {
     this.router.navigate(['/registry-books', id, 'edit']);
   }
 
@@ -260,27 +282,43 @@ export class RegistryBookListPage implements OnInit {
       return;
     }
 
-    const result = this.registryBookService.importRegistryBooks(
-      previewRows.map((row) => ({
-        bookNumber: row.bookNumber,
-        name: row.name,
-        description: row.description,
-        status: row.status,
-      })),
-    );
+    this.isImporting.set(true);
 
-    this.loadRegistryBooks();
-    this.resetImportState();
+    const payload = previewRows.map((row) => ({
+      id: row.id,
+      documentId: row.documentId,
+      firstName: row.firstName,
+      lastName: row.lastName,
+      description: row.description,
+      status: row.status,
+    }));
 
-    let message = `นำเข้าเล่มทะเบียนสำเร็จ ${result.imported} รายการ`;
-    if (result.duplicateBookNumbers.length > 0) {
-      const duplicated = Array.from(new Set(result.duplicateBookNumbers))
-        .filter((value) => value.trim().length > 0)
-        .join(', ');
-      message += `\nรายการที่ข้ามเนื่องจากข้อมูลซ้ำ: ${duplicated}`;
-    }
+    this.registryBookService
+      .importRegistryBooks(payload)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (result) => {
+          this.loadRegistryBooks();
+          this.resetImportState();
 
-    window.alert(message);
+          let message = `�,T�,3�1?�,,�1%�,��,,�1%�,-�,��,1�,��1?�,��1^�,��,-�,��1?�,s�,�,��,T�,��,3�1?�,��1؅,^ ${result.imported} �,��,��,��,?�,��,�`;
+          if (result.duplicateBookNumbers.length > 0) {
+            const duplicated = Array.from(new Set(result.duplicateBookNumbers))
+              .filter((value) => value.trim().length > 0)
+              .join(', ');
+            message += `
+�,��,��,��,?�,��,��,-�,�1^�,,�1%�,��,��1?�,T�,��1^�,-�,؅,^�,��,?�,,�1%�,-�,��,1�,��,<�1%�,3: ${duplicated}`;
+          }
+
+          window.alert(message);
+          this.isImporting.set(false);
+        },
+        error: (error) => {
+          console.error('Failed to import registry books', error);
+          window.alert('ไม่สามารถนำเข้าทะเบียนเอกสารได้ กรุณาลองใหม่อีกครั้ง');
+          this.isImporting.set(false);
+        },
+      });
   }
 
   private parseRegistryBookImport(
@@ -296,7 +334,7 @@ export class RegistryBookListPage implements OnInit {
     const headers = rows[0].map((cell) =>
       this.normalizeHeader(String(cell ?? '')),
     );
-    const bookNumberIndex = this.findHeaderIndex(headers, [
+    const documentIdIndex = this.findHeaderIndex(headers, [
       'เลขเล่มทะเบียน',
       'หมายเลขเล่มทะเบียน',
       'รหัสเล่มทะเบียน',
@@ -307,13 +345,13 @@ export class RegistryBookListPage implements OnInit {
 
     const errors: string[] = [];
 
-    if (bookNumberIndex === -1 || nameIndex === -1) {
+    if (documentIdIndex === -1 || nameIndex === -1) {
       errors.push('ไม่พบคอลัมน์ "เลขเล่มทะเบียน" หรือ "ชื่อเล่มทะเบียน" ในไฟล์');
       return { rows: [], errors };
     }
 
     const previewRows: RegistryBookImportPreviewRow[] = [];
-    const seenBookNumbers = new Set<string>();
+    const seenBookNumbers = new Set<number>();
 
     for (let index = 1; index < rows.length; index += 1) {
       const row = rows[index];
@@ -323,25 +361,25 @@ export class RegistryBookListPage implements OnInit {
         continue;
       }
 
-      const bookNumber = String(row[bookNumberIndex] ?? '').trim();
+      const documentId = (row[documentIdIndex] ?? '').trim();
       const name = String(row[nameIndex] ?? '').trim();
       const description =
         descriptionIndex !== -1 ? String(row[descriptionIndex] ?? '').trim() : '';
       const statusRaw =
         statusIndex !== -1 ? String(row[statusIndex] ?? '').trim() : '';
 
-      if (!bookNumber || !name) {
+      if (!documentId || !name) {
         errors.push(`แถวที่ ${rowNumber}: ต้องระบุเลขเล่มทะเบียนและชื่อเล่มทะเบียน`);
         continue;
       }
 
-      const normalizedKey = bookNumber.toLowerCase();
+      const normalizedKey = Number(documentId);
       if (seenBookNumbers.has(normalizedKey)) {
-        errors.push(`แถวที่ ${rowNumber}: เลขเล่มทะเบียน "${bookNumber}" ซ้ำกับข้อมูลก่อนหน้าในไฟล์`);
+        errors.push(`แถวที่ ${rowNumber}: เลขเล่มทะเบียน "${documentId}" ซ้ำกับข้อมูลก่อนหน้าในไฟล์`);
         continue;
       }
 
-      let status: RegistryBookStatus = 'active';
+      let status: Document['status'] = 'ACTIVE';
       if (statusRaw) {
         const normalizedStatus = this.normalizeRegistryBookStatus(statusRaw);
         if (!normalizedStatus) {
@@ -355,9 +393,11 @@ export class RegistryBookListPage implements OnInit {
 
       seenBookNumbers.add(normalizedKey);
       previewRows.push({
+        id: 0,
         rowNumber,
-        bookNumber,
-        name,
+        documentId: Number(documentId),
+        firstName: name.split(' ')[0],
+        lastName: name.split(' ')[1],
         description: description || undefined,
         status,
       });
@@ -381,18 +421,18 @@ export class RegistryBookListPage implements OnInit {
   private normalizeRegistryBookStatus(value: string): RegistryBookStatus | null {
     const normalized = value.trim().toLowerCase();
     const statusMap: Record<string, RegistryBookStatus> = {
-      พร้อมใช้งาน: 'active',
-      ใช้งาน: 'active',
-      ว่าง: 'active',
-      active: 'active',
-      กำลังยืม: 'borrowed',
-      ยืม: 'borrowed',
-      borrowed: 'borrowed',
-      เก็บถาวร: 'archived',
-      archived: 'archived',
-      ปิดใช้งาน: 'inactive',
-      ไม่ใช้งาน: 'inactive',
-      inactive: 'inactive',
+      พร้อมใช้งาน: 'ACTIVE',
+      ใช้งาน: 'ACTIVE',
+      ว่าง: 'ACTIVE',
+      active: 'ACTIVE',
+      กำลังยืม: 'BORROWED',
+      ยืม: 'BORROWED',
+      borrowed: 'BORROWED',
+      เก็บถาวร: 'ARCHIVED',
+      archived: 'ARCHIVED',
+      ปิดใช้งาน: 'INACTIVE',
+      ไม่ใช้งาน: 'INACTIVE',
+      inactive: 'INACTIVE',
     };
 
     return statusMap[normalized] ?? null;

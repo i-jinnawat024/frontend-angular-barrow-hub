@@ -3,7 +3,7 @@
     <button
       type="button"
       id="btn-back"
-      class="inline-flex items-center text-sm font-medium text-secondary hover:text-[var(--color-text-primary)]"
+      class="inline-flex items-center text-sm font-medium text-secondary hover:text-[var(--color-text-primary)] cursor-pointer"
       (click)="goBack()"
     >
       <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,7 +25,7 @@
         type="button"
         id="btn-edit"
         class="btn-primary cursor-pointer"
-        (click)="editRegistryBook()"
+        (click)="editDocument()"
       >
         <mat-icon class="material-symbols-outlined text-white">edit_square</mat-icon>
         แก้ไขข้อมูล
@@ -33,63 +33,56 @@
     </div>
   </div>
 
-  @if (registryBook) {
+  @if (document) {
     <div class="bg-surface rounded-lg shadow border border-subtle overflow-hidden">
       <div class="px-6 py-5 border-b border-subtle bg-surface-alt">
         <h1 class="text-2xl font-bold text-primary">
-          {{ registryBook.name }}
+          {{ document.firstName }} {{ document.lastName }}  
         </h1>
         <p class="mt-1 text-sm text-muted">
-          เลขทะเบียนเอกสาร: {{ registryBook.bookNumber }}
+          เลขทะเบียนเอกสาร: {{ document.documentId }}
         </p>
       </div>
 
       <div class="px-6 py-5 space-y-6">
-        <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div class="sm:col-span-2">
-            <dt class="text-sm font-medium text-muted">รายละเอียด</dt>
-            <dd class="mt-1 text-sm text-primary">
-              {{ registryBook.description || '-' }}
-            </dd>
-          </div>
-
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div>
-            <dt class="text-sm font-medium text-muted">สถานะ</dt>
-            <dd class="mt-1">
-              @switch (registryBook.status) {
-                @case ('active') {
+            <div class="text-sm font-medium text-muted">สถานะ</div>
+            <div class="mt-1">
+              @switch (document!.status) {
+                @case ('ACTIVE') {
                   <span class="badge badge-success">พร้อมใช้งาน</span>
                 }
-                @case ('borrowed') {
+                @case ('BORROWED') {
                   <span class="badge badge-warning">กำลังยืม</span>
                 }
-                @case ('inactive') {
+                @case ('INACTIVE') {
                   <span class="badge badge-neutral">ปิดใช้งาน</span>
                 }
-                @case ('archived') {
+                @case ('ARCHIVED') {
                   <span class="badge badge-neutral">จัดเก็บแล้ว</span>
                 }
                 @default {
                   <span class="badge badge-neutral">ไม่ทราบสถานะ</span>
                 }
               }
-            </dd>
+            </div>
           </div>
 
           <div>
             <dt class="text-sm font-medium text-muted">วันที่สร้าง</dt>
             <dd class="mt-1 text-sm text-primary">
-              {{ registryBook.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+              {{ document!.createdAt | date: 'dd/MM/yyyy HH:mm' }}
             </dd>
           </div>
 
           <div>
             <dt class="text-sm font-medium text-muted">แก้ไขล่าสุด</dt>
             <dd class="mt-1 text-sm text-primary">
-              {{ registryBook.updatedAt | date: 'dd/MM/yyyy HH:mm' }}
+              {{ document!.updatedAt | date: 'dd/MM/yyyy HH:mm' }}
             </dd>
           </div>
-        </dl>
+        </div>
 
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div class="text-center border border-subtle rounded-lg p-6 bg-surface-alt">
@@ -123,7 +116,7 @@
             <p class="text-xs font-medium text-muted mb-2">Barcode</p>
             <div class="inline-block p-4 bg-surface rounded-lg border border-subtle">
               <div
-                [id]="'barcode-' + registryBook.id"
+                [id]="'barcode-' + document!.id"
                 class="min-h-[100px] flex items-center justify-center"
               >
                 <p class="text-xs text-muted">กำลังสร้าง Barcode...</p>

@@ -1,17 +1,16 @@
-import { RegistryBook } from './registry-book.model';
+import { Document } from './registry-book.model';
 
 export interface Borrow {
   id: string;
-  registryBook: RegistryBook;
-  borrowerName: string;
-  borrowedAt: Date;
-  reason?: string;
-  status: 'active' | 'returned';
-  returnedAt?: Date;
+  document: Document;
+  name: string;
+  description?: string;
+  status: 'BORROWED' | 'RETURNED';
+  createdAt: Date
 }
 
 export interface BorrowCreateDto {
-  registryBookId: string;
+  registryBookId: number;
   borrowerName: string;
   borrowedAt: Date;
   reason?: string;

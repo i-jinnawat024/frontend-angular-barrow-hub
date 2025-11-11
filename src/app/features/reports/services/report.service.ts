@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
-import { RegistryBookService } from '../../registry-books/services/registry-book.service';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { RegistryBookService } from '../../registry-books/services/document.service';
 import { Borrow } from '../../../shared/models/borrow.model';
 
 @Injectable({
@@ -8,16 +10,18 @@ import { Borrow } from '../../../shared/models/borrow.model';
 export class ReportService {
   constructor(private readonly registryBookService: RegistryBookService) {}
 
-  getBorrowsByMonth(year: number, month: number): Borrow[] {
-    const allBorrows = this.registryBookService.getBorrows();
-
-    return allBorrows.filter((borrow) => {
-      const borrowDate = new Date(borrow.borrowedAt);
-      return (
-        borrowDate.getFullYear() === year &&
-        borrowDate.getMonth() === month - 1
-      );
-    });
+  getBorrowsByMonth(year: number, month: number): Observable<Borrow[]> {
+    return this.registryBookService.getBorrows().pipe(
+      map((borrows) =>
+        borrows.filter((borrow) => {
+          const borrowDate = new Date(borrow.createdAt);
+          return (
+            borrowDate.getFullYear() === year &&
+            borrowDate.getMonth() === month - 1
+          );
+        }),
+      ),
+    );
   }
 
   exportToCSV(borrows: Borrow[], year: number, month: number): void {
@@ -32,18 +36,11 @@ export class ReportService {
     ];
 
     const rows = borrows.map((borrow) => {
-      const borrowDate = new Date(borrow.borrowedAt);
       return [
-        borrow.registryBook.bookNumber,
-        borrow.registryBook.name,
-        borrow.borrowerName,
-        borrowDate.toLocaleDateString('th-TH'),
-        borrowDate.toLocaleTimeString('th-TH', {
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
-        borrow.reason || '-',
-        borrow.status === 'active' ? 'กำลังยืม' : 'คืนแล้ว',
+        borrow.document.documentId,
+        `${borrow.document.firstName} ${borrow.document.lastName}`,
+        borrow.description || '-',
+        borrow.status === 'BORROWED' ? 'กำลังยืม' : 'คืนแล้ว',
       ];
     });
 
@@ -77,11 +74,11 @@ export class ReportService {
       totalBorrows: borrows.length,
       borrows: borrows.map((borrow) => ({
         id: borrow.id,
-        bookNumber: borrow.registryBook.bookNumber,
-        name: borrow.registryBook.name,
-        borrowerName: borrow.borrowerName,
-        borrowedAt: borrow.borrowedAt,
-        reason: borrow.reason,
+        documentId: borrow.document.documentId,
+        name: `${borrow.document.firstName} ${borrow.document.lastName}`,
+        borrowerName: borrow.document.firstName,
+        createdAt: borrow.createdAt,
+        description: borrow.description,
         status: borrow.status,
       })),
     };

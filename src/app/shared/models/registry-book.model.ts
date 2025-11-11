@@ -1,24 +1,25 @@
-export interface RegistryBook {
-  id: string;
-  bookNumber: string;
-  name: string;
-  description?: string;
-  status: 'active' | 'borrowed' | 'archived' |'inactive';
+export interface Document {
+  id: number;
+  documentId: number;
+  firstName: string;
+  lastName: string;
+  status: 'ACTIVE' |'INACTIVE'| 'BORROWED' |'ARCHIVED';
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt: Date| null;
+  deletedAt: Date| null;
 }
 
 export interface RegistryBookCreateDto {
-  bookNumber: string;
-  name: string;
-  description?: string;
-  status?: RegistryBook['status'];
+  documentId: number;
+  firstName: string;
+  lastName: string;
+  status?: Document['status'];
 }
 
 export interface RegistryBookUpdateDto {
-  bookNumber?: string;
-  name?: string;
-  description?: string;
-  status?: 'active' | 'borrowed' | 'archived' |'inactive';
+  id:number
+  documentId?: number;
+  firstName?: string;
+  lastName?: string;
+  status?: Document['status'];
 }
-
