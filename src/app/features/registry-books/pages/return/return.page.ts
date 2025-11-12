@@ -153,7 +153,7 @@ export class ReturnPage implements OnInit {
 
   getBorrowDurationDays(borrow: Borrow): number {
     const now = new Date();
-    const diffTime = now.getTime() - borrow.document.createdAt.getTime();
+    const diffTime = now.getTime() - borrow.document.createdAt!.getTime();
     return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
   }
 

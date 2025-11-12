@@ -8,19 +8,19 @@ import { Borrow, BorrowCreateDto } from '../../../shared/models/borrow.model';
 import {
   Document,
   RegistryBookCreateDto,
-  RegistryBookUpdateDto,
+  DocumentUpdateDto,
 } from '../../../shared/models/registry-book.model';
 import { Return, ReturnCreateDto } from '../../../shared/models/return.model';
 
-interface RegistryBookApiResponse
+interface DocumentApiResponse
   extends Omit<Document, 'createdAt' | 'updatedAt'> {
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: Date | null | undefined;
+  updatedAt?: Date | null | undefined;
 }
 
 interface BorrowApiResponse
   extends Omit<Borrow, 'borrowedAt' | 'returnedAt' | 'document'> {
-  document: RegistryBookApiResponse;
+  document: DocumentApiResponse;
 }
 
 interface ReturnApiResponse extends Omit<Return, 'returnedAt' | 'borrow'> {
@@ -45,29 +45,29 @@ export class RegistryBookService {
   constructor(private readonly http: HttpClient) {}
 
   getRegistryBooks(): Observable<Document[]> {
-    return this.http.get<RegistryBookApiResponse[]>(`${this.documentUrl}/document-list`).pipe(
+    return this.http.get<DocumentApiResponse[]>(`${this.documentUrl}/document-list`).pipe(
       map((books) => books.map((book) => this.mapDocument(book))),
     );
   }
 
   getRegistryBookById(id: number): Observable<Document> {
     return this.http
-      .get<RegistryBookApiResponse>(`${this.documentUrl}?id=${id}`)
+      .get<DocumentApiResponse>(`${this.documentUrl}?id=${id}`)
       .pipe(map((book) => this.mapDocument(book)));
   }
 
   createRegistryBook(dto: RegistryBookCreateDto): Observable<Document> {
     return this.http
-      .post<RegistryBookApiResponse>(this.documentUrl, dto)
+      .post<DocumentApiResponse>(this.documentUrl, dto)
       .pipe(map((book) => this.mapDocument(book)));
   }
 
-  updateRegistryBook(
+  updateDocument(
     id: string,
-    dto: RegistryBookUpdateDto,
+    dto: DocumentUpdateDto,
   ): Observable<Document> {
     return this.http
-      .put<RegistryBookApiResponse>(`${this.documentUrl}?id=${id}`, dto)
+      .put<DocumentApiResponse>(`${this.documentUrl}?id=${id}`, dto)
       .pipe(map((book) => this.mapDocument(book)));
   }
 
@@ -173,12 +173,9 @@ export class RegistryBookService {
       .pipe(map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow))));
   }
 
-  private mapDocument(document: RegistryBookApiResponse): Document {
-    console.log('v',document);
+  private mapDocument(document:DocumentApiResponse): Document {
     return {
       ...document,
-      createdAt: new Date(document.createdAt) ?? null,
-      updatedAt: new Date(document.updatedAt)?? null,
     };
   }
 

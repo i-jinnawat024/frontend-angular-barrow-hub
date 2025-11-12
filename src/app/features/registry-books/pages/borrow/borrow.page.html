@@ -32,9 +32,9 @@
     </div>
   </div>
 
- <form [formGroup]="form" (ngSubmit)="onSubmit()"
+  <form [formGroup]="form" (ngSubmit)="onSubmit()"
     class="bg-surface rounded-xl shadow-sm border border-subtle p-6 space-y-6">
-    
+
     <!-- Step 1: Select Books -->
     @if (currentStep === 1) {
     <section class="space-y-4">
@@ -52,9 +52,8 @@
             <span class="material-icons mr-2 text-lg">qr_code_scanner</span>
             สแกน QR
           </button>
-          <button type="button"
-            class="btn-secondary flex-shrink-0"
-            (click)="selectAllBooks()" [disabled]="availableBooks.length === 0">
+          <button type="button" class="btn-secondary flex-shrink-0" (click)="selectAllBooks()"
+            [disabled]="availableBooks.length === 0">
             <span class="material-icons mr-2 text-lg">checklist</span>
             เลือกทั้งหมด
           </button>
@@ -69,17 +68,24 @@
 
       <!-- Selected Books Summary - Fixed at top when scrolling -->
       @if (selectedBooks.length) {
-      <div class="sticky top-0 z-10 rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm shadow-sm">
+      <div class="sticky top-0 z-10 rounded-lg 
+         bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm shadow-sm
+         dark:bg-emerald-900 dark:border-emerald-700">
         <div class="flex items-start gap-3">
-          <span class="material-icons text-emerald-600 text-base mt-0.5 flex-shrink-0">check_circle</span>
+          <span class="material-icons text-emerald-600 text-base mt-0.5 flex-shrink-0 dark:text-emerald-300">
+            check_circle
+          </span>
           <div class="min-w-0 flex-1">
-            <span class="font-medium">เลือกแล้ว {{ selectedBooks.length }} เล่ม</span>
-            <div class="mt-1 text-emerald-700 text-xs font-mono truncate">
+            <span class="font-medium text-primary dark:text-emerald-100">
+              เลือกแล้ว {{ selectedBooks.length }} เล่ม
+            </span>
+            <div class="mt-1 text-emerald-700 text-xs font-mono truncate dark:text-emerald-300">
               {{ selectedBookNumbers }}
             </div>
           </div>
         </div>
       </div>
+
       }
 
       <!-- Books List with Fixed Height and Scroll -->
@@ -98,11 +104,11 @@
           <ul class="divide-y divide-subtle">
             @for (book of availableBooks; track book.id) {
             <li class="group transition-colors duration-200 hover:bg-surface-hover">
-              <label class="flex items-center gap-3 px-4 py-3 cursor-pointer" 
-                     [class.bg-blue-50]="isBookSelected(book.id)">
+              <label class="flex items-center gap-3 px-4 py-3 cursor-pointer"
+                [class.bg-blue-50]="isBookSelected(book.id)">
                 <input type="checkbox"
                   class="h-4 w-4 rounded border-subtle text-primary focus:ring-2 focus:ring-primary focus:ring-offset-0 bg-surface cursor-pointer transition-colors flex-shrink-0"
-                  [checked]="isBookSelected(book.id)" 
+                  [checked]="isBookSelected(book.id)"
                   (change)="onBookSelectionChange(book.id, $event.target.checked)" />
                 <div class="w-32 sm:w-40 min-w-0">
                   <div class="text-sm font-semibold text-primary font-mono truncate">{{ book.documentId }}</div>
@@ -207,7 +213,9 @@
     </section>
 
     <div class="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pt-4 border-t border-subtle">
-      <button type="button" class="btn-secondary cursor-pointer inline-flex items-center w-full sm:w-auto justify-center" (click)="goToStep1()">
+      <button type="button"
+        class="btn-secondary cursor-pointer inline-flex items-center w-full sm:w-auto justify-center"
+        (click)="goToStep1()">
         <span class="material-icons mr-1 text-base">arrow_back</span>
         ย้อนกลับ
       </button>
@@ -215,13 +223,14 @@
         <button type="button" class="btn-secondary cursor-pointer w-full sm:w-auto" (click)="cancel()">
           ยกเลิก
         </button>
-        <button type="submit" class="btn-primary cursor-pointer w-full sm:w-auto" [disabled]="form.invalid || !selectedBookIds.length">
+        <button type="submit" class="btn-primary cursor-pointer w-full sm:w-auto"
+          [disabled]="form.invalid || !selectedBookIds.length">
           ยืมเล่มที่เลือก
         </button>
       </div>
     </div>
     }
-</form>
+  </form>
 
   @if (showScanner) {
   <app-qr-scanner [isScanning]="true" (scanSuccess)="onScanSuccess($event)" (scanError)="onScanError($event)"

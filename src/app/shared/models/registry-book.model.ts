@@ -4,9 +4,9 @@ export interface Document {
   firstName: string;
   lastName: string;
   status: 'ACTIVE' |'INACTIVE'| 'BORROWED' |'ARCHIVED';
-  createdAt: Date;
-  updatedAt: Date| null;
-  deletedAt: Date| null;
+  createdAt?: Date| null | undefined;
+  updatedAt?: Date| null | undefined;
+  deletedAt?: Date| null | undefined;
 }
 
 export interface RegistryBookCreateDto {
@@ -16,7 +16,7 @@ export interface RegistryBookCreateDto {
   status?: Document['status'];
 }
 
-export interface RegistryBookUpdateDto {
+export interface DocumentUpdateDto {
   id:number
   documentId?: number;
   firstName?: string;
