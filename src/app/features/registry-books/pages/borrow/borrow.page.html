@@ -52,14 +52,14 @@
             <span class="material-icons mr-2 text-lg">qr_code_scanner</span>
             สแกน QR
           </button>
-          <button type="button" class="btn-secondary flex-shrink-0" (click)="selectAllBooks()"
+          <button type="button" class="btn-secondary flex-shrink-0" (click)="selectAllDocument()"
             [disabled]="availableBooks.length === 0">
             <span class="material-icons mr-2 text-lg">checklist</span>
             เลือกทั้งหมด
           </button>
           <button type="button"
             class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-700 transition-all duration-200 hover:border-rose-600 hover:text-rose-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:border-rose-500 dark:hover:text-rose-300 dark:focus:ring-offset-gray-900 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-gray-300 disabled:hover:text-gray-700 dark:disabled:hover:border-gray-600 dark:disabled:hover:text-gray-200 flex-shrink-0"
-            (click)="clearSelection()" [disabled]="selectedBookIds.length === 0">
+            (click)="clearSelection()" [disabled]="selectedDocumentIds.length === 0">
             <span class="material-icons mr-2 text-lg">clear_all</span>
             ล้างการเลือก
           </button>
@@ -97,24 +97,24 @@
             เลขทะเบียน
           </div>
           <div class="flex-1 text-xs font-semibold uppercase tracking-wide text-secondary">
-            ชื่อเรื่อง
+            ชื่อ-นามสกุล
           </div>
         </header>
         <div class="max-h-96 overflow-y-auto">
           <ul class="divide-y divide-subtle">
-            @for (book of availableBooks; track book.id) {
+            @for (document of availableBooks; track document.id) {
             <li class="group transition-colors duration-200 hover:bg-surface-hover">
               <label class="flex items-center gap-3 px-4 py-3 cursor-pointer"
-                [class.bg-blue-50]="isBookSelected(book.id)">
+                [class.bg-blue-50]="isDocumentSelected(document.id)">
                 <input type="checkbox"
                   class="h-4 w-4 rounded border-subtle text-primary focus:ring-2 focus:ring-primary focus:ring-offset-0 bg-surface cursor-pointer transition-colors flex-shrink-0"
-                  [checked]="isBookSelected(book.id)"
-                  (change)="onBookSelectionChange(book.id, $event.target.checked)" />
+                  [checked]="isDocumentSelected(document.id)"
+                  (change)="onDocumentSelectionChange(document.id, $event.target.checked)" />
                 <div class="w-32 sm:w-40 min-w-0">
-                  <div class="text-sm font-semibold text-primary font-mono truncate">{{ book.documentId }}</div>
+                  <div class="text-sm font-semibold text-primary font-mono truncate">{{ document.documentId }}</div>
                 </div>
                 <div class="flex-1 min-w-0">
-                  <div class="text-sm font-medium text-primary truncate">{{ book.firstName }}</div>
+                  <div class="text-sm font-medium text-primary truncate">{{ document.firstName }} {{ document.lastName }}</div>
                   <div class="text-xs text-secondary mt-1 flex items-center">
                     <span class="material-icons mr-1 text-xs text-emerald-500">book</span>
                     พร้อมให้ยืม
@@ -147,7 +147,7 @@
         ยกเลิก
       </button>
       <button type="button" class="btn-primary cursor-pointer inline-flex items-center w-full sm:w-auto justify-center"
-        [disabled]="!selectedBookIds.length" (click)="goToStep2()">
+        [disabled]="!selectedDocumentIds.length" (click)="goToStep2()">
         ขั้นตอนถัดไป
         <span class="material-icons ml-1 text-base">arrow_forward</span>
       </button>
@@ -224,7 +224,7 @@
           ยกเลิก
         </button>
         <button type="submit" class="btn-primary cursor-pointer w-full sm:w-auto"
-          [disabled]="form.invalid || !selectedBookIds.length">
+          [disabled]="form.invalid || !selectedDocumentIds.length">
           ยืมเล่มที่เลือก
         </button>
       </div>

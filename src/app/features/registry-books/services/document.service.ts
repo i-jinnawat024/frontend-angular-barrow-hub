@@ -121,11 +121,11 @@ export class RegistryBookService {
       .pipe(map((response) => this.mapBorrow(response.result)));
   }
 
-  createBulkBorrows(dtos: BorrowCreateDto[]): Observable<Borrow[]> {
+  createBulkBorrows(dto: BorrowCreateDto): Observable<Borrow[]> {
     return this.http
       .post<ApiResponse<BorrowApiResponse[] | null>>(
-        `${this.historyUrl}/bulk`,
-        dtos.map((dto) => this.serializeBorrowDto(dto)),
+        `${this.documentUrl}/borrow`,
+        this.serializeBorrowDto(dto),
       )
       .pipe(
         map((response) => response.result ?? []),
@@ -227,10 +227,6 @@ export class RegistryBookService {
   private serializeBorrowDto(dto: BorrowCreateDto) {
     return {
       ...dto,
-      borrowedAt:
-        dto.borrowedAt instanceof Date
-          ? dto.borrowedAt.toISOString()
-          : dto.borrowedAt,
     };
   }
 

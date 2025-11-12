@@ -10,9 +10,8 @@ export interface Borrow {
 }
 
 export interface BorrowCreateDto {
-  registryBookId: number;
-  borrowerName: string;
-  borrowedAt: Date;
-  reason?: string;
+  userId: string;
+  documentId: number[];
+  description?: string;
 }
 
