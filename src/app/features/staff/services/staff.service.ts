@@ -5,6 +5,7 @@ import { map } from 'rxjs/operators';
 
 import { environment } from '../../../../environments/environment';
 import { Staff, StaffCreateDto, StaffUpdateDto } from '../../../shared/models/staff.model';
+import { ApiResponse } from '../../../shared/models/api-response.model';
 
 interface StaffApiResponse extends Omit<Staff, 'createdAt' | 'updatedAt'> {
   createdAt?: string | null;
@@ -26,7 +27,8 @@ export class StaffService {
   constructor(private readonly http: HttpClient) {}
 
   getStaff(): Observable<Staff[]> {
-    return this.http.get<StaffApiResponse[]>(this.staffUrl).pipe(
+    return this.http.get<ApiResponse<StaffApiResponse[] | null>>(this.staffUrl).pipe(
+      map((response) => response.result ?? []),
       map((staff) => staff.map((member) => this.mapStaff(member))),
     );
   }
@@ -39,30 +41,34 @@ export class StaffService {
 
   getStaffById(id: string): Observable<Staff> {
     return this.http
-      .get<StaffApiResponse>(`${this.staffUrl}/${id}`)
-      .pipe(map((member) => this.mapStaff(member)));
+      .get<ApiResponse<StaffApiResponse>>(`${this.staffUrl}/${id}`)
+      .pipe(map((response) => this.mapStaff(response.result)));
   }
 
   createStaff(dto: StaffCreateDto): Observable<Staff> {
     return this.http
-      .post<StaffApiResponse>(this.staffUrl, dto)
-      .pipe(map((member) => this.mapStaff(member)));
+      .post<ApiResponse<StaffApiResponse>>(this.staffUrl, dto)
+      .pipe(map((response) => this.mapStaff(response.result)));
   }
 
   updateStaff(id: string, dto: StaffUpdateDto): Observable<Staff> {
     return this.http
-      .put<StaffApiResponse>(`${this.staffUrl}/${id}`, dto)
-      .pipe(map((member) => this.mapStaff(member)));
+      .put<ApiResponse<StaffApiResponse>>(`${this.staffUrl}/${id}`, dto)
+      .pipe(map((response) => this.mapStaff(response.result)));
   }
 
   deleteStaff(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.staffUrl}/${id}`);
+    return this.http
+      .delete<ApiResponse<null>>(`${this.staffUrl}/${id}`)
+      .pipe(map(() => undefined));
   }
 
   importStaff(rows: StaffCreateDto[]): Observable<StaffImportResult> {
-    return this.http.post<StaffImportResult>(`${this.staffUrl}/import`, {
-      staff: rows,
-    });
+    return this.http
+      .post<ApiResponse<StaffImportResult>>(`${this.staffUrl}/import`, {
+        staff: rows,
+      })
+      .pipe(map((response) => response.result));
   }
 
   private mapStaff(member: StaffApiResponse): Staff {

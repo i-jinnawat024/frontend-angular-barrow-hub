@@ -11,6 +11,7 @@ import {
   DocumentUpdateDto,
 } from '../../../shared/models/registry-book.model';
 import { Return, ReturnCreateDto } from '../../../shared/models/return.model';
+import { ApiResponse } from '../../../shared/models/api-response.model';
 
 interface DocumentApiResponse
   extends Omit<Document, 'createdAt' | 'updatedAt'> {
@@ -45,21 +46,24 @@ export class RegistryBookService {
   constructor(private readonly http: HttpClient) {}
 
   getRegistryBooks(): Observable<Document[]> {
-    return this.http.get<DocumentApiResponse[]>(`${this.documentUrl}/document-list`).pipe(
-      map((books) => books.map((book) => this.mapDocument(book))),
-    );
+    return this.http
+      .get<ApiResponse<DocumentApiResponse[] | null>>(`${this.documentUrl}/document-list`)
+      .pipe(
+        map((response) => response.result ?? []),
+        map((books) => books.map((book) => this.mapDocument(book))),
+      );
   }
 
   getRegistryBookById(id: number): Observable<Document> {
     return this.http
-      .get<DocumentApiResponse>(`${this.documentUrl}?id=${id}`)
-      .pipe(map((book) => this.mapDocument(book)));
+      .get<ApiResponse<DocumentApiResponse>>(`${this.documentUrl}?id=${id}`)
+      .pipe(map((response) => this.mapDocument(response.result)));
   }
 
   createRegistryBook(dto: RegistryBookCreateDto): Observable<Document> {
     return this.http
-      .post<DocumentApiResponse>(this.documentUrl, dto)
-      .pipe(map((book) => this.mapDocument(book)));
+      .post<ApiResponse<DocumentApiResponse>>(this.documentUrl, dto)
+      .pipe(map((response) => this.mapDocument(response.result)));
   }
 
   updateDocument(
@@ -67,87 +71,105 @@ export class RegistryBookService {
     dto: DocumentUpdateDto,
   ): Observable<Document> {
     return this.http
-      .put<DocumentApiResponse>(`${this.documentUrl}?id=${id}`, dto)
-      .pipe(map((book) => this.mapDocument(book)));
+      .put<ApiResponse<DocumentApiResponse>>(`${this.documentUrl}?id=${id}`, dto)
+      .pipe(map((response) => this.mapDocument(response.result)));
   }
 
   deleteRegistryBook(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.documentUrl}/${id}`);
+    return this.http
+      .delete<ApiResponse<null>>(`${this.documentUrl}/${id}`)
+      .pipe(map(() => undefined));
   }
 
   importRegistryBooks(
     rows: RegistryBookCreateDto[],
   ): Observable<RegistryBookImportResult> {
-    return this.http.post<RegistryBookImportResult>(
-      `${this.documentUrl}/import`,
-      { registryBooks: rows },
-    );
+    return this.http
+      .post<ApiResponse<RegistryBookImportResult>>(`${this.documentUrl}/import`, {
+        registryBooks: rows,
+      })
+      .pipe(map((response) => response.result));
   }
 
   getBorrows(): Observable<Borrow[]> {
-    return this.http.get<BorrowApiResponse[]>(this.historyUrl).pipe(
-      map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow))),
-    );
+    return this.http
+      .get<ApiResponse<BorrowApiResponse[] | null>>(this.historyUrl)
+      .pipe(
+        map((response) => response.result ?? []),
+        map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow))),
+      );
   }
 
   getActiveBorrows(): Observable<Borrow[]> {
     return this.http
-      .get<BorrowApiResponse[]>(`${this.historyUrl}/active`)
-      .pipe(map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow))));
+      .get<ApiResponse<BorrowApiResponse[] | null>>(`${this.historyUrl}/active`)
+      .pipe(
+        map((response) => response.result ?? []),
+        map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow))),
+      );
   }
 
   getBorrowById(id: string): Observable<Borrow> {
     return this.http
-      .get<BorrowApiResponse>(`${this.historyUrl}/${id}`)
-      .pipe(map((borrow) => this.mapBorrow(borrow)));
+      .get<ApiResponse<BorrowApiResponse>>(`${this.historyUrl}/${id}`)
+      .pipe(map((response) => this.mapBorrow(response.result)));
   }
 
   createBorrow(dto: BorrowCreateDto): Observable<Borrow> {
     return this.http
-      .post<BorrowApiResponse>(this.historyUrl, this.serializeBorrowDto(dto))
-      .pipe(map((borrow) => this.mapBorrow(borrow)));
+      .post<ApiResponse<BorrowApiResponse>>(this.historyUrl, this.serializeBorrowDto(dto))
+      .pipe(map((response) => this.mapBorrow(response.result)));
   }
 
   createBulkBorrows(dtos: BorrowCreateDto[]): Observable<Borrow[]> {
     return this.http
-      .post<BorrowApiResponse[]>(
+      .post<ApiResponse<BorrowApiResponse[] | null>>(
         `${this.historyUrl}/bulk`,
         dtos.map((dto) => this.serializeBorrowDto(dto)),
       )
-      .pipe(map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow))));
+      .pipe(
+        map((response) => response.result ?? []),
+        map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow))),
+      );
   }
 
   getReturns(): Observable<Return[]> {
-    return this.http.get<ReturnApiResponse[]>(this.returnsUrl).pipe(
-      map((returns) => returns.map((record) => this.mapReturn(record))),
-    );
+    return this.http
+      .get<ApiResponse<ReturnApiResponse[] | null>>(this.returnsUrl)
+      .pipe(
+        map((response) => response.result ?? []),
+        map((returns) => returns.map((record) => this.mapReturn(record))),
+      );
   }
 
   createReturn(dto: ReturnCreateDto): Observable<Return> {
     return this.http
-      .post<ReturnApiResponse>(
+      .post<ApiResponse<ReturnApiResponse>>(
         this.returnsUrl,
         this.serializeReturnDto(dto),
       )
-      .pipe(map((record) => this.mapReturn(record)));
+      .pipe(map((response) => this.mapReturn(response.result)));
   }
 
   createBulkReturns(dtos: ReturnCreateDto[]): Observable<Return[]> {
     return this.http
-      .post<ReturnApiResponse[]>(
+      .post<ApiResponse<ReturnApiResponse[] | null>>(
         `${this.returnsUrl}/bulk`,
         dtos.map((dto) => this.serializeReturnDto(dto)),
       )
-      .pipe(map((returns) => returns.map((record) => this.mapReturn(record))));
+      .pipe(
+        map((response) => response.result ?? []),
+        map((returns) => returns.map((record) => this.mapReturn(record))),
+      );
   }
 
   getBorrowByBookId(bookId: string): Observable<Borrow | null> {
     return this.http
-      .get<BorrowApiResponse>(
+      .get<ApiResponse<BorrowApiResponse | null>>(
         `${this.historyUrl}/by-book/${encodeURIComponent(bookId)}`,
       )
       .pipe(
-        map((borrow) => this.mapBorrow(borrow)),
+        map((response) => (response.result ? this.mapBorrow(response.result) : null)),
         catchError((error) => {
           if (error?.status === 404) {
             return of(null);
@@ -159,18 +181,24 @@ export class RegistryBookService {
 
   getBorrowHistoryByStaffName(staffName: string): Observable<Borrow[]> {
     return this.http
-      .get<BorrowApiResponse[]>(
+      .get<ApiResponse<BorrowApiResponse[] | null>>(
         `${this.historyUrl}/history/staff/${encodeURIComponent(staffName)}`,
       )
-      .pipe(map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow))));
+      .pipe(
+        map((response) => response.result ?? []),
+        map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow))),
+      );
   }
 
   getBorrowHistoryByDocumentId(id: number): Observable<Borrow[]> {
     return this.http
-      .get<BorrowApiResponse[]>(
+      .get<ApiResponse<BorrowApiResponse[] | null>>(
         `${this.historyUrl}/document?documentId=${id}`,
       )
-      .pipe(map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow))));
+      .pipe(
+        map((response) => response.result ?? []),
+        map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow))),
+      );
   }
 
   private mapDocument(document:DocumentApiResponse): Document {
