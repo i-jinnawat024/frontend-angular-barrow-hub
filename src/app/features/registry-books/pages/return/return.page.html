@@ -249,6 +249,10 @@
                     <div class="text-sm font-medium text-primary line-clamp-2">
                       {{ borrow.document.firstName }} {{ borrow.document.lastName }}
                     </div>
+                    <div class="mt-1 text-xs text-secondary flex items-center gap-1">
+                      <span class="material-icons text-sm">person</span>
+                      <span>{{ borrow.name || '-' }}</span>
+                    </div>
                     @if (borrow.description) {
                     <div class="mt-1 text-xs text-secondary">
                       <span class="font-medium">หมายเหตุ:</span> {{ borrow.description }}

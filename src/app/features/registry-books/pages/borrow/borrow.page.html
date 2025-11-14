@@ -8,9 +8,7 @@
           [class.bg-emerald-500]="currentStep === 2" [class.text-white]="currentStep === 2">
           @if (currentStep === 2) {
           <span class="material-symbols-outlined text-base">check</span>
-          } @else {
-          1
-          }
+          } @else { 1 }
         </div>
         <span class="ml-2 text-sm font-medium" [class.text-primary]="currentStep === 1">
           เลือกเล่มทะเบียน
@@ -34,7 +32,6 @@
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()"
     class="bg-surface rounded-xl shadow-sm border border-subtle p-6 space-y-6">
-
     <!-- Step 1: Select Books -->
     @if (currentStep === 1) {
     <section class="space-y-4">
@@ -68,9 +65,8 @@
 
       <!-- Selected Books Summary - Fixed at top when scrolling -->
       @if (selectedBooks.length) {
-      <div class="sticky top-0 z-10 rounded-lg 
-         bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm shadow-sm
-         dark:bg-emerald-900 dark:border-emerald-700">
+      <div
+        class="sticky top-0 z-10 rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm shadow-sm dark:bg-emerald-900 dark:border-emerald-700">
         <div class="flex items-start gap-3">
           <span class="material-icons text-emerald-600 text-base mt-0.5 flex-shrink-0 dark:text-emerald-300">
             check_circle
@@ -91,18 +87,55 @@
       <!-- Books List with Fixed Height and Scroll -->
       @if (availableBooks.length) {
       <div class="rounded-xl border border-subtle bg-surface">
-        <header class="hidden border-b border-subtle px-4 py-3 sm:flex bg-surface-alt rounded-t-xl">
+        <div
+          class="flex flex-col gap-3 border-b border-subtle px-4 py-3 sm:flex-row sm:items-center sm:justify-between bg-surface-alt rounded-t-xl">
+          <div class="relative w-full sm:max-w-xs">
+            <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-base">
+              search
+            </span>
+            <input type="text" class="form-control pl-10 pr-9"
+              placeholder="ค้นหาเลขเล่มทะเบียนหรือชื่อผู้ถือครอง"
+              [value]="bookSearchTerm"
+              (input)="onBookSearch($event.target.value)" />
+            @if (bookSearchTerm) {
+            <button type="button"
+              class="absolute right-2 top-1/2 -translate-y-1/2 text-secondary hover:text-danger transition-colors"
+              (click)="clearBookSearch()">
+              <span class="material-icons text-sm">close</span>
+            </button>
+            }
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button type="button"
+              class="inline-flex items-center gap-1 rounded-lg border border-subtle px-3 py-2 text-sm font-medium text-secondary hover:text-primary hover:border-primary transition-colors"
+              [class.bg-surface]="bookSortField === 'documentId'"
+              (click)="changeBookSort('documentId')">
+              <span>จัดตามเลขเล่มทะเบียน</span>
+              <span class="material-icons text-base">{{ getBookSortIcon('documentId') }}</span>
+            </button>
+            <button type="button"
+              class="inline-flex items-center gap-1 rounded-lg border border-subtle px-3 py-2 text-sm font-medium text-secondary hover:text-primary hover:border-primary transition-colors"
+              [class.bg-surface]="bookSortField === 'name'"
+              (click)="changeBookSort('name')">
+              <span>จัดตามชื่อผู้ถือครอง</span>
+              <span class="material-icons text-base">{{ getBookSortIcon('name') }}</span>
+            </button>
+          </div>
+        </div>
+        <header class="hidden border-b border-subtle px-4 py-3 sm:flex bg-surface-alt">
           <div class="w-12"></div>
-          <div class="w-32 sm:w-40 text-xs font-semibold uppercase tracking-wide text-secondary">
-            เลขทะเบียน
+          <!-- <div class="w-32 sm:w-40 text-xs font-semibold uppercase tracking-wide text-secondary">
+            ?1??,??,,?,-?,??1??,s?,?,??,T
           </div>
           <div class="flex-1 text-xs font-semibold uppercase tracking-wide text-secondary">
-            ชื่อ-นามสกุล
-          </div>
+            ?,S?,??1^?,--?,T?,??,??,??,??,,?,?
+          </div> -->
         </header>
         <div class="max-h-96 overflow-y-auto">
+          @let bookList = filteredBooks;
+          @if (bookList.length) {
           <ul class="divide-y divide-subtle">
-            @for (document of availableBooks; track document.id) {
+            @for (document of bookList; track document.id) {
             <li class="group transition-colors duration-200 hover:bg-surface-hover">
               <label class="flex items-center gap-3 px-4 py-3 cursor-pointer"
                 [class.bg-blue-50]="isDocumentSelected(document.id)">
@@ -111,30 +144,38 @@
                   [checked]="isDocumentSelected(document.id)"
                   (change)="onDocumentSelectionChange(document.id, $event.target.checked)" />
                 <div class="w-32 sm:w-40 min-w-0">
-                  <div class="text-sm font-semibold text-primary font-mono truncate">{{ document.documentId }}</div>
+                  <div class="text-sm font-semibold text-primary font-mono truncate">
+                    {{ document.documentId }}
+                  </div>
                 </div>
                 <div class="flex-1 min-w-0">
-                  <div class="text-sm font-medium text-primary truncate">{{ document.firstName }} {{ document.lastName }}</div>
+                  <div class="text-sm font-medium text-primary truncate">
+                    {{ document.firstName }} {{ document.lastName }}
+                  </div>
                   <div class="text-xs text-secondary mt-1 flex items-center">
                     <span class="material-icons mr-1 text-xs text-emerald-500">book</span>
-                    พร้อมให้ยืม
+                    <!-- ?,z?,??1%?,-?,??1??,??1%?,??,??,? -->
                   </div>
                 </div>
               </label>
             </li>
             }
           </ul>
+          } @else {
+          <div class="px-4 py-8 text-center text-sm text-secondary">
+            ????????????????????????????????
+          </div>
+          }
         </div>
       </div>
       } @else {
+
       <div class="rounded-xl border-2 border-dashed border-subtle bg-surface-alt px-6 py-12 text-center">
         <span class="material-icons mx-auto text-3xl text-muted">menu_book</span>
         <h3 class="mt-3 text-sm font-semibold text-primary">ไม่มีเล่มทะเบียนที่พร้อมให้ยืม</h3>
         <p class="mt-1 text-sm text-secondary">ในขณะนี้ไม่มีหนังสือที่พร้อมให้ยืมได้</p>
       </div>
-      }
-
-      @if (form.get('selectedBookIds')?.invalid && form.get('selectedBookIds')?.touched) {
+      } @if (form.get('selectedBookIds')?.invalid && form.get('selectedBookIds')?.touched) {
       <div class="flex items-center gap-2 rounded-lg bg-rose-50 px-4 py-3 text-sm text-rose-700">
         <span class="material-icons text-base">error</span>
         <span>กรุณาเลือกเล่มทะเบียนอย่างน้อย 1 เล่ม</span>
@@ -172,17 +213,29 @@
 
       <div class="grid grid-cols-1 gap-6">
         <div>
-          <label for="borrowerName" class="form-label">
+          <label for="userId" class="form-label">
             ชื่อผู้ยืม <span class="text-red-500">*</span>
           </label>
-          <input type="text" id="borrowerName" formControlName="borrowerName" class="form-control"
-            placeholder="ระบุชื่อผู้ยืม" />
-          @if (form.get('borrowerName')?.invalid && form.get('borrowerName')?.touched) {
+          <select id="userId" formControlName="userId" class="form-control">
+            <option value="" disabled selected hidden>-- เลือกผู้ยืม --</option>
+
+            @for (user of staffOptions(); track user.id) {
+
+            <option [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
+
+            }
+          </select>
+
+          @if (!staffOptions().length) {
+
+          <p class="mt-1 text-sm text-muted">ไม่มีผู้ใช้งานในระบบ</p>
+
+          } @if (form.get('userId')?.invalid && form.get('userId')?.touched) {
           <p class="mt-1 text-sm text-danger">กรุณากรอกชื่อผู้ยืม</p>
           }
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label for="borrowedAt" class="form-label">
               วันที่ยืม <span class="text-red-500">*</span>
@@ -202,7 +255,7 @@
             <p class="mt-1 text-sm text-danger">กรุณาเลือกเวลาที่ยืม</p>
             }
           </div>
-        </div>
+        </div> -->
 
         <div>
           <label for="reason" class="form-label">เหตุผลการยืม (ถ้ามี)</label>

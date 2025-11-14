@@ -22,12 +22,12 @@ export interface StaffImportResult {
   providedIn: 'root',
 })
 export class StaffService {
-  private readonly staffUrl = `${environment.apiBaseUrl}/staff`;
+  private readonly userUrl = `${environment.apiBaseUrl}/users`;
 
   constructor(private readonly http: HttpClient) {}
 
   getStaff(): Observable<Staff[]> {
-    return this.http.get<ApiResponse<StaffApiResponse[] | null>>(this.staffUrl).pipe(
+    return this.http.get<ApiResponse<StaffApiResponse[] | null>>(this.userUrl).pipe(
       map((response) => response.result ?? []),
       map((staff) => staff.map((member) => this.mapStaff(member))),
     );
@@ -41,31 +41,31 @@ export class StaffService {
 
   getStaffById(id: string): Observable<Staff> {
     return this.http
-      .get<ApiResponse<StaffApiResponse>>(`${this.staffUrl}/${id}`)
+      .get<ApiResponse<StaffApiResponse>>(`${this.userUrl}/${id}`)
       .pipe(map((response) => this.mapStaff(response.result)));
   }
 
   createStaff(dto: StaffCreateDto): Observable<Staff> {
     return this.http
-      .post<ApiResponse<StaffApiResponse>>(this.staffUrl, dto)
+      .post<ApiResponse<StaffApiResponse>>(this.userUrl, dto)
       .pipe(map((response) => this.mapStaff(response.result)));
   }
 
   updateStaff(id: string, dto: StaffUpdateDto): Observable<Staff> {
     return this.http
-      .put<ApiResponse<StaffApiResponse>>(`${this.staffUrl}/${id}`, dto)
+      .put<ApiResponse<StaffApiResponse>>(`${this.userUrl}/${id}`, dto)
       .pipe(map((response) => this.mapStaff(response.result)));
   }
 
   deleteStaff(id: string): Observable<void> {
     return this.http
-      .delete<ApiResponse<null>>(`${this.staffUrl}/${id}`)
+      .delete<ApiResponse<null>>(`${this.userUrl}/${id}`)
       .pipe(map(() => undefined));
   }
 
   importStaff(rows: StaffCreateDto[]): Observable<StaffImportResult> {
     return this.http
-      .post<ApiResponse<StaffImportResult>>(`${this.staffUrl}/import`, {
+      .post<ApiResponse<StaffImportResult>>(`${this.userUrl}/import`, {
         staff: rows,
       })
       .pipe(map((response) => response.result));

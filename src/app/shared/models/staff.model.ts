@@ -3,9 +3,8 @@ export interface Staff {
   firstName: string;
   lastName: string;
   email: string;
-  phone?: string;
-  position: string;
-  department?: string;
+  telNumber?: string;
+  password: string;
   isActive: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -15,10 +14,8 @@ export interface StaffCreateDto {
   firstName: string;
   lastName: string;
   email: string;
-  phone?: string;
-  position: string;
-  department?: string;
-  isActive?: boolean;
+  telNumber?: number;
+  password: string;
 }
 
 export interface StaffUpdateDto {

@@ -6,7 +6,9 @@ export interface Borrow {
   name: string;
   description?: string;
   status: 'BORROWED' | 'RETURNED';
-  createdAt: Date
+  createdAt: Date;
+  updatedAt?: Date | null;
+  deletedAt?: Date | null;
 }
 
 export interface BorrowCreateDto {

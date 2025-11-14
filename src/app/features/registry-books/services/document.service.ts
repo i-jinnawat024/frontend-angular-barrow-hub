@@ -14,14 +14,18 @@ import { Return, ReturnCreateDto } from '../../../shared/models/return.model';
 import { ApiResponse } from '../../../shared/models/api-response.model';
 
 interface DocumentApiResponse
-  extends Omit<Document, 'createdAt' | 'updatedAt'> {
-  createdAt?: Date | null | undefined;
-  updatedAt?: Date | null | undefined;
+  extends Omit<Document, 'createdAt' | 'updatedAt' | 'deletedAt'> {
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  deletedAt?: string | null;
 }
 
 interface BorrowApiResponse
-  extends Omit<Borrow, 'borrowedAt' | 'returnedAt' | 'document'> {
+  extends Omit<Borrow, 'document' | 'createdAt' | 'updatedAt' | 'deletedAt'> {
   document: DocumentApiResponse;
+  createdAt: string;
+  updatedAt?: string | null;
+  deletedAt?: string | null;
 }
 
 interface ReturnApiResponse extends Omit<Return, 'returnedAt' | 'borrow'> {
@@ -102,7 +106,7 @@ export class RegistryBookService {
 
   getActiveBorrows(): Observable<Borrow[]> {
     return this.http
-      .get<ApiResponse<BorrowApiResponse[] | null>>(`${this.historyUrl}/active`)
+      .get<ApiResponse<BorrowApiResponse[] | null>>(`${this.historyUrl}/?status=BORROWED`)
       .pipe(
         map((response) => response.result ?? []),
         map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow))),
@@ -201,19 +205,23 @@ export class RegistryBookService {
       );
   }
 
-  private mapDocument(document:DocumentApiResponse): Document {
+  private mapDocument(document: DocumentApiResponse): Document {
     return {
       ...document,
+      createdAt: document.createdAt ? new Date(document.createdAt) : null,
+      updatedAt: document.updatedAt ? new Date(document.updatedAt) : null,
+      deletedAt: document.deletedAt ? new Date(document.deletedAt) : null,
     };
   }
 
   private mapBorrow(borrow: BorrowApiResponse): Borrow {
-    console.log(borrow.document)
-    const result = {
+    return {
       ...borrow,
       document: this.mapDocument(borrow.document),
+      createdAt: new Date(borrow.createdAt),
+      updatedAt: borrow.updatedAt ? new Date(borrow.updatedAt) : null,
+      deletedAt: borrow.deletedAt ? new Date(borrow.deletedAt) : null,
     };
-    return result;
   }
 
   private mapReturn(record: ReturnApiResponse): Return {

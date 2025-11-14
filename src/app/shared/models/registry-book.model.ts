@@ -4,6 +4,7 @@ export interface Document {
   firstName: string;
   lastName: string;
   status: 'ACTIVE' |'INACTIVE'| 'BORROWED' |'ARCHIVED';
+  description?: string
   createdAt?: Date| null | undefined;
   updatedAt?: Date| null | undefined;
   deletedAt?: Date| null | undefined;
