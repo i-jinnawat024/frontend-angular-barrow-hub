@@ -32,7 +32,6 @@ ngOnInit(): void {
     .pipe(
       switchMap((params) => {
         const id = Number(params.get('id'));
-        console.log('param id =', id);
         if (!id) {
           this.router.navigate(['/registry-books']);
           return EMPTY;
@@ -40,7 +39,6 @@ ngOnInit(): void {
 
         return this.registryBookService.getRegistryBookById(id).pipe(
           tap((document) => {
-            console.log('book =', document);
             this.document = document;
           }),
           switchMap(() => this.registryBookService.getBorrowHistoryByDocumentId(id)),
@@ -51,9 +49,7 @@ ngOnInit(): void {
     )
     .subscribe({
       next: (history) => {
-        console.log('object');
         this.borrowHistory = history;
-        console.log('set borrowHistory done', this.borrowHistory);
       },
       error: (err) => console.error('error =', err),
     });

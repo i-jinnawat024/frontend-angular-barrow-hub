@@ -7,7 +7,7 @@ export interface Return {
 }
 
 export interface ReturnCreateDto {
-  borrowId: string;
-  returnedAt: Date;
+  documentIds: number[];
+  userId:string
 }
 

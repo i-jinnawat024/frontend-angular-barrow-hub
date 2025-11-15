@@ -94,9 +94,7 @@
                     <td class="px-4 py-2">{{ preview.rowNumber }}</td>
                     <td class="px-4 py-2 font-medium text-primary">{{ preview.firstName + ' ' + preview.lastName }}</td>
                     <td class="px-4 py-2">{{ preview.email }}</td>
-                    <td class="px-4 py-2">{{ preview.phone ?? '-' }}</td>
-                    <td class="px-4 py-2">{{ preview.position }}</td>
-                    <td class="px-4 py-2">{{ preview.department ?? '-' }}</td>
+                    <td class="px-4 py-2">{{ preview.telNumber ?? '-' }}</td>
                     <td class="px-4 py-2">
                       @if (preview.isActive) {
                         เปิดใช้งาน
@@ -216,7 +214,7 @@
               </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-primary">
-              {{ member.phone || '-' }}
+              {{ member.telNumber || '-' }}
             </td>
             <!-- <td class="px-6 py-4 whitespace-nowrap text-sm text-muted">
                   {{ member.department || '-' }}

@@ -4,15 +4,16 @@ export interface Borrow {
   id: string;
   document: Document;
   name: string;
+  userId?: string;
   description?: string;
   status: 'BORROWED' | 'RETURNED';
-  createdAt: Date
+  createdAt: Date;
+  updatedAt?: Date | null;
+  // deletedAt?: Date | null;
 }
 
 export interface BorrowCreateDto {
-  registryBookId: number;
-  borrowerName: string;
-  borrowedAt: Date;
-  reason?: string;
+  userId: string;
+  documentId: number[];
+  description?: string;
 }
-

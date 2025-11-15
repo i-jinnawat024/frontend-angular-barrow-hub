@@ -7,7 +7,7 @@ import { RegistryBookService } from '../../services/document.service';
 import {
   Document,
   RegistryBookCreateDto,
-  RegistryBookUpdateDto,
+  DocumentUpdateDto,
 } from '../../../../shared/models/registry-book.model';
 
 @Component({
@@ -85,15 +85,15 @@ export class RegistryBookFormPage implements OnInit {
     const dto = this.mapFormToDto();
 
     if (this.isEditMode && this.id) {
-      const updateDto: RegistryBookUpdateDto = { ...dto, id: Number(this.id) };
+      const updateDto: DocumentUpdateDto = { ...dto, id: Number(this.id) };
       this.registryBookService
-        .updateRegistryBook(this.id, updateDto)
+        .updateDocument(this.id, updateDto)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => this.router.navigate(['/registry-books']),
           error: (error) => {
             console.error('Failed to update registry book', error);
-            window.alert('ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง');
+            window.alert(error.message);
           },
         });
     } else {
