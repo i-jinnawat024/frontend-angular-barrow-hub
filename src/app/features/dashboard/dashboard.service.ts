@@ -89,7 +89,6 @@ export class DashboardService {
   }
 
   getStats() {
-    console.log(this.stats.asReadonly())
     return this.stats.asReadonly();
   }
 
@@ -113,7 +112,6 @@ export class DashboardService {
   }
 
   private mapDocument(document: DocumentApiResponse): IDocument {
-    console.log(document);
     return {
       ...document,
       createdAt: new Date(document.createdAt),
