@@ -18,9 +18,9 @@
           </svg>
           ส่งออก JSON
         </button> -->
-        <button type="button" class="btn-primary cursor-pointer" (click)="exportToCSV()">
+        <button type="button" class="btn-primary cursor-pointer" (click)="exportToExcel()">
           <mat-icon style="font-size: 18px; width: 18px; height: 18px">download</mat-icon>
-          ดาวน์โหลด CSV
+          ดาวน์โหลด Excel
         </button>
       }
     </div>
@@ -145,7 +145,7 @@
                   {{ borrow.document.firstName }} {{ borrow.document.lastName }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-primary">
-                  {{ borrow.document.firstName }}
+                  {{ borrow.name }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-muted">
                   {{ borrow.createdAt | date: 'dd/MM/yyyy' }}
@@ -154,8 +154,7 @@
                   {{ borrow.createdAt | date: 'HH:mm' }}
                 </td>
                 <td class="px-6 py-4 text-sm text-muted">
-                  <!-- {{ borrow.reason || '-' }} -->
-                    -
+                  {{ borrow.description || '-' }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   @if (borrow.status === 'BORROWED') {

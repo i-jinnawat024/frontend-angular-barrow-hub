@@ -1,14 +1,25 @@
 import { CommonModule } from '@angular/common';
-import { Component, input, output, signal, OnInit, OnDestroy, effect, computed } from '@angular/core';
-import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
-import {  MatIconModule } from "@angular/material/icon";
+import {
+  Component,
+  input,
+  output,
+  signal,
+  OnInit,
+  OnDestroy,
+  effect,
+  computed,
+  inject,
+} from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { Router } from '@angular/router';
+import { AuthService, AuthUser } from '../../services/auth.service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, ThemeToggleComponent, MatIconModule],
+  imports: [CommonModule, MatIconModule],
   templateUrl: './header.component.html',
-  styleUrl: './header.component.scss'
+  styleUrl: './header.component.scss',
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   sidebarOpen = input<boolean>(false);
@@ -17,9 +28,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   private readonly isDesktopScreen = signal(this.checkIsDesktop());
   private resizeListener?: () => void;
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   protected readonly headerMarginLeft = signal('0');
   protected readonly isDesktopView = computed(() => this.isDesktopScreen());
+  protected readonly currentUser = computed(() => this.authService.user());
 
   sidebarCollapsed = input<boolean>(false);
 
@@ -60,7 +74,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       const sidebarOpen = this.sidebarOpen();
       const sidebarCollapsed = this.sidebarCollapsed();
       const isDesktop = this.isDesktopScreen();
-      
+
       if (isDesktop && sidebarOpen) {
         if (sidebarCollapsed) {
           this.headerMarginLeft.set('4rem'); // 64px for collapsed
@@ -94,6 +108,29 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   protected getHeaderMarginLeft(): string {
     return this.headerMarginLeft();
+  }
+
+  protected async logout(): Promise<void> {
+    this.authService.logout();
+    await this.router.navigate(['/login']);
+  }
+
+  protected getUserInitials(user: AuthUser | null): string {
+    if (!user?.name) {
+      return 'BH';
+    }
+
+    const names = user.name.trim().split(' ').filter(Boolean);
+    if (names.length === 0) {
+      return 'BH';
+    }
+
+    const [first, second] = names;
+    if (!second) {
+      return first.slice(0, 2).toUpperCase();
+    }
+
+    return `${first[0]}${second[0]}`.toUpperCase();
   }
 
   private checkIsDesktop(): boolean {

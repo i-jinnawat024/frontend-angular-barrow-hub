@@ -3,7 +3,7 @@ export interface IDocument {
   first_name: string;
   last_name: string;
   documentNumber: string;
-  status: 'available' | 'borrowed' | 'archived';
+  status: 'ACTIVE' | 'BORROWED' | 'ARCHIVED';
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date | null;

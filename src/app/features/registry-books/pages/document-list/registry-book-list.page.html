@@ -20,8 +20,7 @@
       <a
         class="btn-secondary inline-flex items-center gap-1 cursor-pointer"
         mat-button
-        [attr.href]="templateDownloadUrl"
-        [attr.download]="'registry-books-template.xlsx'"
+       (click)="exportToExcel()"
       >
         <mat-icon style="font-size: 18px; width: 18px; height: 18px">download</mat-icon>
         @if (this.isDesktopView()) {
@@ -86,18 +85,18 @@
                 <tr>
                   <th class="px-4 py-2">แถวที่</th>
                   <th class="px-4 py-2">เลขเล่มทะเบียน</th>
-                  <th class="px-4 py-2">ชื่อเล่มทะเบียน</th>
-                  <th class="px-4 py-2">รายละเอียด</th>
+                  <th class="px-4 py-2">ชื่อ</th>
+                  <th class="px-4 py-2">นามสกุล</th>
                   <th class="px-4 py-2">สถานะ</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-subtle bg-surface text-secondary">
                 @for (preview of importPreviewSample(); track preview.rowNumber) {
                   <tr>
-                    <td class="px-4 py-2">{{ preview.rowNumber }}</td>
+                    <td class="px-4 py-2">{{ preview.rowNumber - 1}}</td>
                     <td class="px-4 py-2 font-medium text-primary">{{ preview.documentId }}</td>
-                    <td class="px-4 py-2">{{ preview.firstName }} {{ preview.lastName }}</td>
-                    <td class="px-4 py-2">{{ preview.description ?? '-' }}</td>
+                    <td class="px-4 py-2">{{ preview.firstName }}</td>
+                    <td class="px-4 py-2">{{ preview.lastName }}</td>
                     <td class="px-4 py-2">
                       @switch (preview.status) {
                         @case ('ACTIVE') { พร้อมใช้งาน }
@@ -264,7 +263,7 @@
                         edit_document
                       </mat-icon>
                     </button>
-                    <button
+                    <!-- <button
                       type="button"
                       class="text-danger hover:text-danger-strong cursor-pointer"
                       (click)="deleteRegistryBook(book.id)"
@@ -276,7 +275,7 @@
                       >
                         delete
                       </mat-icon>
-                    </button>
+                    </button> -->
                   </div>
                 </td>
               </tr>
