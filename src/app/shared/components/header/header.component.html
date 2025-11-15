@@ -1,37 +1,33 @@
-<header
-  id="app-header"
-  class="sticky top-0 z-40 border-b border-subtle bg-surface transition-all duration-300"
-  [style.margin-left]="getHeaderMarginLeft()"
->
+<header id="app-header" class="sticky top-0 z-40 border-b border-subtle bg-surface transition-all duration-300"
+  [style.margin-left]="getHeaderMarginLeft()">
   <div class="flex max-w-screen flex-wrap items-center  gap-3 px-4 py-3 md:flex-nowrap md:px-6" id="header-container">
     <div class="flex flex-1 items-center gap-3">
-      <button
-        type="button"
-        id="btn-toggle-sidebar"
+      <button type="button" id="btn-toggle-sidebar"
         class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-subtle bg-surface text-muted shadow-sm transition hover:bg-surface-hover hover:text-[var(--color-text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-info)] cursor-pointer"
-        (click)="onToggleSidebar()"
-        aria-controls="app-sidebar"
-        [attr.aria-expanded]="sidebarOpen()"
-        [attr.aria-label]="toggleLabel()"
-      >
-      @switch (toggleIcon()) {
+        (click)="onToggleSidebar()" aria-controls="app-sidebar" [attr.aria-expanded]="sidebarOpen()"
+        [attr.aria-label]="toggleLabel()">
+        @switch (toggleIcon()) {
         @case('expand'){
-          <mat-icon class="material-symbols-outlined">right_panel_close</mat-icon>
+        <mat-icon class="material-symbols-outlined">right_panel_close</mat-icon>
         }
         @case ('collapse') {
-          <mat-icon class="material-symbols-outlined">left_panel_close</mat-icon>
+        <mat-icon class="material-symbols-outlined">left_panel_close</mat-icon>
         }
         @case ('close') {
-          <mat-icon class="material-symbols-outlined">close</mat-icon>
+        <mat-icon class="material-symbols-outlined">close</mat-icon>
         }
         @case ('menu') {
-          <mat-icon class="material-symbols-outlined">right_panel_close</mat-icon>
+        <mat-icon class="material-symbols-outlined">right_panel_close</mat-icon>
         }
-      }
+        }
       </button>
 
       <a href="/" class="flex items-center gap-3 text-primary">
-        <img src="../../../../assets/icon.svg" class="h-10 w-10 rounded-md object-cover" />
+       <img
+  src="https://image2url.com/images/1763220306904-de55e46c-7a8c-4ef4-bc92-7f8ab352756a.png"
+  class="h-10 w-10 rounded-md object-cover"
+/>
+
 
         <div class="flex flex-col">
           <span class="text-base font-semibold leading-tight md:text-lg">BarrowHub</span>
@@ -41,21 +37,26 @@
     </div>
 
     <div class="flex items-center gap-2" id="header-actions">
-      <!-- <app-theme-toggle id="theme-toggle-component"></app-theme-toggle> -->
-      <!-- <button
-        type="button"
-        id="btn-quick-actions"
-        class="hidden items-center rounded-md border border-subtle px-3 py-2 text-sm font-medium text-muted transition hover:bg-surface-hover hover:text-[var(--color-text-primary)] md:inline-flex"
-      >
-        Quick actions
-      </button> -->
-      <!-- <button
-        type="button"
-        id="btn-new-request"
-        class="inline-flex items-center rounded-md bg-[var(--color-primary)] px-3 py-2 text-sm font-medium text-[var(--color-on-primary)] shadow-sm transition hover:bg-[var(--color-primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-info)]"
-      >
-        New request
-      </button> -->
+      <div class="flex items-center gap-3 rounded-full border border-subtle bg-surface px-3 py-2 shadow-sm">
+        <div class="relative h-11 w-11 overflow-hidden rounded-full bg-[var(--color-primary-container)] text-primary">
+          <span class="flex h-full w-full items-center justify-center text-sm font-semibold uppercase">
+            {{ getUserInitials(currentUser()) }}
+          </span>
+        </div>
+        <div class="hidden text-right sm:block">
+          <p class="text-sm font-semibold text-primary">
+            {{ currentUser()?.name ?? 'Barrow Hub ผู้ใช้' }}
+          </p>
+          <p class="text-xs text-muted">
+            {{ currentUser()?.role ?? 'ผู้ใช้งาน' }}
+          </p>
+        </div>
+        <button type="button" class="btn-secondary gap-1 whitespace-nowrap px-3 py-2 text-xs font-medium"
+          (click)="logout()" aria-label="ออกจากระบบ">
+          <mat-icon class="material-symbols-outlined text-base">logout</mat-icon>
+          <span class="hidden md:inline">ออกจากระบบ</span>
+        </button>
+      </div>
     </div>
   </div>
 </header>
