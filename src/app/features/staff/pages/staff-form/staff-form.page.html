@@ -14,18 +14,23 @@
     <div class="space-y-6">
       <!-- Name -->
       <div>
-        <label for="name" class="form-label">
-          ชื่อ-นามสกุล <span class="text-danger">*</span>
+        <label for="firstName" class="form-label">
+          ชื่อ<span class="text-danger">*</span>
         </label>
-        <input
-          type="text"
-          id="name"
-          formControlName="name"
-          class="form-control"
-          placeholder="เช่น สมชาย ดีมาก"
-        />
-        @if (form.get('name')?.invalid && form.get('name')?.touched) {
-          <p class="mt-1 text-sm text-danger">กรุณากรอกชื่อ-นามสกุล</p>
+        <input type="text" id="firstName" formControlName="firstName" class="form-control"
+          placeholder="เช่น สมชาย" />
+        @if (form.get('firstName')?.invalid && form.get('firstName')?.touched) {
+        <p class="mt-1 text-sm text-danger">กรุณากรอกชื่อ</p>
+        }
+      </div>
+      <div>
+        <label for="lastName" class="form-label">
+          นามสกุล<span class="text-danger">*</span>
+        </label>
+        <input type="text" id="lastName" formControlName="lastName" class="form-control"
+          placeholder="เช่น ดีมาก" />
+        @if (form.get('lastName')?.invalid && form.get('lastName')?.touched) {
+        <p class="mt-1 text-sm text-danger">กรุณากรอกนามสกุล</p>
         }
       </div>
 
@@ -34,22 +39,17 @@
         <label for="email" class="form-label">
           อีเมล <span class="text-danger">*</span>
         </label>
-        <input
-          type="email"
-          id="email"
-          formControlName="email"
-          class="form-control"
-          placeholder="เช่น somchai@example.com"
-        />
+        <input type="email" id="email" formControlName="email" class="form-control"
+          placeholder="เช่น somchai@example.com" />
         @if (form.get('email')?.invalid && form.get('email')?.touched) {
-          <p class="mt-1 text-sm text-danger">
-            @if (form.get('email')?.errors?.['required']) {
-              กรุณากรอกอีเมล
-            }
-            @if (form.get('email')?.errors?.['email']) {
-              อีเมลไม่ถูกต้อง
-            }
-          </p>
+        <p class="mt-1 text-sm text-danger">
+          @if (form.get('email')?.errors?.['required']) {
+          กรุณากรอกอีเมล
+          }
+          @if (form.get('email')?.errors?.['email']) {
+          อีเมลไม่ถูกต้อง
+          }
+        </p>
         }
       </div>
 
@@ -58,75 +58,37 @@
         <label for="phone" class="form-label">
           เบอร์โทรศัพท์
         </label>
-        <input
-          type="tel"
-          id="phone"
-          formControlName="phone"
-          class="form-control"
-          placeholder="เช่น 081-234-5678"
-        />
+        <input type="tel" id="phone" formControlName="phone" class="form-control" placeholder="เช่น 081-234-5678" />
       </div>
 
-      <!-- Position -->
+      <!-- Password -->
       <div>
-        <label for="position" class="form-label">
-          ตำแหน่ง <span class="text-danger">*</span>
+        <label for="password" class="form-label">
+          รหัสผ่าน <span class="text-danger">*</span>
         </label>
-        <input
-          type="text"
-          id="position"
-          formControlName="position"
-          class="form-control"
-          placeholder="เช่น พนักงาน"
-        />
-        @if (form.get('position')?.invalid && form.get('position')?.touched) {
-          <p class="mt-1 text-sm text-danger">กรุณากรอกตำแหน่ง</p>
+        <input type="password" id="password" formControlName="password" class="form-control" placeholder="เช่น 123456" />
+        @if (form.get('password')?.invalid && form.get('password')?.touched) {
+        <p class="mt-1 text-sm text-danger">กรุณากรอกรหัสผ่าน</p>
         }
-      </div>
-
-      <!-- Department -->
-      <div>
-        <label for="department" class="form-label">
-          แผนก
-        </label>
-        <input
-          type="text"
-          id="department"
-          formControlName="department"
-          class="form-control"
-          placeholder="เช่น สำนักงาน"
-        />
       </div>
 
       <!-- Is Active (Edit Mode Only) -->
       @if (isEditMode) {
-        <div>
-          <label class="flex items-center">
-            <input
-              type="checkbox"
-              formControlName="isActive"
-              class="h-4 w-4 rounded border-subtle accent-primary"
-            />
-            <span class="ml-2 text-sm text-secondary">ใช้งาน</span>
-          </label>
-        </div>
+      <div>
+        <label class="flex items-center">
+          <input type="checkbox" formControlName="isActive" class="h-4 w-4 rounded border-subtle accent-primary" />
+          <span class="ml-2 text-sm text-secondary">ใช้งาน</span>
+        </label>
+      </div>
       }
     </div>
 
     <!-- Actions -->
     <div class="mt-6 flex items-center justify-end gap-3">
-      <button
-        type="button"
-        class="btn-secondary"
-        (click)="cancel()"
-      >
+      <button type="button" class="btn-secondary" (click)="cancel()">
         ยกเลิก
       </button>
-      <button
-        type="submit"
-        class="btn-primary"
-        [disabled]="form.invalid"
-      >
+      <button type="submit" class="btn-primary" [disabled]="form.invalid">
         {{ isEditMode ? 'บันทึกการแก้ไข' : 'เพิ่มบุคลากร' }}
       </button>
     </div>

@@ -1,31 +1,26 @@
-﻿<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-4 py-8">
   <!-- Header -->
   <div class="mb-8 flex items-center justify-between">
     <div>
-      <h1 class="text-3xl font-bold text-primary">รายงานการยืม</h1>
-      <p class="mt-2 text-secondary">สามารถดาวน์โหลด export รายงานการยืมได้ตามต้องการ</p>
+      <h1 class="text-3xl font-bold text-primary">รายงานการยืมเล่มทะเบียน</h1>
+      <p class="mt-2 text-secondary">ตรวจสอบสถิติและส่งออกรายงานการยืมเล่มทะเบียน</p>
     </div>
     <div class="flex items-center gap-3">
-      @if (borrows.length > 0) {
-        <button
-          type="button"
-          class="inline-flex items-center btn-secondary"
-          (click)="exportToJSON()"
-        >
+      @if (filteredBorrows().length > 0) {
+        <!-- <button type="button" class="inline-flex items-center btn-secondary" (click)="exportToJSON()">
           <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 10v6m0 0l-3-3m3 3 3-3m2 8H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"
+            ></path>
           </svg>
-          Export JSON
-        </button>
-        <button
-          type="button"
-          class="btn-primary"
-          (click)="exportToCSV()"
-        >
-          <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-          </svg>
-          Export CSV
+          ส่งออก JSON
+        </button> -->
+        <button type="button" class="btn-primary cursor-pointer" (click)="exportToCSV()">
+          <mat-icon style="font-size: 18px; width: 18px; height: 18px">download</mat-icon>
+          ดาวน์โหลด CSV
         </button>
       }
     </div>
@@ -36,13 +31,9 @@
     <form [formGroup]="form" class="flex items-end gap-4">
       <div class="flex-1">
         <label for="month" class="form-label">
-          กรุณาเลือกเดือน
+          เลือกเดือน
         </label>
-        <select
-          id="month"
-          formControlName="month"
-          class="form-control"
-        >
+        <select id="month" formControlName="month" class="form-control">
           @for (month of [1,2,3,4,5,6,7,8,9,10,11,12]; track month) {
             <option [value]="month">{{ getMonthName(month) }}</option>
           }
@@ -50,13 +41,9 @@
       </div>
       <div class="flex-1">
         <label for="year" class="form-label">
-          กรุณาเลือกปี
+          เลือกปี
         </label>
-        <select
-          id="year"
-          formControlName="year"
-          class="form-control"
-        >
+        <select id="year" formControlName="year" class="form-control">
           @for (year of getAvailableYears(); track year) {
             <option [value]="year">{{ year }}</option>
           }
@@ -70,10 +57,10 @@
     <div class="flex items-center justify-between">
       <div>
         <h2 class="text-lg font-semibold text-primary">
-          สรุปรายงานเดือน {{ getMonthName(selectedMonth) }} {{ selectedYear }}
+          รายงานการยืมประจำเดือน {{ getMonthName(selectedMonth) }} {{ selectedYear }}
         </h2>
         <p class="mt-1 text-sm text-muted">
-          จำนวนการยืมทั้งหมด: <span class="font-semibold text-primary">{{ borrows.length }}</span> รายการ
+          จำนวนรายการทั้งหมด: <span class="font-semibold text-primary">{{ borrowsCount() }}</span> รายการ
         </p>
       </div>
     </div>
@@ -81,79 +68,130 @@
 
   <!-- Borrows Table -->
   <div class="bg-surface rounded-lg shadow border border-subtle overflow-hidden">
-    @if (borrows.length > 0) {
-      <div class="overflow-x-auto">
+    <div class="border-b border-subtle bg-surface-alt px-4 py-4">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div class="relative w-full sm:w-80">
+          <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+            <mat-icon class="text-secondary text-base">search</mat-icon>
+          </div>
+          <input
+            type="search"
+            class="form-control w-full ps-10 pe-10"
+            placeholder="ค้นหารายการยืม"
+            autocomplete="off"
+            [value]="searchTerm()"
+            (input)="onSearchTermChange($event)"
+          />
+          @if (hasSearchTerm()) {
+            <button
+              type="button"
+              class="table-search-clear"
+              (click)="clearSearch()"
+              aria-label="ล้างการค้นหา"
+            >
+              <mat-icon class="text-secondary text-base">close</mat-icon>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      @if (filteredBorrows().length > 0) {
         <table class="w-full">
           <thead class="bg-table-header">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                เลขทะเบียนหนังสือ
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                ชื่อหนังสือทะเบียน
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                ชื่อผู้ยืม
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                วันที่ยืม
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                เวลาที่ยืม
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                เหตุผล
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                สถานะ
-              </th>
+              @for (column of columns; track column.property) {
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider"
+                >
+                  @if (column.sortable) {
+                    <button
+                      type="button"
+                      class="table-sort-button"
+                      (click)="toggleSort(column.property)"
+                      [attr.aria-sort]="
+                        isSortedAscending(column.property)
+                          ? 'ascending'
+                          : isSortedDescending(column.property)
+                          ? 'descending'
+                          : 'none'
+                      "
+                    >
+                      <span>{{ column.label }}</span>
+                      <mat-icon class="table-sort-icon">
+                        @if (isSortedAscending(column.property)) {
+                          arrow_upward
+                        } @else if (isSortedDescending(column.property)) {
+                          arrow_downward
+                        } @else {
+                          unfold_more
+                        }
+                      </mat-icon>
+                    </button>
+                  } @else {
+                    <span class="table-header-label">{{ column.label }}</span>
+                  }
+                </th>
+              }
             </tr>
           </thead>
           <tbody class="bg-surface divide-y divide-subtle">
-            @for (borrow of borrows; track borrow.id) {
+            @for (borrow of filteredBorrows(); track borrow.id) {
               <tr class="hover:bg-surface-hover">
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">
-                  {{ borrow.registryBook.bookNumber }}
+                  {{ borrow.document.documentId }}
                 </td>
                 <td class="px-6 py-4 text-sm text-primary">
-                  {{ borrow.registryBook.title }}
+                  {{ borrow.document.firstName }} {{ borrow.document.lastName }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-primary">
-                  {{ borrow.borrowerName }}
+                  {{ borrow.document.firstName }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-muted">
-                  {{ borrow.borrowedAt | date:'dd/MM/yyyy' }}
+                  {{ borrow.createdAt | date: 'dd/MM/yyyy' }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-muted">
-                  {{ borrow.borrowedAt | date:'HH:mm' }}
+                  {{ borrow.createdAt | date: 'HH:mm' }}
                 </td>
                 <td class="px-6 py-4 text-sm text-muted">
-                  {{ borrow.reason || '-' }}
+                  <!-- {{ borrow.reason || '-' }} -->
+                    -
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  @if (borrow.status === 'active') {
-                    <span class="badge badge-warning">
-                      กำลังยืม
-                    </span>
+                  @if (borrow.status === 'BORROWED') {
+                    <span class="badge badge-warning"> กำลังยืม </span>
                   } @else {
-                    <span class="badge badge-success">
-                      คืนแล้ว
-                    </span>
+                    <span class="badge badge-success"> คืนแล้ว </span>
                   }
                 </td>
               </tr>
             }
           </tbody>
         </table>
-      </div>
-    } @else {
-      <div class="p-12 text-center">
-        <svg class="mx-auto h-12 w-12 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-        </svg>
-        <h3 class="mt-2 text-sm font-medium text-primary">ไม่มีข้อมูลการยืม</h3>
-        <p class="mt-1 text-sm text-muted">ไม่มีข้อมูลการยืมในเดือน {{ getMonthName(selectedMonth) }} {{ selectedYear }}</p>
-      </div>
-    }
+      } @else if (borrowsCount() === 0 && !hasSearchTerm()) {
+        <div class="p-12 text-center">
+          <svg class="mx-auto h-12 w-12 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"
+            ></path>
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-primary">ยังไม่มีข้อมูลการยืม</h3>
+          <p class="mt-1 text-sm text-muted">
+            ยังไม่มีรายการยืมสำหรับเดือน {{ getMonthName(selectedMonth) }} {{ selectedYear }}
+          </p>
+        </div>
+      } @else {
+        <div class="p-12 text-center">
+          <mat-icon class="material-symbols-outlined text-muted" style="font-size: 48px">
+            search_off
+          </mat-icon>
+          <h3 class="mt-2 text-sm font-medium text-primary">ไม่พบรายการที่ค้นหา</h3>
+          <p class="mt-1 text-sm text-muted">ปรับคำค้นหรือเงื่อนไขแล้วลองอีกครั้ง</p>
+        </div>
+      }
+    </div>
   </div>
 </div>

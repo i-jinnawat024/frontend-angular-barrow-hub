@@ -1,7 +1,13 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
-import { Document } from '../../shared/models/document.model';
-import { Staff } from '../../shared/models/staff.model';
+import { Observable, of } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+
+import { environment } from '../../../environments/environment';
+import { IDocument } from '../../shared/models/document.model';
 import { Loan } from '../../shared/models/loan.model';
+import { Staff } from '../../shared/models/staff.model';
+import { ApiResponse } from '../../shared/models/api-response.model';
 
 export interface DashboardStats {
   totalDocuments: number;
@@ -10,168 +16,107 @@ export interface DashboardStats {
   activeLoans: Loan[];
 }
 
+type DocumentApiResponse = Omit<IDocument, 'createdAt' | 'updatedAt' | 'deletedAt'> & {
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string | null;
+};
+
+type StaffApiResponse = Omit<Staff, 'createdAt' | 'updatedAt'> & {
+  createdAt?: string | null;
+  updatedAt?: string | null;
+};
+
+type LoanApiResponse = Omit<
+  Loan,
+  'borrowedAt' | 'expectedReturnAt' | 'returnedAt' | 'document' | 'borrower'
+> & {
+  borrowedAt: string;
+  expectedReturnAt: string;
+  returnedAt?: string | null;
+  document: DocumentApiResponse;
+  borrower: StaffApiResponse;
+};
+
+interface DashboardStatsResponse {
+  totalDocuments: number;
+  totalStaff: number;
+  borrowedDocuments: number;
+  activeLoans: LoanApiResponse[];
+}
+
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DashboardService {
-  // Mock data
-  private documents: Document[] = [
-    {
-      id: '1',
-      title: 'เอกสารการประชุมคณะกรรมการ',
-      documentNumber: 'DOC-001',
-      description: 'รายงานการประชุมประจำเดือน',
-      status: 'available',
-      createdAt: new Date('2024-01-15'),
-      updatedAt: new Date('2024-01-15')
-    },
-    {
-      id: '2',
-      title: 'คู่มือการปฏิบัติงาน',
-      documentNumber: 'DOC-002',
-      description: 'คู่มือสำหรับเจ้าหน้าที่ใหม่',
-      status: 'borrowed',
-      createdAt: new Date('2024-02-01'),
-      updatedAt: new Date('2024-02-10')
-    },
-    {
-      id: '3',
-      title: 'รายงานงบประมาณ',
-      documentNumber: 'DOC-003',
-      description: 'รายงานงบประมาณปี 2024',
-      status: 'borrowed',
-      createdAt: new Date('2024-01-20'),
-      updatedAt: new Date('2024-02-05')
-    },
-    {
-      id: '4',
-      title: 'นโยบายการให้บริการ',
-      documentNumber: 'DOC-004',
-      description: 'นโยบายและแนวทางปฏิบัติ',
-      status: 'available',
-      createdAt: new Date('2024-03-01'),
-      updatedAt: new Date('2024-03-01')
-    },
-    {
-      id: '5',
-      title: 'สัญญาโครงการ',
-      documentNumber: 'DOC-005',
-      description: 'สัญญาโครงการพัฒนาระบบ',
-      status: 'borrowed',
-      createdAt: new Date('2024-02-15'),
-      updatedAt: new Date('2024-02-20')
-    }
-  ];
-
-  private staff: Staff[] = [
-    {
-      id: '1',
-      name: 'สมชาย ใจดี',
-      email: 'somchai@example.com',
-      position: 'ผู้จัดการ',
-      department: 'ฝ่ายบริหาร',
-      isActive: true
-    },
-    {
-      id: '2',
-      name: 'สมหญิง รักงาน',
-      email: 'somying@example.com',
-      position: 'เจ้าหน้าที่เอกสาร',
-      department: 'ฝ่ายเอกสาร',
-      isActive: true
-    },
-    {
-      id: '3',
-      name: 'วิชัย เก่งมาก',
-      email: 'wichai@example.com',
-      position: 'นักวิเคราะห์',
-      department: 'ฝ่ายแผนงาน',
-      isActive: true
-    },
-    {
-      id: '4',
-      name: 'มาลี สวยงาม',
-      email: 'malee@example.com',
-      position: 'เจ้าหน้าที่ประสานงาน',
-      department: 'ฝ่ายประสานงาน',
-      isActive: true
-    },
-    {
-      id: '5',
-      name: 'ประเสริฐ ดีมาก',
-      email: 'prasert@example.com',
-      position: 'ผู้ช่วยผู้จัดการ',
-      department: 'ฝ่ายบริหาร',
-      isActive: true
-    }
-  ];
-
-  private loans: Loan[] = [
-    {
-      id: '1',
-      document: this.documents[1],
-      borrower: this.staff[0],
-      borrowedAt: new Date('2024-02-10'),
-      expectedReturnAt: new Date('2024-03-10'),
-      status: 'active'
-    },
-    {
-      id: '2',
-      document: this.documents[2],
-      borrower: this.staff[2],
-      borrowedAt: new Date('2024-02-05'),
-      expectedReturnAt: new Date('2024-03-05'),
-      status: 'active'
-    },
-    {
-      id: '3',
-      document: this.documents[4],
-      borrower: this.staff[1],
-      borrowedAt: new Date('2024-02-20'),
-      expectedReturnAt: new Date('2024-03-20'),
-      status: 'active'
-    }
-  ];
-
-  private stats = signal<DashboardStats>({
+  private readonly stats = signal<DashboardStats>({
     totalDocuments: 0,
     totalStaff: 0,
     borrowedDocuments: 0,
-    activeLoans: []
+    activeLoans: [],
   });
 
-  constructor() {
-    this.loadStats();
+  private readonly dashboardUrl = `${environment.apiBaseUrl}/dashboard`;
+
+  constructor(private readonly http: HttpClient) {
+    this.refresh();
   }
 
-  private loadStats(): void {
-    const totalDocuments = this.documents.length;
-    const totalStaff = this.staff.filter(s => s.isActive).length;
-    const borrowedDocuments = this.documents.filter(d => d.status === 'borrowed').length;
-    const activeLoans = this.loans.filter(l => l.status === 'active');
+  loadStats(): Observable<DashboardStats> {
+    return this.http
+      .get<ApiResponse<DashboardStatsResponse>>(`${this.dashboardUrl}/stats`)
+      .pipe(
+        map((response) => this.mapStatsResponse(response.result)),
+        tap((stats) => this.stats.set(stats)),
+        catchError((error) => {
+          console.error('Failed to load dashboard stats', error);
+          return of(this.stats());
+        }),
+      );
+  }
 
-    this.stats.set({
-      totalDocuments,
-      totalStaff,
-      borrowedDocuments,
-      activeLoans
-    });
+  refresh(): void {
+    this.loadStats().subscribe();
   }
 
   getStats() {
     return this.stats.asReadonly();
   }
 
-  getDocuments(): Document[] {
-    return this.documents;
+  private mapStatsResponse(response: DashboardStatsResponse): DashboardStats {
+    return {
+      totalDocuments: response.totalDocuments,
+      totalStaff: response.totalStaff,
+      borrowedDocuments: response.borrowedDocuments,
+      activeLoans: response.activeLoans.map((loan) => this.mapLoan(loan)),
+    };
   }
 
-  getStaff(): Staff[] {
-    return this.staff;
+  private mapLoan(loan: LoanApiResponse): Loan {
+    return {
+      ...loan,
+      document: this.mapDocument(loan.document),
+      borrower: this.mapStaff(loan.borrower),
+      borrowedAt: new Date(loan.borrowedAt),
+      expectedReturnAt: new Date(loan.expectedReturnAt),
+      returnedAt: loan.returnedAt ? new Date(loan.returnedAt) : undefined,
+    };
   }
 
-  getActiveLoans(): Loan[] {
-    return this.loans.filter(l => l.status === 'active');
+  private mapDocument(document: DocumentApiResponse): IDocument {
+    return {
+      ...document,
+      createdAt: new Date(document.createdAt),
+      updatedAt: new Date(document.updatedAt),
+      deletedAt: document.deletedAt ? new Date(document.deletedAt) : null,
+    };
+  }
+
+  private mapStaff(staff: StaffApiResponse): Staff {
+    return {
+      ...staff,
+      createdAt: staff.createdAt ? new Date(staff.createdAt) : undefined,
+      updatedAt: staff.updatedAt ? new Date(staff.updatedAt) : undefined,
+    };
   }
 }
-

@@ -8,6 +8,7 @@
 @use "flowbite/src/themes/default";
 @use '@angular/material' as mat;
 
+// Light theme (default)
 html {
   @include mat.theme((
     color: (
@@ -19,11 +20,21 @@ html {
   ));
 }
 
+// Dark theme
+html[data-theme='dark'] {
+  @include mat.theme((
+    color: (
+      primary: mat.$azure-palette,
+      tertiary: mat.$blue-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+}
+
 body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
-  color-scheme: light;
+  // Use CSS variable for color-scheme to support theme switching
+  color-scheme: var(--color-scheme);
 
   // Set a default background, font and text colors for the application using
   // Angular Material's system-level CSS variables. Learn more about these
@@ -163,6 +174,12 @@ body {
     cursor: not-allowed;
   }
 
+  .alert-warning {
+    border: 1px solid var(--color-warning-strong);
+    background-color: var(--color-warning-container);
+    color: var(--color-warning-strong);
+  }
+
   .form-label {
     @apply block text-sm font-medium mb-2;
     color: var(--color-text-secondary);
@@ -197,6 +214,52 @@ body {
   .badge-neutral {
     background-color: var(--color-neutral-container);
     color: var(--color-text-secondary);
+  }
+
+  .table-sort-button {
+    @apply inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider;
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s ease;
+  }
+
+  .table-sort-button:hover,
+  .table-sort-button:focus-visible {
+    color: var(--color-text-primary);
+  }
+
+  .table-sort-button:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  .table-sort-icon {
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .table-header-label {
+    @apply inline-flex items-center text-xs font-semibold uppercase tracking-wider;
+    color: var(--color-text-secondary);
+  }
+
+  .table-search-clear {
+    @apply absolute inset-y-0 flex items-center justify-center;
+    right: 0.5rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    color: var(--color-text-secondary);
+    transition: color 0.2s ease;
+  }
+
+  .table-search-clear:hover,
+  .table-search-clear:focus-visible {
+    color: var(--color-text-primary);
   }
 }
 
