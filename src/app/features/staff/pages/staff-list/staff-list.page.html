@@ -15,8 +15,7 @@
       <a
         class="btn-secondary inline-flex items-center gap-1 cursor-pointer"
         mat-button
-        [attr.href]="templateDownloadUrl"
-        [attr.download]="'staff-template.xlsx'"
+        (click)="exportUserToExcel()"
       >
         <mat-icon style="font-size: 18px; width: 18px; height: 18px">download</mat-icon>
         @if (this.isDesktopView()) {
@@ -80,11 +79,10 @@
               <thead class="bg-table-header text-xs uppercase text-secondary">
                 <tr>
                   <th class="px-4 py-2">แถวที่</th>
-                  <th class="px-4 py-2">ชื่อ-นามสกุล</th>
+                  <th class="px-4 py-2">ชื่อ</th>
+                  <th class="px-4 py-2">นามสกุล</th>
                   <th class="px-4 py-2">อีเมล</th>
                   <th class="px-4 py-2">เบอร์โทร</th>
-                  <th class="px-4 py-2">ตำแหน่ง</th>
-                  <th class="px-4 py-2">หน่วยงาน</th>
                   <th class="px-4 py-2">สถานะ</th>
                 </tr>
               </thead>
@@ -92,9 +90,10 @@
                 @for (preview of importPreviewSample(); track preview.rowNumber) {
                   <tr>
                     <td class="px-4 py-2">{{ preview.rowNumber }}</td>
-                    <td class="px-4 py-2 font-medium text-primary">{{ preview.firstName + ' ' + preview.lastName }}</td>
+                    <td class="px-4 py-2 font-medium text-primary">{{ preview.firstName }}</td>
+                    <td class="px-4 py-2">{{ preview.lastName }}</td>
                     <td class="px-4 py-2">{{ preview.email }}</td>
-                    <td class="px-4 py-2">{{ preview.telNumber ?? '-' }}</td>
+                    <td class="px-4 py-2">{{ preview.telNumber ?? '-'}}</td>
                     <td class="px-4 py-2">
                       @if (preview.isActive) {
                         เปิดใช้งาน
@@ -116,7 +115,7 @@
 
           <div class="mt-4 flex flex-col gap-2 text-sm text-secondary sm:flex-row sm:items-center sm:justify-between">
             <p>
-              คอลัมน์ที่รองรับ: ชื่อ-นามสกุล, อีเมล, ตำแหน่ง, เบอร์โทร (ถ้ามี), หน่วยงาน (ถ้ามี), สถานะ (ถ้ามี) หรือดาวน์โหลดไฟล์ Template (.xlsx) เพื่ออ้างอิงรูปแบบ
+              คอลัมน์ที่รองรับ: ชื่อ-นามสกุล, อีเมล, เบอร์โทร (ถ้ามี), สถานะ (ถ้ามี) หรือดาวน์โหลดไฟล์ Template (.xlsx) เพื่ออ้างอิงรูปแบบ
             </p>
             <div class="flex gap-2">
               <button type="button" class="btn-secondary" (click)="cancelImportPreview()">
@@ -212,6 +211,9 @@
                   <div class="text-sm font-medium text-primary">{{ member.firstName + ' ' + member.lastName }}</div>
                 </div>
               </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-primary">
+              {{ member.email || '-' }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-primary">
               {{ member.telNumber || '-' }}

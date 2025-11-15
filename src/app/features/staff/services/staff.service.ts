@@ -65,9 +65,7 @@ export class StaffService {
 
   importStaff(rows: StaffCreateDto[]): Observable<StaffImportResult> {
     return this.http
-      .post<ApiResponse<StaffImportResult>>(`${this.userUrl}`, {
-        staff: rows,
-      })
+      .post<ApiResponse<StaffImportResult>>(`${this.userUrl}/bulk`,rows)
       .pipe(map((response) => response.result));
   }
 

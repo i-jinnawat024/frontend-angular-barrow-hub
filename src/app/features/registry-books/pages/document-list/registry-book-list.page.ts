@@ -468,7 +468,7 @@ export class RegistryBookListPage implements OnInit {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
 
-    saveAs(blob, `registry-books-${new Date().toISOString().slice(0,10)}.xlsx`);
+    saveAs(blob, `document-${new Date().toISOString().slice(0,10)}.xlsx`);
   }
 
   mapStatus(status: string) {
