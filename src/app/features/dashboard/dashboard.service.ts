@@ -10,12 +10,21 @@ import { Staff } from '../../shared/models/staff.model';
 import { ApiResponse } from '../../shared/models/api-response.model';
 
 export interface DashboardStats {
-  totalDocuments: number;
-  totalStaff: number;
-  borrowedDocuments: number;
-  activeLoans: Loan[];
+   totalHistories: number,
+      totalDocuments: number,
+      totalUser: number,
+      histories: any,
 }
-
+export interface IHistories {
+  historyId: number,
+  documentId: number,
+  documentName: string,
+  borrowerId: number,
+  borrowerName: string,
+  borrowedAt: string,
+  expectedReturnAt: string,
+  returnedAt?: string | null,
+}
 type DocumentApiResponse = Omit<IDocument, 'createdAt' | 'updatedAt' | 'deletedAt'> & {
   createdAt: string;
   updatedAt: string;
@@ -40,9 +49,9 @@ type LoanApiResponse = Omit<
 
 interface DashboardStatsResponse {
   totalDocuments: number;
-  totalStaff: number;
-  borrowedDocuments: number;
-  activeLoans: LoanApiResponse[];
+  totalUser: number;
+  totalHistories: number;
+  histories: LoanApiResponse[];
 }
 
 @Injectable({
@@ -51,9 +60,9 @@ interface DashboardStatsResponse {
 export class DashboardService {
   private readonly stats = signal<DashboardStats>({
     totalDocuments: 0,
-    totalStaff: 0,
-    borrowedDocuments: 0,
-    activeLoans: [],
+    totalUser: 0,
+    totalHistories: 0,
+    histories: [],
   });
 
   private readonly dashboardUrl = `${environment.apiBaseUrl}/dashboard`;
@@ -64,9 +73,9 @@ export class DashboardService {
 
   loadStats(): Observable<DashboardStats> {
     return this.http
-      .get<ApiResponse<DashboardStatsResponse>>(`${this.dashboardUrl}/stats`)
+      .get<ApiResponse<DashboardStatsResponse>>(`${this.dashboardUrl}`)
       .pipe(
-        map((response) => this.mapStatsResponse(response.result)),
+        map((response) => this.mapStatsResponse(response.result) ),
         tap((stats) => this.stats.set(stats)),
         catchError((error) => {
           console.error('Failed to load dashboard stats', error);
@@ -80,30 +89,31 @@ export class DashboardService {
   }
 
   getStats() {
+    console.log(this.stats.asReadonly())
     return this.stats.asReadonly();
   }
 
   private mapStatsResponse(response: DashboardStatsResponse): DashboardStats {
-    return {
+    const result = {
       totalDocuments: response.totalDocuments,
-      totalStaff: response.totalStaff,
-      borrowedDocuments: response.borrowedDocuments,
-      activeLoans: response.activeLoans.map((loan) => this.mapLoan(loan)),
+      totalUser: response.totalUser,
+      totalHistories: response.totalHistories,
+      histories: response.histories.map((borrowed) => this.mapBorrowd(borrowed)),
     };
+    return result
   }
 
-  private mapLoan(loan: LoanApiResponse): Loan {
+  private mapBorrowd(loan: LoanApiResponse): Loan {
     return {
       ...loan,
       document: this.mapDocument(loan.document),
-      borrower: this.mapStaff(loan.borrower),
-      borrowedAt: new Date(loan.borrowedAt),
-      expectedReturnAt: new Date(loan.expectedReturnAt),
-      returnedAt: loan.returnedAt ? new Date(loan.returnedAt) : undefined,
+      createdAt: new Date(loan.createdAt),
+      updatedAt: loan.updatedAt ? new Date(loan.updatedAt) : null,
     };
   }
 
   private mapDocument(document: DocumentApiResponse): IDocument {
+    console.log(document);
     return {
       ...document,
       createdAt: new Date(document.createdAt),
@@ -112,11 +122,4 @@ export class DashboardService {
     };
   }
 
-  private mapStaff(staff: StaffApiResponse): Staff {
-    return {
-      ...staff,
-      createdAt: staff.createdAt ? new Date(staff.createdAt) : undefined,
-      updatedAt: staff.updatedAt ? new Date(staff.updatedAt) : undefined,
-    };
-  }
 }

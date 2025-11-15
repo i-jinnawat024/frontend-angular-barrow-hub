@@ -3,11 +3,11 @@ import { Staff } from './staff.model';
 
 export interface Loan {
   id: string;
+  userId: string;
+  name: string;
   document: IDocument;
-  borrower: Staff;
-  borrowedAt: Date;
-  expectedReturnAt: Date;
-  returnedAt?: Date;
-  status: 'active' | 'returned' | 'overdue';
+  description: string | null;
+  createdAt: Date;
+  updatedAt: Date|null;
 }
 
