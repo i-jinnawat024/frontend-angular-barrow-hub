@@ -58,7 +58,7 @@ export class DashboardPage implements OnInit {
     (loan) => loan.document.first_name + ' ' + loan.document.last_name,
     (loan) => loan.document.documentNumber,
     (loan) => loan.borrower.firstName + ' ' + loan.borrower.lastName,
-    (loan) => loan.borrower.position,
+    (loan) => loan.borrower.telNumber,
     (loan) => loan.status,
   ];
 

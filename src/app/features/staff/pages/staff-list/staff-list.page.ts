@@ -29,9 +29,8 @@ interface StaffImportPreviewRow {
   firstName: string;
   lastName: string;
   email: string;
-  phone?: string;
-  position: string;
-  department?: string;
+  telNumber?: number;
+  password: string;
   isActive: boolean;
 }
 
@@ -85,20 +84,8 @@ export class StaffListPage implements OnInit {
       label: 'เบอร์โทร',
       property: 'phoneNumber',
       sortable: false,
-      accessor: (member) => member.phone,
+      accessor: (member) => member.telNumber,
     },
-    // {
-    //   label: 'ตำแหน่ง',
-    //   property: 'position',
-    //   sortable: true,
-    //   accessor: (member) => member.position,
-    // },
-    // {
-    //   label: 'หน่วยงาน',
-    //   property: 'department',
-    //   sortable: true,
-    //   accessor: (member) => member.department ?? '',
-    // },
     {
       label: 'สถานะ',
       property: 'isActive',
@@ -115,8 +102,6 @@ export class StaffListPage implements OnInit {
   private readonly searchAccessors: Array<(member: Staff) => unknown> = [
     (member) => member.firstName + ' ' + member.lastName,
     (member) => member.email,
-    (member) => member.position,
-    (member) => member.department ?? '',
     (member) => (member.isActive ? 'active' : 'inactive'),
   ];
 
@@ -290,9 +275,8 @@ export class StaffListPage implements OnInit {
       firstName: row.firstName,
       lastName: row.lastName,
       email: row.email,
-      phone: row.phone,
-      position: row.position,
-      department: row.department,
+      telNumber: row.telNumber,
+      password: row.password,
       isActive: row.isActive,
     }));
 
@@ -405,9 +389,8 @@ export class StaffListPage implements OnInit {
         firstName: name.split(' ')[0],
         lastName: name.split(' ')[1],
         email,
-        phone: phone || undefined,
-        position,
-        department: department || undefined,
+        telNumber: phone ? Number(phone) : undefined,
+        password: '',
         isActive,
       });
     }

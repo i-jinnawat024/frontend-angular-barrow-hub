@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import {
   AbstractControl,
@@ -15,8 +15,14 @@ import { RegistryBookService } from '../../services/document.service';
 import { BorrowCreateDto } from '../../../../shared/models/borrow.model';
 import { Document } from '../../../../shared/models/registry-book.model';
 import { QrScannerComponent } from '../../../../shared/components/qr-scanner/qr-scanner.component';
-import { MatIconModule } from "@angular/material/icon";
+import { MatIconModule } from '@angular/material/icon';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { StaffService } from '../../../staff/services/staff.service';
+import { Staff } from '../../../../shared/models/staff.model';
+import Swal from 'sweetalert2';
+
+type BookSortField = 'documentId' | 'name';
+type SortDirection = 'asc' | 'desc';
 
 @Component({
   selector: 'app-borrow',
@@ -31,50 +37,119 @@ export class BorrowPage implements OnInit {
   availableBooks: Document[] = [];
   showScanner = false;
   currentStep: 1 | 2 = 1;
-  scannedBookIds: Set<number> = new Set();
+  scannedDocumentIds: Set<number> = new Set();
   private readonly destroyRef = inject(DestroyRef);
-  
-  private readonly selectedBookIdsControl: FormControl<number[]>;
+  protected readonly staffOptions = signal<Staff[]>([]);
+  protected bookSearchTerm = '';
+  protected bookSortField: BookSortField = 'documentId';
+  protected bookSortDirection: SortDirection = 'asc';
+
+
+  private readonly selectedDocumentIdsControl: FormControl<number[]>;
 
   constructor(
     private readonly fb: FormBuilder,
     private readonly registryBookService: RegistryBookService,
     private readonly router: Router,
     private readonly datePipe: DatePipe,
+    private staffService: StaffService
   ) {
     const now = new Date();
 
-    this.selectedBookIdsControl = this.fb.nonNullable.control<number[]>([], {
+    this.selectedDocumentIdsControl = this.fb.nonNullable.control<number[]>([], {
       validators: [this.atLeastOneSelectionValidator()],
     });
 
     this.form = this.fb.group({
-      selectedBookIds: this.selectedBookIdsControl,
-      borrowerName: ['', [Validators.required]],
+      selectedDocumentIds: this.selectedDocumentIdsControl,
+      userId: ['', [Validators.required]],
       borrowedAt: [now, [Validators.required]],
-      borrowedTime: [
-        this.datePipe.transform(now, 'HH:mm') || '',
-        [Validators.required],
-      ],
+      borrowedTime: [this.datePipe.transform(now, 'HH:mm') || '', [Validators.required]],
       reason: [''],
     });
   }
 
   ngOnInit(): void {
     this.loadAvailableBooks();
+    this.loadUsers();
   }
 
-  get selectedBookIds(): number[] {
-    return this.selectedBookIdsControl.value ?? [];
+  loadUsers(): void {
+    this.staffService
+      .getStaff()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (users) => this.staffOptions.set(users),
+        error: (error) => console.error('Failed to load users list from API', error),
+      });
+  }
+  get selectedDocumentIds(): number[] {
+    return this.selectedDocumentIdsControl.value ?? [];
   }
 
   get selectedBooks(): Document[] {
-    const ids = new Set(this.selectedBookIds);
+    const ids = new Set(this.selectedDocumentIds);
     return this.availableBooks.filter((book) => ids.has(book.id));
   }
 
   get selectedBookNumbers(): string {
     return this.selectedBooks.map((book) => book.documentId).join(', ');
+  }
+
+  get filteredBooks(): Document[] {
+    const term = this.bookSearchTerm.trim().toLowerCase();
+    const direction = this.bookSortDirection === 'asc' ? 1 : -1;
+
+    return this.availableBooks
+      .filter((book) => {
+        if (!term) {
+          return true;
+        }
+
+        const documentNumber = String(book.documentId);
+        const fullName = `${book.firstName} ${book.lastName}`.toLowerCase();
+        return documentNumber.includes(term) || fullName.includes(term);
+      })
+      .sort((a, b) => {
+        let compare = 0;
+        if (this.bookSortField === 'documentId') {
+          compare = a.documentId - b.documentId;
+        } else {
+          const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
+          const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
+          compare = nameA.localeCompare(nameB, 'th');
+        }
+
+        if (compare === 0) {
+          compare = a.id - b.id;
+        }
+
+        return compare * direction;
+      });
+  }
+
+  onBookSearch(term: string): void {
+    this.bookSearchTerm = term;
+  }
+
+  clearBookSearch(): void {
+    this.bookSearchTerm = '';
+  }
+
+  changeBookSort(field: BookSortField): void {
+    if (this.bookSortField === field) {
+      this.bookSortDirection = this.bookSortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.bookSortField = field;
+      this.bookSortDirection = 'asc';
+    }
+  }
+
+  getBookSortIcon(field: BookSortField): string {
+    if (this.bookSortField !== field) {
+      return 'unfold_more';
+    }
+    return this.bookSortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward';
   }
 
   private atLeastOneSelectionValidator(): ValidatorFn {
@@ -84,12 +159,12 @@ export class BorrowPage implements OnInit {
     };
   }
 
-  private updateSelectedBookIds(ids: number[], markTouched = true): void {
-    this.selectedBookIdsControl.setValue(ids);
+  private updateSelectedDocumentIds(ids: number[], markTouched = true): void {
+    this.selectedDocumentIdsControl.setValue(ids);
     if (markTouched) {
-      this.selectedBookIdsControl.markAsTouched();
+      this.selectedDocumentIdsControl.markAsTouched();
     }
-    this.selectedBookIdsControl.updateValueAndValidity({ emitEvent: false });
+    this.selectedDocumentIdsControl.updateValueAndValidity({ emitEvent: false });
   }
 
   loadAvailableBooks(): void {
@@ -98,58 +173,52 @@ export class BorrowPage implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (books) => {
-          this.availableBooks = books.filter(
-            (book) => book.status === 'ACTIVE',
-          );
+          this.availableBooks = books.filter((book) => book.status === 'ACTIVE');
 
-          const availableIds = new Set(
-            this.availableBooks.map((book) => book.id),
-          );
-          const filtered = this.selectedBookIds.filter((id) =>
-            availableIds.has(id),
-          );
-          if (filtered.length !== this.selectedBookIds.length) {
-            this.updateSelectedBookIds(filtered, false);
+          const availableIds = new Set(this.availableBooks.map((book) => book.id));
+          const filtered = this.selectedDocumentIds.filter((id) => availableIds.has(id));
+          if (filtered.length !== this.selectedDocumentIds.length) {
+            this.updateSelectedDocumentIds(filtered, false);
           }
         },
-        error: (error) =>
-          console.error('Failed to load registry books', error),
+        error: (error) => console.error('Failed to load registry books', error),
       });
   }
 
-  isBookSelected(bookId: number): boolean {
-    return this.selectedBookIds.includes(bookId);
+  isDocumentSelected(documentId: number): boolean {
+    return this.selectedDocumentIds.includes(documentId);
   }
 
-  onBookSelectionChange(bookId: number, checked: boolean): void {
-    const selected = new Set(this.selectedBookIds);
+  onDocumentSelectionChange(documentId: number, checked: boolean): void {
+    const selected = new Set(this.selectedDocumentIds);
     if (checked) {
-      selected.add(bookId);
+      selected.add(documentId);
     } else {
-      selected.delete(bookId);
+      selected.delete(documentId);
     }
-    this.updateSelectedBookIds(Array.from(selected));
+    this.updateSelectedDocumentIds(Array.from(selected));
   }
 
-  selectAllBooks(): void {
-    if (!this.availableBooks.length) {
-      this.updateSelectedBookIds([], false);
+  selectAllDocument(): void {
+    const visibleBooks = this.filteredBooks;
+    if (!visibleBooks.length) {
+      this.updateSelectedDocumentIds([], false);
       return;
     }
 
-    const allIds = this.availableBooks.map((book) => book.id);
-    this.updateSelectedBookIds(allIds);
+    const allIds = visibleBooks.map((book) => book.id);
+    this.updateSelectedDocumentIds(allIds);
   }
 
   clearSelection(): void {
-    this.updateSelectedBookIds([]);
-    this.scannedBookIds.clear();
+    this.updateSelectedDocumentIds([]);
+    this.scannedDocumentIds.clear();
   }
 
   // Step Navigation
   goToStep2(): void {
-    if (!this.selectedBookIds.length) {
-      this.selectedBookIdsControl.markAsTouched();
+    if (!this.selectedDocumentIds.length) {
+      this.selectedDocumentIdsControl.markAsTouched();
       alert('กรุณาเลือกเล่มทะเบียนอย่างน้อย 1 เล่ม');
       return;
     }
@@ -184,15 +253,15 @@ export class BorrowPage implements OnInit {
             return;
           }
 
-          if (this.isBookSelected(book.id)) {
+          if (this.isDocumentSelected(book.id)) {
             alert(`เล่มทะเบียน ${book.documentId} ถูกเลือกไปแล้ว`);
             return;
           }
 
-          this.scannedBookIds.add(book.id);
-          const selected = new Set(this.selectedBookIds);
+          this.scannedDocumentIds.add(book.id);
+          const selected = new Set(this.selectedDocumentIds);
           selected.add(book.id);
-          this.updateSelectedBookIds(Array.from(selected));
+          this.updateSelectedDocumentIds(Array.from(selected));
           alert(`✅ เพิ่มเล่มทะเบียน ${book.documentId} แล้ว`);
         },
         error: () => alert('ไม่พบเล่มทะเบียนที่ตรงกับ QR code นี้'),
@@ -210,51 +279,54 @@ export class BorrowPage implements OnInit {
 
   // Form Submission
   onSubmit(): void {
-    if (!this.form.valid || !this.selectedBookIds.length) {
+    if (!this.form.valid || !this.selectedDocumentIds.length) {
       this.form.markAllAsTouched();
-      this.selectedBookIdsControl.updateValueAndValidity();
+      this.selectedDocumentIdsControl.updateValueAndValidity();
       alert('�,?�,��,,�,"�,��,?�,��,-�,?�,,�1%�,-�,��,1�,��1��,��1%�,,�,��,s�,-�1%�,���,T');
       return;
     }
 
     const formValue = this.form.value as {
-      borrowerName: string;
-      borrowedAt: Date | string;
-      borrowedTime: string;
+      userId: string;
       reason?: string;
     };
 
-    const borrowedDate = new Date(formValue.borrowedAt);
-    const [hours, minutes] = formValue.borrowedTime.split(':');
-    borrowedDate.setHours(parseInt(hours, 10), parseInt(minutes, 10));
+    const userId = formValue.userId;
+    if (!userId) {
+      this.form.get('userId')?.markAsTouched();
+      alert('�,?�,��,,�,"�,��,?�,��,-�,?�,S�,��1^�,-�,o�,1�1%�,��,��,�');
+      return;
+    }
 
-    const borrowDtos: BorrowCreateDto[] = this.selectedBookIds.map((bookId) => ({
-      registryBookId: bookId,
-      borrowerName: formValue.borrowerName,
-      borrowedAt: new Date(borrowedDate),
-      reason: formValue.reason || undefined,
-    }));
-
+    const borrowDtos: BorrowCreateDto = {
+      userId,
+      documentId: this.selectedDocumentIds,
+      description: formValue.reason?.trim() || undefined,
+    };
     this.registryBookService
       .createBulkBorrows(borrowDtos)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (borrows) => {
-          if (!borrows.length) {
+          if (!borrows) {
             return;
           }
 
-          const scannedCount = this.selectedBookIds.filter((id) =>
-            this.scannedBookIds.has(id),
+          const scannedCount = this.selectedDocumentIds.filter((id) =>
+            this.scannedDocumentIds.has(id)
           ).length;
 
-          let message = `�,��,��,��1?�,��1^�,��,-�,��1?�,s�,�,��,T�,^�,3�,T�,���,T ${borrows.length} �1?�,��1^�,��,��,3�1?�,��1O.,^�1?�,��1%�,���`;
+          let message = ``;
           if (scannedCount > 0) {
             message += ` (�,��1?�,?�,T QR ${scannedCount} �1?�,��1^�,�)`;
           }
 
-          alert(message);
-          this.router.navigate(['/registry-books']);
+          Swal.fire({
+            title: 'บันทึกการยืมสำเร็จ',
+            text: message,
+            icon: 'success',
+            confirmButtonText: 'ตกลง',
+          }).then(() => window.location.reload());
         },
         error: (error) => {
           console.error('Failed to create borrow records', error);
@@ -264,14 +336,15 @@ export class BorrowPage implements OnInit {
   }
 
   cancel(): void {
-    if (this.selectedBookIds.length > 0 || 
-        this.form.get('borrowerName')?.value ||
-        this.form.get('reason')?.value) {
+    if (
+      this.selectedDocumentIds.length > 0 ||
+      this.form.get('userId')?.value ||
+      this.form.get('reason')?.value
+    ) {
       if (!confirm('คุณมีข้อมูลที่ยังไม่ได้บันทึก ต้องการยกเลิกหรือไม่?')) {
         return;
       }
     }
     this.router.navigate(['/registry-books']);
   }
-
 }

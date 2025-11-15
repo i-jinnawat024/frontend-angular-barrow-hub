@@ -7,6 +7,7 @@ import { environment } from '../../../environments/environment';
 import { IDocument } from '../../shared/models/document.model';
 import { Loan } from '../../shared/models/loan.model';
 import { Staff } from '../../shared/models/staff.model';
+import { ApiResponse } from '../../shared/models/api-response.model';
 
 export interface DashboardStats {
   totalDocuments: number;
@@ -62,14 +63,16 @@ export class DashboardService {
   }
 
   loadStats(): Observable<DashboardStats> {
-    return this.http.get<DashboardStatsResponse>(`${this.dashboardUrl}/stats`).pipe(
-      map((response) => this.mapStatsResponse(response)),
-      tap((stats) => this.stats.set(stats)),
-      catchError((error) => {
-        console.error('Failed to load dashboard stats', error);
-        return of(this.stats());
-      }),
-    );
+    return this.http
+      .get<ApiResponse<DashboardStatsResponse>>(`${this.dashboardUrl}/stats`)
+      .pipe(
+        map((response) => this.mapStatsResponse(response.result)),
+        tap((stats) => this.stats.set(stats)),
+        catchError((error) => {
+          console.error('Failed to load dashboard stats', error);
+          return of(this.stats());
+        }),
+      );
   }
 
   refresh(): void {

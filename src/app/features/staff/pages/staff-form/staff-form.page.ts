@@ -7,11 +7,11 @@ import { StaffService } from '../../services/staff.service';
 import { Staff, StaffCreateDto, StaffUpdateDto } from '../../../../shared/models/staff.model';
 
 interface StaffFormValue {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  phone?: string | null;
-  position: string;
-  department?: string | null;
+  telNumber?: number | null;
+  password: string;
   isActive: boolean;
 }
 
@@ -35,11 +35,11 @@ export class StaffFormPage implements OnInit {
     private route: ActivatedRoute
   ) {
     this.form = this.fb.group({
-      name: ['', [Validators.required]],
+      firstName: ['', [Validators.required]],
+      lastName: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
-      phone: [''],
-      position: ['', [Validators.required]],
-      department: [''],
+      telNumber: [''],
+      password: ['', [Validators.required]],
       isActive: [true]
     });
   }
@@ -56,11 +56,11 @@ export class StaffFormPage implements OnInit {
           this.loadStaff();
         } else {
           this.form.reset({
-            name: '',
+            firstName: '',
+            lastName: '',
             email: '',
-            phone: '',
-            position: '',
-            department: '',
+            telNumber: '',
+            password: '',
             isActive: true,
           });
         }
@@ -78,11 +78,11 @@ export class StaffFormPage implements OnInit {
       .subscribe({
         next: (staff) => {
           this.form.patchValue({
-            name: this.composeFullName(staff),
+            firstName: staff.firstName,
+            lastName: staff.lastName,
             email: staff.email,
-            phone: staff.phone ?? '',
-            position: staff.position,
-            department: staff.department ?? '',
+            telNumber: staff.telNumber ?? '',
+            password: staff.password ?? '',
             isActive: staff.isActive,
           });
         },
@@ -126,22 +126,20 @@ export class StaffFormPage implements OnInit {
 
   private mapFormToStaffDto(): StaffCreateDto {
     const raw = this.form.value as StaffFormValue;
-    const { firstName, lastName } = this.extractNameParts(raw.name ?? '');
+    const { firstName, lastName } = this.extractNameParts(`${raw.firstName ?? ''} ${raw.lastName ?? ''}`);
 
     return {
       firstName,
       lastName,
       email: (raw.email ?? '').trim(),
-      phone: this.normalizeOptionalField(raw.phone),
-      position: (raw.position ?? '').trim(),
-      department: this.normalizeOptionalField(raw.department),
-      isActive: raw.isActive ?? true,
+      telNumber: this.normalizeOptionalField(raw.telNumber),
+      password: (raw.password ?? '').trim(),
     };
   }
 
-  private normalizeOptionalField(value?: string | null): string | undefined {
+  private normalizeOptionalField(value?: number | null): number | undefined {
     const normalized = value?.toString().trim();
-    return normalized ? normalized : undefined;
+    return normalized ? Number(normalized) : undefined;
   }
 
   private extractNameParts(fullName: string): { firstName: string; lastName: string } {
