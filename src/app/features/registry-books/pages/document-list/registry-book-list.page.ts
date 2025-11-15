@@ -23,7 +23,8 @@ import {
 } from '../../../../shared/utils/table-utils';
 import { readTabularFile } from '../../../../shared/utils/csv-utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { first } from 'rxjs';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver'
 
 type RegistryBookStatus = Document['status'];
 
@@ -77,7 +78,7 @@ export class RegistryBookListPage implements OnInit {
     accessor?: (book: Document) => unknown;
   }> = [
     {
-      label: 'เลขทะเบียน',
+      label: 'เลขเล่มทะเบียน',
       property: 'DocumnetNumber',
       sortable: true,
       accessor: (book) => book.documentId,
@@ -285,12 +286,9 @@ export class RegistryBookListPage implements OnInit {
     this.isImporting.set(true);
 
     const payload = previewRows.map((row) => ({
-      id: row.id,
       documentId: row.documentId,
       firstName: row.firstName,
       lastName: row.lastName,
-      description: row.description,
-      status: row.status,
     }));
 
     this.registryBookService
@@ -314,7 +312,7 @@ export class RegistryBookListPage implements OnInit {
           this.isImporting.set(false);
         },
         error: (error) => {
-          console.error('Failed to import registry books', error);
+          console.error('Failed to import document', error);
           window.alert('ไม่สามารถนำเข้าทะเบียนเอกสารได้ กรุณาลองใหม่อีกครั้ง');
           this.isImporting.set(false);
         },
@@ -336,17 +334,19 @@ export class RegistryBookListPage implements OnInit {
     );
     const documentIdIndex = this.findHeaderIndex(headers, [
       'เลขเล่มทะเบียน',
-      'หมายเลขเล่มทะเบียน',
-      'รหัสเล่มทะเบียน',
+      'ชื่อ',
+      'นามสกุล',
+      'สถานะ',
     ]);
-    const nameIndex = this.findHeaderIndex(headers, ['ชื่อเล่มทะเบียน', 'ชื่อเล่มทะเบียน/ทะเบียน']);
+    const firstNameIndex = this.findHeaderIndex(headers, ['ชื่อ']);
+    const lastNameIndex = this.findHeaderIndex(headers, [ 'นามสกุล']);
     const descriptionIndex = this.findHeaderIndex(headers, ['รายละเอียด', 'คำอธิบาย']);
     const statusIndex = this.findHeaderIndex(headers, ['สถานะ']);
 
     const errors: string[] = [];
 
-    if (documentIdIndex === -1 || nameIndex === -1) {
-      errors.push('ไม่พบคอลัมน์ "เลขเล่มทะเบียน" หรือ "ชื่อเล่มทะเบียน" ในไฟล์');
+    if (documentIdIndex === -1 || firstNameIndex === -1 || lastNameIndex === -1) {
+      errors.push('ไม่พบคอลัมน์ "เลขเล่มทะเบียน" หรือ "ชื่อ-นามสกุล" ในไฟล์');
       return { rows: [], errors };
     }
 
@@ -362,20 +362,21 @@ export class RegistryBookListPage implements OnInit {
       }
 
       const documentId = (row[documentIdIndex] ?? '').trim();
-      const name = String(row[nameIndex] ?? '').trim();
+      const firstName = String(row[firstNameIndex] ?? '').trim();
+      const lastName = String(row[lastNameIndex] ?? '').trim();
       const description =
         descriptionIndex !== -1 ? String(row[descriptionIndex] ?? '').trim() : '';
       const statusRaw =
         statusIndex !== -1 ? String(row[statusIndex] ?? '').trim() : '';
 
-      if (!documentId || !name) {
-        errors.push(`แถวที่ ${rowNumber}: ต้องระบุเลขเล่มทะเบียนและชื่อเล่มทะเบียน`);
+      if (!documentId || !firstName || !lastName) {
+        errors.push(`แถวที่ ${rowNumber-1}: ต้องระบุเลขเล่มทะเบียนและชื่อ-นามสกุล`);
         continue;
       }
 
       const normalizedKey = Number(documentId);
       if (seenBookNumbers.has(normalizedKey)) {
-        errors.push(`แถวที่ ${rowNumber}: เลขเล่มทะเบียน "${documentId}" ซ้ำกับข้อมูลก่อนหน้าในไฟล์`);
+        errors.push(`แถวที่ ${rowNumber-1}: เลขเล่มทะเบียน "${documentId}" ซ้ำกับข้อมูลก่อนหน้าในไฟล์`);
         continue;
       }
 
@@ -384,7 +385,7 @@ export class RegistryBookListPage implements OnInit {
         const normalizedStatus = this.normalizeRegistryBookStatus(statusRaw);
         if (!normalizedStatus) {
           errors.push(
-            `แถวที่ ${rowNumber}: ไม่สามารถตีความสถานะ "${statusRaw}" ได้ กรุณาใช้คำว่า พร้อมใช้งาน, กำลังยืม, เก็บถาวร หรือ ปิดใช้งาน`,
+            `แถวที่ ${rowNumber-1}: ไม่สามารถตีความสถานะ "${statusRaw}" ได้ กรุณาใช้คำว่า พร้อมใช้งาน, กำลังยืม, เก็บถาวร หรือ ปิดใช้งาน`,
           );
           continue;
         }
@@ -396,8 +397,8 @@ export class RegistryBookListPage implements OnInit {
         id: 0,
         rowNumber,
         documentId: Number(documentId),
-        firstName: name.split(' ')[0],
-        lastName: name.split(' ')[1],
+        firstName,
+        lastName,
         description: description || undefined,
         status,
       });
@@ -444,4 +445,40 @@ export class RegistryBookListPage implements OnInit {
     this.importFileName.set(null);
     this.isImporting.set(false);
   }
+
+   exportToExcel() {
+    const data = this.filteredRegistryBooks().map((book) => ({
+      'เลขเล่มทะเบียน': book.documentId,
+      'ชื่อ': book.firstName,
+      'นามสกุล': book.lastName,
+      'สถานะ': this.mapStatus(book.status),
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+
+    // Auto width (ปรับให้พอดี)
+    const colWidths = Object.keys(data[0]).map(key => ({ wch: Math.max(key.length, 12) }));
+    worksheet['!cols'] = colWidths;
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'RegistryBooks');
+
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+
+    saveAs(blob, `registry-books-${new Date().toISOString().slice(0,10)}.xlsx`);
+  }
+
+  mapStatus(status: string) {
+    switch (status) {
+      case 'ACTIVE': return 'พร้อมใช้งาน';
+      case 'BORROWED': return 'กำลังยืม';
+      case 'ARCHIVED': return 'เก็บถาวร';
+      case 'INACTIVE': return 'ปิดใช้งาน';
+      default: return 'ไม่ทราบสถานะ';
+    }
+  }
+
 }
