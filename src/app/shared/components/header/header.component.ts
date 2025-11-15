@@ -1,14 +1,23 @@
 import { CommonModule } from '@angular/common';
-import { Component, input, output, signal, OnInit, OnDestroy, effect, computed } from '@angular/core';
+import {
+  Component,
+  input,
+  output,
+  signal,
+  OnInit,
+  OnDestroy,
+  effect,
+  computed,
+} from '@angular/core';
 import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
-import {  MatIconModule } from "@angular/material/icon";
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-header',
   standalone: true,
   imports: [CommonModule, ThemeToggleComponent, MatIconModule],
   templateUrl: './header.component.html',
-  styleUrl: './header.component.scss'
+  styleUrl: './header.component.scss',
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   sidebarOpen = input<boolean>(false);
@@ -60,7 +69,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       const sidebarOpen = this.sidebarOpen();
       const sidebarCollapsed = this.sidebarCollapsed();
       const isDesktop = this.isDesktopScreen();
-      
+
       if (isDesktop && sidebarOpen) {
         if (sidebarCollapsed) {
           this.headerMarginLeft.set('4rem'); // 64px for collapsed
