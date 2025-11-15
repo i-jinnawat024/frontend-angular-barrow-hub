@@ -1,19 +1,19 @@
-﻿<app-header
-  [sidebarOpen]="sidebarOpen()"
-  [sidebarCollapsed]="sidebarCollapsed()"
-  (toggleSidebar)="toggleSidebar()"
-  (closeSidebar)="closeSidebar()"
-></app-header>
-<app-sidebar
-  [isOpen]="sidebarOpen()"
-  [isCollapsed]="sidebarCollapsed()"
-  (closeSidebar)="closeSidebar()"
-></app-sidebar>
-<main 
+@if (!hideShellChrome()) {
+  <app-header
+    [sidebarOpen]="sidebarOpen()"
+    [sidebarCollapsed]="sidebarCollapsed()"
+    (toggleSidebar)="toggleSidebar()"
+    (closeSidebar)="closeSidebar()"
+  ></app-header>
+  <app-sidebar
+    [isOpen]="sidebarOpen()"
+    [isCollapsed]="sidebarCollapsed()"
+    (closeSidebar)="closeSidebar()"
+  ></app-sidebar>
+}
+<main
   class="min-h-screen bg-page transition-all duration-300"
   [style.margin-left]="getMainMarginLeft()"
 >
   <router-outlet />
 </main>
-
-
