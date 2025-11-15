@@ -11,57 +11,97 @@ import { SidebarComponent } from '../shared/components/sidebar/sidebar.component
 //   styleUrl: './shell.layout.scss'
 })
 export class ShellLayoutComponent implements OnInit, OnDestroy {
-  // Sidebar state - closed by default, user can toggle
-  protected readonly sidebarOpen = signal(false);
-  protected readonly sidebarCollapsed = signal(false);
+  private readonly initialDesktop = this.isDesktopViewport();
 
+  // Sidebar state - defaults based on viewport
+  protected readonly sidebarOpen = signal(this.initialDesktop);
+  protected readonly sidebarCollapsed = signal(false);
+  protected readonly isDesktopScreen = signal(this.initialDesktop);
+
+  private desktopCollapsedCache = false;
   private resizeListener?: () => void;
 
   ngOnInit(): void {
-    // Optional: Auto-open sidebar on desktop on initial load
-    if (this.isDesktop()) {
+    this.syncSidebarForViewport(this.isDesktopScreen());
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    this.resizeListener = () => {
+      const isDesktop = this.isDesktopViewport();
+      if (isDesktop !== this.isDesktopScreen()) {
+        this.isDesktopScreen.set(isDesktop);
+        this.syncSidebarForViewport(isDesktop);
+      }
+    };
+
+    window.addEventListener('resize', this.resizeListener);
+  }
+
+  ngOnDestroy(): void {
+    if (typeof window === 'undefined' || !this.resizeListener) {
+      return;
+    }
+
+    window.removeEventListener('resize', this.resizeListener);
+  }
+
+  private isDesktopViewport(): boolean {
+    return typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches;
+  }
+
+  private syncSidebarForViewport(isDesktop: boolean): void {
+    if (isDesktop) {
       this.sidebarOpen.set(true);
+      this.sidebarCollapsed.set(this.desktopCollapsedCache);
+      return;
+    }
+
+    this.desktopCollapsedCache = this.sidebarCollapsed();
+    this.sidebarOpen.set(false);
+    this.sidebarCollapsed.set(false);
+  }
+
+  protected toggleSidebar(): void {
+    const isDesktop = this.isDesktopScreen();
+
+    if (isDesktop) {
+      if (!this.sidebarOpen()) {
+        this.sidebarOpen.set(true);
+        this.sidebarCollapsed.set(false);
+        this.desktopCollapsedCache = false;
+        return;
+      }
+
+      const collapsed = this.sidebarCollapsed();
+      this.sidebarCollapsed.set(!collapsed);
+      this.desktopCollapsedCache = !collapsed;
+      return;
+    }
+
+    const shouldOpen = !this.sidebarOpen();
+    this.sidebarOpen.set(shouldOpen);
+
+    if (shouldOpen) {
       this.sidebarCollapsed.set(false);
     }
   }
 
-  ngOnDestroy(): void {
-    if (this.resizeListener) {
-      window.removeEventListener('resize', this.resizeListener);
-    }
-  }
-
-  private isDesktop(): boolean {
-    return typeof window !== 'undefined' && window.innerWidth >= 768;
-  }
-
-  protected toggleSidebar(): void {
-    // On desktop: toggle between expanded and collapsed
-    // On mobile: toggle between open and closed (full sidebar)
-    console.log('object');
-    if (this.isDesktop()) {
-      if (this.sidebarOpen()) {
-        // If sidebar is open, toggle between expanded and collapsed
-        this.sidebarCollapsed.update((collapsed) => !collapsed);
-      } else {
-        // If sidebar is closed, open it expanded
-        this.sidebarOpen.set(false);
-        this.sidebarCollapsed.set(false);
-      }
-    } else {
-      // On mobile: just toggle open/closed (always expanded when open)
-      // this.sidebarOpen.update((isOpen) => !isOpen);
-      // this.sidebarCollapsed.set(false);
-    }
-  }
-
   protected closeSidebar(): void {
+    if (this.isDesktopScreen()) {
+      return;
+    }
+
     this.sidebarOpen.set(false);
     this.sidebarCollapsed.set(false);
   }
 
   protected getMainMarginLeft(): string {
-    if (!this.sidebarOpen()) return '0';
+    if (!this.isDesktopScreen() || !this.sidebarOpen()) {
+      return '0';
+    }
+
     if (this.sidebarCollapsed()) return '4rem'; // 64px for collapsed
     return '16rem'; // 256px for expanded
   }

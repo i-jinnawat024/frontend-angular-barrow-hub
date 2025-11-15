@@ -1,0 +1,447 @@
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  HostListener,
+  OnInit,
+  ViewChild,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
+import { RegistryBookService } from '../../services/document.service';
+import { Document } from '../../../../shared/models/registry-book.model';
+import {
+  SortState,
+  compareValues,
+  cycleSortState,
+  defaultSortState,
+  toSearchableString,
+} from '../../../../shared/utils/table-utils';
+import { readTabularFile } from '../../../../shared/utils/csv-utils';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { first } from 'rxjs';
+
+type RegistryBookStatus = Document['status'];
+
+interface RegistryBookImportPreviewRow {
+  id: number;
+  rowNumber: number;
+  documentId: number;
+  firstName:string,
+  lastName:string,
+  description?: string;
+  status: RegistryBookStatus;
+}
+
+@Component({
+  selector: 'app-registry-book-list',
+  standalone: true,
+  imports: [CommonModule, MatIconModule],
+  templateUrl: './registry-book-list.page.html',
+  styleUrl: './registry-book-list.page.scss',
+})
+export class RegistryBookListPage implements OnInit {
+  private readonly registryBooks = signal<Document[]>([]);
+  protected readonly searchTerm = signal('');
+  protected readonly sortState = signal<SortState>({ ...defaultSortState });
+  private readonly isDesktopScreen = signal(this.checkIsDesktop());
+  protected readonly isDesktopView = computed(() => this.isDesktopScreen());
+  protected readonly importPreview = signal<RegistryBookImportPreviewRow[]>([]);
+  protected readonly importErrors = signal<string[]>([]);
+  protected readonly importFileName = signal<string | null>(null);
+  protected readonly isImporting = signal(false);
+  protected readonly hasImportPreview = computed(
+    () => this.importPreview().length > 0,
+  );
+  protected readonly hasImportErrors = computed(
+    () => this.importErrors().length > 0,
+  );
+  protected readonly importPreviewSample = computed(() =>
+    this.importPreview().slice(0, 10),
+  );
+  protected readonly importPreviewRemaining = computed(() => {
+    const total = this.importPreview().length;
+    return total > 10 ? total - 10 : 0;
+  });
+  protected readonly templateDownloadUrl = '/samples/registry-books-template.xlsx';
+  private readonly destroyRef = inject(DestroyRef);
+
+  protected readonly columns: Array<{
+    label: string;
+    property: string;
+    sortable: boolean;
+    accessor?: (book: Document) => unknown;
+  }> = [
+    {
+      label: 'เลขทะเบียน',
+      property: 'DocumnetNumber',
+      sortable: true,
+      accessor: (book) => book.documentId,
+    },
+    {
+      label: 'ชื่อ-นามสกุล',
+      property: 'name',
+      sortable: true,
+      accessor: (book) => `${book.firstName} ${book.lastName}`,
+    },
+    {
+      label: 'สถานะ',
+      property: 'status',
+      sortable: true,
+      accessor: (book) => book.status,
+    },
+    {
+      label: 'จัดการ',
+      property: 'actions',
+      sortable: false,
+    },
+  ];
+
+  private readonly searchAccessors: Array<(book: Document) => unknown> = [
+    (book) => book.documentId,
+    (book) => `${book.firstName} ${book.lastName}`,
+    (book) => book.status,
+  ];
+
+  protected readonly filteredRegistryBooks = computed(() => {
+    const raw = this.registryBooks();
+    const term = this.searchTerm().trim().toLowerCase();
+
+    const filtered = term
+      ? raw.filter((book) =>
+          this.searchAccessors.some((accessor) =>
+            toSearchableString(accessor(book)).includes(term),
+          ),
+        )
+      : raw;
+
+    const sort = this.sortState();
+    if (!sort.active) {
+      return filtered;
+    }
+
+    const column = this.columns.find(
+      (col) => col.property === sort.active && col.sortable && col.accessor,
+    );
+
+    if (!column?.accessor) {
+      return filtered;
+    }
+
+    return [...filtered].sort((a, b) =>
+      compareValues(column.accessor!(a), column.accessor!(b), sort.direction),
+    );
+  });
+
+  protected readonly registryBookCount = computed(
+    () => this.registryBooks().length,
+  );
+
+  protected readonly hasSearchTerm = computed(
+    () => this.searchTerm().trim().length > 0,
+  );
+
+  constructor(
+    private readonly registryBookService: RegistryBookService,
+    private readonly router: Router,
+  ) {}
+
+  @ViewChild('registryImportInput') private registryImportInput?: ElementRef<HTMLInputElement>;
+
+  ngOnInit(): void {
+    this.loadRegistryBooks();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.isDesktopScreen.set(this.checkIsDesktop());
+  }
+
+  private checkIsDesktop(): boolean {
+    return typeof window !== 'undefined' && window.innerWidth >= 768;
+  }
+
+  loadRegistryBooks(): void {
+    this.registryBookService
+      .getRegistryBooks()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (books) => this.registryBooks.set(books),
+        error: (error) =>
+          console.error('Failed to load registry books', error),
+      });
+  }
+
+  deleteRegistryBook(id: number): void {
+    if (!confirm('ต้องการลบเล่มทะเบียนรายการนี้หรือไม่?')) {
+      return;
+    }
+
+    this.registryBookService
+      .deleteRegistryBook(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.loadRegistryBooks(),
+        error: (error) => {
+          console.error('Failed to delete registry book', error);
+          window.alert('ไม่สามารถลบทะเบียนเอกสารได้ กรุณาลองใหม่อีกครั้ง');
+        },
+      });
+  }
+
+  viewDetails(id: number): void {
+    this.router.navigate(['/registry-books', id]);
+  }
+
+  editRegistryBook(id: number): void {
+    this.router.navigate(['/registry-books', id, 'edit']);
+  }
+
+  createRegistryBook(): void {
+    this.router.navigate(['/registry-books', 'create']);
+  }
+
+  protected onSearchTermChange(event: Event): void {
+    const value = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.searchTerm.set(value);
+  }
+
+  protected clearSearch(): void {
+    this.searchTerm.set('');
+  }
+
+  protected toggleSort(property: string): void {
+    const column = this.columns.find((col) => col.property === property);
+    if (!column?.sortable) {
+      return;
+    }
+
+    const nextState = cycleSortState(this.sortState(), property);
+    this.sortState.set(nextState);
+  }
+
+  protected isSortedAscending(property: string): boolean {
+    const sort = this.sortState();
+    return sort.active === property && sort.direction === 'asc';
+  }
+
+  protected isSortedDescending(property: string): boolean {
+    const sort = this.sortState();
+    return sort.active === property && sort.direction === 'desc';
+  }
+
+  protected openImportDialog(): void {
+    if (this.registryImportInput) {
+      this.registryImportInput.nativeElement.value = '';
+      this.registryImportInput.nativeElement.click();
+    }
+  }
+
+  protected async onImportFileSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    this.importFileName.set(file.name);
+    this.importErrors.set([]);
+    this.importPreview.set([]);
+
+    this.isImporting.set(true);
+
+    try {
+      const { rows: rawRows, errors: readErrors } = await readTabularFile(file);
+      const { rows, errors } = this.parseRegistryBookImport(rawRows);
+      this.importPreview.set(rows);
+      this.importErrors.set([...readErrors, ...errors]);
+    } catch (error) {
+      console.error(error);
+      this.importPreview.set([]);
+      this.importErrors.set(['ไม่สามารถอ่านไฟล์สำหรับนำเข้าได้ กรุณาลองใหม่อีกครั้ง']);
+    } finally {
+      this.isImporting.set(false);
+      if (this.registryImportInput) {
+        this.registryImportInput.nativeElement.value = '';
+      }
+    }
+  }
+
+  protected cancelImportPreview(): void {
+    this.resetImportState();
+  }
+
+  protected confirmImportPreview(): void {
+    const previewRows = this.importPreview();
+    if (previewRows.length === 0) {
+      return;
+    }
+
+    this.isImporting.set(true);
+
+    const payload = previewRows.map((row) => ({
+      id: row.id,
+      documentId: row.documentId,
+      firstName: row.firstName,
+      lastName: row.lastName,
+      description: row.description,
+      status: row.status,
+    }));
+
+    this.registryBookService
+      .importRegistryBooks(payload)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (result) => {
+          this.loadRegistryBooks();
+          this.resetImportState();
+
+          let message = `�,T�,3�1?�,,�1%�,��,,�1%�,-�,��,1�,��1?�,��1^�,��,-�,��1?�,s�,�,��,T�,��,3�1?�,��1؅,^ ${result.imported} �,��,��,��,?�,��,�`;
+          if (result.duplicateBookNumbers.length > 0) {
+            const duplicated = Array.from(new Set(result.duplicateBookNumbers))
+              .filter((value) => value.trim().length > 0)
+              .join(', ');
+            message += `
+�,��,��,��,?�,��,��,-�,�1^�,,�1%�,��,��1?�,T�,��1^�,-�,؅,^�,��,?�,,�1%�,-�,��,1�,��,<�1%�,3: ${duplicated}`;
+          }
+
+          window.alert(message);
+          this.isImporting.set(false);
+        },
+        error: (error) => {
+          console.error('Failed to import registry books', error);
+          window.alert('ไม่สามารถนำเข้าทะเบียนเอกสารได้ กรุณาลองใหม่อีกครั้ง');
+          this.isImporting.set(false);
+        },
+      });
+  }
+
+  private parseRegistryBookImport(
+    rows: string[][],
+  ): { rows: RegistryBookImportPreviewRow[]; errors: string[] } {
+    if (rows.length === 0) {
+      return {
+        rows: [],
+        errors: ['ไฟล์ไม่มีข้อมูล กรุณาตรวจสอบไฟล์ Template ก่อนอัปโหลด'],
+      };
+    }
+
+    const headers = rows[0].map((cell) =>
+      this.normalizeHeader(String(cell ?? '')),
+    );
+    const documentIdIndex = this.findHeaderIndex(headers, [
+      'เลขเล่มทะเบียน',
+      'หมายเลขเล่มทะเบียน',
+      'รหัสเล่มทะเบียน',
+    ]);
+    const nameIndex = this.findHeaderIndex(headers, ['ชื่อเล่มทะเบียน', 'ชื่อเล่มทะเบียน/ทะเบียน']);
+    const descriptionIndex = this.findHeaderIndex(headers, ['รายละเอียด', 'คำอธิบาย']);
+    const statusIndex = this.findHeaderIndex(headers, ['สถานะ']);
+
+    const errors: string[] = [];
+
+    if (documentIdIndex === -1 || nameIndex === -1) {
+      errors.push('ไม่พบคอลัมน์ "เลขเล่มทะเบียน" หรือ "ชื่อเล่มทะเบียน" ในไฟล์');
+      return { rows: [], errors };
+    }
+
+    const previewRows: RegistryBookImportPreviewRow[] = [];
+    const seenBookNumbers = new Set<number>();
+
+    for (let index = 1; index < rows.length; index += 1) {
+      const row = rows[index];
+      const rowNumber = index + 1;
+
+      if (!row || row.every((cell) => String(cell ?? '').trim() === '')) {
+        continue;
+      }
+
+      const documentId = (row[documentIdIndex] ?? '').trim();
+      const name = String(row[nameIndex] ?? '').trim();
+      const description =
+        descriptionIndex !== -1 ? String(row[descriptionIndex] ?? '').trim() : '';
+      const statusRaw =
+        statusIndex !== -1 ? String(row[statusIndex] ?? '').trim() : '';
+
+      if (!documentId || !name) {
+        errors.push(`แถวที่ ${rowNumber}: ต้องระบุเลขเล่มทะเบียนและชื่อเล่มทะเบียน`);
+        continue;
+      }
+
+      const normalizedKey = Number(documentId);
+      if (seenBookNumbers.has(normalizedKey)) {
+        errors.push(`แถวที่ ${rowNumber}: เลขเล่มทะเบียน "${documentId}" ซ้ำกับข้อมูลก่อนหน้าในไฟล์`);
+        continue;
+      }
+
+      let status: Document['status'] = 'ACTIVE';
+      if (statusRaw) {
+        const normalizedStatus = this.normalizeRegistryBookStatus(statusRaw);
+        if (!normalizedStatus) {
+          errors.push(
+            `แถวที่ ${rowNumber}: ไม่สามารถตีความสถานะ "${statusRaw}" ได้ กรุณาใช้คำว่า พร้อมใช้งาน, กำลังยืม, เก็บถาวร หรือ ปิดใช้งาน`,
+          );
+          continue;
+        }
+        status = normalizedStatus;
+      }
+
+      seenBookNumbers.add(normalizedKey);
+      previewRows.push({
+        id: 0,
+        rowNumber,
+        documentId: Number(documentId),
+        firstName: name.split(' ')[0],
+        lastName: name.split(' ')[1],
+        description: description || undefined,
+        status,
+      });
+    }
+
+    if (previewRows.length === 0 && errors.length === 0) {
+      errors.push('ไม่พบข้อมูลที่สามารถนำเข้าได้');
+    }
+
+    return { rows: previewRows, errors };
+  }
+
+  private normalizeHeader(header: string): string {
+    return header.replace(/\s+/g, '').replace(/\uFEFF/g, '').toLowerCase();
+  }
+
+  private findHeaderIndex(headers: string[], expectedHeaders: string[]): number {
+    return headers.findIndex((header) => expectedHeaders.includes(header));
+  }
+
+  private normalizeRegistryBookStatus(value: string): RegistryBookStatus | null {
+    const normalized = value.trim().toLowerCase();
+    const statusMap: Record<string, RegistryBookStatus> = {
+      พร้อมใช้งาน: 'ACTIVE',
+      ใช้งาน: 'ACTIVE',
+      ว่าง: 'ACTIVE',
+      active: 'ACTIVE',
+      กำลังยืม: 'BORROWED',
+      ยืม: 'BORROWED',
+      borrowed: 'BORROWED',
+      เก็บถาวร: 'ARCHIVED',
+      archived: 'ARCHIVED',
+      ปิดใช้งาน: 'INACTIVE',
+      ไม่ใช้งาน: 'INACTIVE',
+      inactive: 'INACTIVE',
+    };
+
+    return statusMap[normalized] ?? null;
+  }
+
+  private resetImportState(): void {
+    this.importPreview.set([]);
+    this.importErrors.set([]);
+    this.importFileName.set(null);
+    this.isImporting.set(false);
+  }
+}

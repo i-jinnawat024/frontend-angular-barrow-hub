@@ -1,87 +1,143 @@
 <div class="container mx-auto px-4 py-8 max-w-4xl">
-  <!-- Header -->
   <div class="mb-6 flex items-center justify-between">
     <button
       type="button"
-      class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+      id="btn-back"
+      class="inline-flex items-center text-sm font-medium text-secondary hover:text-[var(--color-text-primary)] cursor-pointer"
       (click)="goBack()"
     >
       <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
       </svg>
-      กลับ
+      ย้อนกลับ
     </button>
-    <button
-      type="button"
-      class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700"
-      (click)="editRegistryBook()"
-    >
-      <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-      </svg>
-      แก้ไข
-    </button>
+    <div class="flex items-center gap-3">
+      <button
+        type="button"
+        id="btn-history"
+        class="btn-secondary cursor-pointer"
+        (click)="viewBorrowHistory()"
+      >
+      <mat-icon>dehaze</mat-icon>
+        ดูประวัติการยืม
+      </button>
+      <button
+        type="button"
+        id="btn-edit"
+        class="btn-primary cursor-pointer"
+        (click)="editDocument()"
+      >
+        <mat-icon class="material-symbols-outlined text-white">edit_square</mat-icon>
+        แก้ไขข้อมูล
+      </button>
+    </div>
   </div>
 
-  @if (registryBook) {
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
-      <!-- Header Section -->
-      <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ registryBook.title }}</h1>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">เลขที่เล่มทะเบียน: {{ registryBook.bookNumber }}</p>
+  @if (document) {
+    <div class="bg-surface rounded-lg shadow border border-subtle overflow-hidden">
+      <div class="px-6 py-5 border-b border-subtle bg-surface-alt">
+        <h1 class="text-2xl font-bold text-primary">
+          {{ document.firstName }} {{ document.lastName }}  
+        </h1>
+        <p class="mt-1 text-sm text-muted">
+          เลขทะเบียนเอกสาร: {{ document.documentId }}
+        </p>
       </div>
 
-      <!-- Content Section -->
-      <div class="px-6 py-5">
-        <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <!-- Description -->
-          <div class="sm:col-span-2">
-            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">คำอธิบาย</dt>
-            <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-              {{ registryBook.description || '-' }}
+      <div class="px-6 py-5 space-y-6">
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div>
+            <div class="text-sm font-medium text-muted">สถานะ</div>
+            <div class="mt-1">
+              @switch (document!.status) {
+                @case ('ACTIVE') {
+                  <span class="badge badge-success">พร้อมใช้งาน</span>
+                }
+                @case ('BORROWED') {
+                  <span class="badge badge-warning">กำลังยืม</span>
+                }
+                @case ('INACTIVE') {
+                  <span class="badge badge-neutral">ปิดใช้งาน</span>
+                }
+                @case ('ARCHIVED') {
+                  <span class="badge badge-neutral">จัดเก็บแล้ว</span>
+                }
+                @default {
+                  <span class="badge badge-neutral">ไม่ทราบสถานะ</span>
+                }
+              }
+            </div>
+          </div>
+
+          <div>
+            <dt class="text-sm font-medium text-muted">วันที่สร้าง</dt>
+            <dd class="mt-1 text-sm text-primary">
+              {{ document!.createdAt | date: 'dd/MM/yyyy HH:mm' }}
             </dd>
           </div>
 
-          <!-- Status -->
           <div>
-            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">สถานะ</dt>
-            <dd class="mt-1">
-              @if (registryBook.status === 'available') {
-                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                  พร้อมใช้งาน
-                </span>
-              }
-              @if (registryBook.status === 'borrowed') {
-                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
-                  ถูกยืม
-                </span>
-              }
-              @if (registryBook.status === 'archived') {
-                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200">
-                  เก็บไว้
-                </span>
-              }
+            <dt class="text-sm font-medium text-muted">แก้ไขล่าสุด</dt>
+            <dd class="mt-1 text-sm text-primary">
+              {{ document!.updatedAt | date: 'dd/MM/yyyy HH:mm' }}
             </dd>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div class="text-center border border-subtle rounded-lg p-6 bg-surface-alt">
+            <p class="text-xs font-medium text-muted mb-2">QR Code</p>
+            @if (qrCodeDataUrl) {
+              <div class="inline-block p-4 bg-surface rounded-lg border border-subtle">
+                <img
+                  [src]="qrCodeDataUrl"
+                  alt="QR Code"
+                  class="w-48 h-48 mx-auto"
+                />
+                <button
+                  type="button"
+                  id="btn-print-qr"
+                  class="btn-secondary mt-3 inline-flex items-center justify-center cursor-pointer"
+                  (click)="printQrCode()"
+                  [disabled]="!qrCodeDataUrl"
+                >
+                  <mat-icon class="material-symbols-outlined text-white">print</mat-icon>
+                  พิมพ์ QR Code
+                </button>
+              </div>
+            } @else {
+              <div class="w-48 h-48 mx-auto bg-muted rounded-lg flex items-center justify-center">
+                <p class="text-xs text-muted">กำลังสร้าง QR Code...</p>
+              </div>
+            }
           </div>
 
-          <!-- Created At -->
-          <div>
-            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">วันที่สร้าง</dt>
-            <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-              {{ registryBook.createdAt | date:'dd/MM/yyyy HH:mm' }}
-            </dd>
+          <div class="text-center border border-subtle rounded-lg p-6 bg-surface-alt">
+            <p class="text-xs font-medium text-muted mb-2">Barcode</p>
+            <div class="inline-block p-4 bg-surface rounded-lg border border-subtle">
+              <div
+                [id]="'barcode-' + document!.id"
+                class="min-h-[100px] flex items-center justify-center"
+              >
+                <p class="text-xs text-muted">กำลังสร้าง Barcode...</p>
+              </div>
+              <button
+                type="button"
+                id="btn-print-barcode"
+                class="btn-primary mt-3 inline-flex items-center justify-center cursor-pointer"
+                (click)="printBarcode()"
+              >
+                <mat-icon class="material-symbols-outlined text-white" >print</mat-icon>
+                พิมพ์ Barcode
+              </button>
+            </div>
           </div>
-
-          <!-- Updated At -->
-          <div>
-            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">อัปเดตล่าสุด</dt>
-            <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-              {{ registryBook.updatedAt | date:'dd/MM/yyyy HH:mm' }}
-            </dd>
-          </div>
-        </dl>
+        </div>
       </div>
+    </div>
+  } @else {
+    <div class="rounded-lg border border-dashed border-subtle px-6 py-12 text-center text-muted">
+      ไม่พบข้อมูลเล่มทะเบียน
     </div>
   }
 </div>
-
