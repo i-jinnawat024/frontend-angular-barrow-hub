@@ -4,11 +4,12 @@ export interface Borrow {
   id: string;
   document: Document;
   name: string;
+  userId?: string;
   description?: string;
   status: 'BORROWED' | 'RETURNED';
   createdAt: Date;
   updatedAt?: Date | null;
-  deletedAt?: Date | null;
+  // deletedAt?: Date | null;
 }
 
 export interface BorrowCreateDto {
@@ -16,4 +17,3 @@ export interface BorrowCreateDto {
   documentId: number[];
   description?: string;
 }
-

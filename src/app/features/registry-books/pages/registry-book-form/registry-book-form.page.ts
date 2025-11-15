@@ -92,7 +92,6 @@ export class RegistryBookFormPage implements OnInit {
         .subscribe({
           next: () => this.router.navigate(['/registry-books']),
           error: (error) => {
-            console.log('e')
             console.error('Failed to update registry book', error);
             window.alert(error.message);
           },

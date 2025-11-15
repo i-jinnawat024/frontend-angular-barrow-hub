@@ -25,7 +25,6 @@ interface BorrowApiResponse
   document: DocumentApiResponse;
   createdAt: string;
   updatedAt?: string | null;
-  deletedAt?: string | null;
 }
 
 interface ReturnApiResponse extends Omit<Return, 'returnedAt' | 'borrow'> {
@@ -45,7 +44,6 @@ export interface RegistryBookImportResult {
 export class RegistryBookService {
   private readonly documentUrl = `${environment.apiBaseUrl}/documents`;
   private readonly historyUrl = `${environment.apiBaseUrl}/history`;
-  private readonly returnsUrl = `${environment.apiBaseUrl}/returns`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -125,7 +123,7 @@ export class RegistryBookService {
       .pipe(map((response) => this.mapBorrow(response.result)));
   }
 
-  createBulkBorrows(dto: BorrowCreateDto): Observable<Borrow[]> {
+  createBulkBorrows(dto: BorrowCreateDto) {
     return this.http
       .post<ApiResponse<BorrowApiResponse[] | null>>(
         `${this.documentUrl}/borrow`,
@@ -133,13 +131,13 @@ export class RegistryBookService {
       )
       .pipe(
         map((response) => response.result ?? []),
-        map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow))),
+        map((borrows) => borrows),
       );
   }
 
   getReturns(): Observable<Return[]> {
     return this.http
-      .get<ApiResponse<ReturnApiResponse[] | null>>(this.returnsUrl)
+      .get<ApiResponse<ReturnApiResponse[] | null>>(this.documentUrl)
       .pipe(
         map((response) => response.result ?? []),
         map((returns) => returns.map((record) => this.mapReturn(record))),
@@ -149,17 +147,17 @@ export class RegistryBookService {
   createReturn(dto: ReturnCreateDto): Observable<Return> {
     return this.http
       .post<ApiResponse<ReturnApiResponse>>(
-        this.returnsUrl,
+        this.documentUrl,
         this.serializeReturnDto(dto),
       )
       .pipe(map((response) => this.mapReturn(response.result)));
   }
 
-  createBulkReturns(dtos: ReturnCreateDto[]): Observable<Return[]> {
+  createBulkReturns(dtos: ReturnCreateDto): Observable<Return[]> {
     return this.http
-      .post<ApiResponse<ReturnApiResponse[] | null>>(
-        `${this.returnsUrl}/bulk`,
-        dtos.map((dto) => this.serializeReturnDto(dto)),
+      .put<ApiResponse<ReturnApiResponse[] | null>>(
+        `${this.documentUrl}/return`,
+        dtos,
       )
       .pipe(
         map((response) => response.result ?? []),
@@ -220,7 +218,6 @@ export class RegistryBookService {
       document: this.mapDocument(borrow.document),
       createdAt: new Date(borrow.createdAt),
       updatedAt: borrow.updatedAt ? new Date(borrow.updatedAt) : null,
-      deletedAt: borrow.deletedAt ? new Date(borrow.deletedAt) : null,
     };
   }
 
@@ -241,10 +238,6 @@ export class RegistryBookService {
   private serializeReturnDto(dto: ReturnCreateDto) {
     return {
       ...dto,
-      returnedAt:
-        dto.returnedAt instanceof Date
-          ? dto.returnedAt.toISOString()
-          : dto.returnedAt,
     };
   }
 }

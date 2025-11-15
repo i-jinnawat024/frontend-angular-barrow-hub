@@ -19,6 +19,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { StaffService } from '../../../staff/services/staff.service';
 import { Staff } from '../../../../shared/models/staff.model';
+import Swal from 'sweetalert2';
 
 type BookSortField = 'documentId' | 'name';
 type SortDirection = 'asc' | 'desc';
@@ -307,7 +308,7 @@ export class BorrowPage implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (borrows) => {
-          if (!borrows.length) {
+          if (!borrows) {
             return;
           }
 
@@ -315,13 +316,17 @@ export class BorrowPage implements OnInit {
             this.scannedDocumentIds.has(id)
           ).length;
 
-          let message = `�,��,��,��1?�,��1^�,��,-�,��1?�,s�,�,��,T�,^�,3�,T�,���,T ${borrows.length} �1?�,��1^�,��,��,3�1?�,��1O.,^�1?�,��1%�,���`;
+          let message = ``;
           if (scannedCount > 0) {
             message += ` (�,��1?�,?�,T QR ${scannedCount} �1?�,��1^�,�)`;
           }
 
-          alert(message);
-          this.router.navigate(['/registry-books']);
+          Swal.fire({
+            title: 'บันทึกการยืมสำเร็จ',
+            text: message,
+            icon: 'success',
+            confirmButtonText: 'ตกลง',
+          }).then(() => window.location.reload());
         },
         error: (error) => {
           console.error('Failed to create borrow records', error);
