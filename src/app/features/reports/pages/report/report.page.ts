@@ -38,7 +38,7 @@ export class ReportPage implements OnInit {
   }> = [
     {
       label: 'เลขเล่มทะเบียน',
-      property: 'bookNumber',
+      property: 'documentId',
       sortable: true,
       accessor: (borrow) => borrow.document.documentId,
     },
@@ -52,11 +52,17 @@ export class ReportPage implements OnInit {
       label: 'ผู้ยืม',
       property: 'borrowerName',
       sortable: true,
-      accessor: (borrow) => borrow.document.firstName,
+      accessor: (borrow) => borrow.name,
     },
     {
       label: 'วันที่ยืม',
-      property: 'borrowedDate',
+      property: 'createdAt',
+      sortable: true,
+      accessor: (borrow) => borrow.createdAt,
+    },
+    {
+      label: 'เวลา',
+      property: 'borrowedTime',
       sortable: true,
       accessor: (borrow) => borrow.createdAt,
     },
@@ -153,10 +159,10 @@ export class ReportPage implements OnInit {
       });
   }
 
-  exportToCSV(): void {
+  exportToExcel(): void {
     const data = this.filteredBorrows();
     if (data.length > 0) {
-      this.reportService.exportToCSV(data, this.selectedYear, this.selectedMonth);
+      this.reportService.exportToExcel(data, this.selectedYear, this.selectedMonth);
     } else {
       alert('ไม่มีข้อมูลให้ส่งออก กรุณาเลือกช่วงเวลาที่มีข้อมูลก่อน');
     }
