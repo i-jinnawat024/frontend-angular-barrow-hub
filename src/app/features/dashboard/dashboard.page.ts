@@ -39,13 +39,13 @@ export class DashboardPage implements OnInit {
       label: 'ข้อมูลผู้ยืม',
       property: 'borrowerName',
       sortable: true,
-      accessor: (loan) => loan.borrower.firstName + ' ' + loan.borrower.lastName,
+      accessor: (loan) => loan.name,
     },
     {
       label: 'วันที่ยืม',
       property: 'borrowedAt',
       sortable: true,
-      accessor: (loan) => loan.borrowedAt,
+      accessor: (loan) => loan.createdAt,
     },
     {
       label: 'ระยะเวลาการยืม (วัน)',
@@ -57,24 +57,23 @@ export class DashboardPage implements OnInit {
   private readonly searchAccessors: Array<(loan: Loan) => unknown> = [
     (loan) => loan.document.first_name + ' ' + loan.document.last_name,
     (loan) => loan.document.documentNumber,
-    (loan) => loan.borrower.firstName + ' ' + loan.borrower.lastName,
-    (loan) => loan.borrower.telNumber,
-    (loan) => loan.status,
+    (loan) => loan.name,
+    (loan) => loan.description ?? '',
   ];
 
-  protected readonly activeLoans = computed(() => this.stats().activeLoans);
+  protected readonly histories = computed(() => this.stats().histories);
 
-  protected readonly filteredLoans = computed(() => {
-    const loans = this.activeLoans();
+  protected readonly filteredHistories = computed(() => {
+    const histories = this.histories();
     const term = this.searchTerm().trim().toLowerCase();
 
     const filtered = term
-      ? loans.filter((loan) =>
+      ? histories.filter((history: any) =>
           this.searchAccessors.some((accessor) =>
-            toSearchableString(accessor(loan)).includes(term),
+            toSearchableString(accessor(history)).includes(term),
           ),
         )
-      : loans;
+      : histories;
 
     const sort = this.sortState();
     if (!sort.active) {
@@ -94,7 +93,7 @@ export class DashboardPage implements OnInit {
     );
   });
 
-  protected readonly totalActiveLoans = computed(() => this.activeLoans().length);
+  protected readonly totalHistories = computed(() => this.histories().length);
 
   protected readonly hasSearchTerm = computed(
     () => this.searchTerm().trim().length > 0,
@@ -109,7 +108,7 @@ export class DashboardPage implements OnInit {
   }
 
   getActiveLoans(): Loan[] {
-    return this.filteredLoans();
+    return this.filteredHistories();
   }
 
   protected onSearchTermChange(event: Event): void {
