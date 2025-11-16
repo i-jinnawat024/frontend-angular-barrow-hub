@@ -25,6 +25,7 @@ import { readTabularFile } from '../../../../shared/utils/csv-utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver'
+import { AlertService } from '../../../../shared/services/alert.service';
 
 type RegistryBookStatus = Document['status'];
 
@@ -149,6 +150,7 @@ export class RegistryBookListPage implements OnInit {
   constructor(
     private readonly registryBookService: RegistryBookService,
     private readonly router: Router,
+    private readonly alert: AlertService,
   ) {}
 
   @ViewChild('registryImportInput') private registryImportInput?: ElementRef<HTMLInputElement>;
@@ -168,7 +170,7 @@ export class RegistryBookListPage implements OnInit {
 
   loadRegistryBooks(): void {
     this.registryBookService
-      .getRegistryBooks()
+      .getDocuments()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (books) => this.registryBooks.set(books),
@@ -189,7 +191,7 @@ export class RegistryBookListPage implements OnInit {
         next: () => this.loadRegistryBooks(),
         error: (error) => {
           console.error('Failed to delete registry book', error);
-          window.alert('ไม่สามารถลบทะเบียนเอกสารได้ กรุณาลองใหม่อีกครั้ง');
+          this.alert.error('ไม่สามารถลบทะเบียนเอกสารได้','กรุณาลองใหม่อีกครั้ง');
         },
       });
   }
@@ -292,7 +294,7 @@ export class RegistryBookListPage implements OnInit {
     }));
 
     this.registryBookService
-      .importRegistryBooks(payload)
+      .importDocuments(payload)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) => {
@@ -308,12 +310,12 @@ export class RegistryBookListPage implements OnInit {
 �,��,��,��,?�,��,��,-�,�1^�,,�1%�,��,��1?�,T�,��1^�,-�,؅,^�,��,?�,,�1%�,-�,��,1�,��,<�1%�,3: ${duplicated}`;
           }
 
-          window.alert(message);
+          this.alert.success(message);
           this.isImporting.set(false);
         },
         error: (error) => {
           console.error('Failed to import document', error);
-          window.alert('ไม่สามารถนำเข้าทะเบียนเอกสารได้ กรุณาลองใหม่อีกครั้ง');
+          this.alert.error('ไม่สามารถนำเข้าได้',error.status === 409 ? 'มีเลขเล่มทะเบียนซ้ำในไฟล์' : 'กรุณาตรวจสอบไฟล์ Template ก่อนอัปโหลด');
           this.isImporting.set(false);
         },
       });

@@ -37,7 +37,7 @@ ngOnInit(): void {
           return EMPTY;
         }
 
-        return this.registryBookService.getRegistryBookById(id).pipe(
+        return this.registryBookService.getDocumentById(id).pipe(
           tap((document) => {
             this.document = document;
           }),

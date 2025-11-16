@@ -9,6 +9,7 @@ import {
   RegistryBookCreateDto,
   DocumentUpdateDto,
 } from '../../../../shared/models/registry-book.model';
+import { AlertService } from '../../../../shared/services/alert.service';
 
 @Component({
   selector: 'app-registry-book-form',
@@ -26,6 +27,7 @@ export class RegistryBookFormPage implements OnInit {
   constructor(
     private fb: FormBuilder,
     private registryBookService: RegistryBookService,
+    private alert: AlertService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -68,7 +70,7 @@ export class RegistryBookFormPage implements OnInit {
     }
 
     this.registryBookService
-      .getRegistryBookById(Number(this.id))
+      .getDocumentById(Number(this.id))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (book) => this.patchForm(book),
@@ -93,18 +95,18 @@ export class RegistryBookFormPage implements OnInit {
           next: () => this.router.navigate(['/registry-books']),
           error: (error) => {
             console.error('Failed to update registry book', error);
-            window.alert(error.message);
+            this.alert.error('เกิดข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง');
           },
         });
     } else {
       this.registryBookService
-        .createRegistryBook(dto)
+        .createDocument([dto])
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => this.router.navigate(['/registry-books']),
           error: (error) => {
-            console.error('Failed to create registry book', error);
-            window.alert('ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง');
+            console.error('Failed to create registry book', error.error);
+            this.alert.error('เกิดข้อผิดพลาด', error.error.message ?? 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง');
           },
         });
     }

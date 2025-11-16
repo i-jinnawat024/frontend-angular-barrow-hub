@@ -169,7 +169,7 @@ export class BorrowPage implements OnInit {
 
   loadAvailableBooks(): void {
     this.registryBookService
-      .getRegistryBooks()
+      .getDocuments()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (books) => {
@@ -244,7 +244,7 @@ export class BorrowPage implements OnInit {
     }
 
     this.registryBookService
-      .getRegistryBookById(Number(normalizedId))
+      .getDocumentById(Number(normalizedId))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (book) => {

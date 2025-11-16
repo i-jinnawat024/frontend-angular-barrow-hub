@@ -40,7 +40,7 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
             this.router.navigate(['/registry-books']);
             return EMPTY;
           }
-          return this.registryBookService.getRegistryBookById(this.id);
+          return this.registryBookService.getDocumentById(this.id);
         }),
         takeUntilDestroyed(this.destroyRef),
       )

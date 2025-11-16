@@ -46,7 +46,7 @@ export class RegistryBookService {
 
   constructor(private readonly http: HttpClient) {}
 
-  getRegistryBooks(): Observable<Document[]> {
+  getDocuments(): Observable<Document[]> {
     return this.http
       .get<ApiResponse<DocumentApiResponse[] | null>>(`${this.documentUrl}/document-list`)
       .pipe(
@@ -55,13 +55,13 @@ export class RegistryBookService {
       );
   }
 
-  getRegistryBookById(id: number): Observable<Document> {
+  getDocumentById(id: number): Observable<Document> {
     return this.http
       .get<ApiResponse<DocumentApiResponse>>(`${this.documentUrl}?id=${id}`)
       .pipe(map((response) => this.mapDocument(response.result)));
   }
 
-  createRegistryBook(dto: RegistryBookCreateDto): Observable<Document> {
+  createDocument(dto: RegistryBookCreateDto[]): Observable<Document> {
     return this.http
       .post<ApiResponse<DocumentApiResponse>>(this.documentUrl, dto)
       .pipe(map((response) => this.mapDocument(response.result)));
@@ -79,8 +79,7 @@ export class RegistryBookService {
       .pipe(map(() => undefined));
   }
 
-  importRegistryBooks(dto: Omit<RegistryBookCreateDto, 'status'>[]): Observable<RegistryBookImportResult> {
-    console.log(dto)
+  importDocuments(dto: Omit<RegistryBookCreateDto, 'status'>[]): Observable<RegistryBookImportResult> {
     return this.http
       .post<ApiResponse<RegistryBookImportResult>>(`${this.documentUrl}`, dto)
       .pipe(map((response) => response.result));
