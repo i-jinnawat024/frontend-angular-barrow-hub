@@ -64,10 +64,9 @@ export class StaffHistoryPage implements OnInit {
       return;
     }
 
-    const fullName = `${this.staff.firstName} ${this.staff.lastName}`.trim();
 
     this.documentService
-      .getBorrowHistoryByStaffName(fullName)
+      .getBorrowHistoryByUserId(this.staff.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (history) => (this.borrowHistory = history),
