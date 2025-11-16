@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnDestroy, OnInit, Output, input, effect } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, Output, input, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Html5Qrcode } from 'html5-qrcode';
 
@@ -9,7 +9,7 @@ import { Html5Qrcode } from 'html5-qrcode';
   templateUrl: './qr-scanner.component.html',
   styleUrl: './qr-scanner.component.scss'
 })
-export class QrScannerComponent implements OnInit, OnDestroy {
+export class QrScannerComponent implements OnDestroy {
   @Output() scanSuccess = new EventEmitter<string>();
   @Output() scanError = new EventEmitter<string>();
   @Output() close = new EventEmitter<void>();
@@ -22,6 +22,7 @@ export class QrScannerComponent implements OnInit, OnDestroy {
   protected scannerId = 'qr-scanner-' + Date.now();
   private lastScannedText: string | null = null;
   private lastScannedTime = 0;
+  private startInProgress = false;
 
   constructor() {
     effect(() => {
@@ -34,24 +35,22 @@ export class QrScannerComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit(): void {
-    // Start scanning if already set to true
-    if (this.isScanning()) {
-      setTimeout(() => this.startScanning(), 100);
-    }
-  }
-
   ngOnDestroy(): void {
     this.stopScanning();
   }
 
   async startScanning(): Promise<void> {
+    if (this.startInProgress) {
+      return;
+    }
+
+    this.startInProgress = true;
     try {
       // Stop any existing scanner first
       await this.stopScanning();
-      
+
       this.html5QrCode = new Html5Qrcode(this.scannerId);
-      
+
       await this.html5QrCode.start(
         { facingMode: 'environment' }, // Use back camera
         {
@@ -60,13 +59,15 @@ export class QrScannerComponent implements OnInit, OnDestroy {
           aspectRatio: 1.0
         },
         (decodedText) => this.handleScanSuccess(decodedText),
-        (errorMessage) => {
+        () => {
           // Error callback - ignore for continuous scanning
         }
       );
     } catch (error: any) {
       console.error('Error starting scanner:', error);
       this.scanError.emit(error.message || 'ไม่สามารถเปิดกล้องได้');
+    } finally {
+      this.startInProgress = false;
     }
   }
 
