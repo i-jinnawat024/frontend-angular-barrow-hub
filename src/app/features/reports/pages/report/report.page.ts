@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { ReportService } from '../../services/report.service';
 import { Borrow } from '../../../../shared/models/borrow.model';
+import { AlertService } from '../../../../shared/services/alert.service';
 import {
   SortState,
   compareValues,
@@ -125,9 +126,10 @@ export class ReportPage implements OnInit {
   );
 
   constructor(
-    private readonly fb: FormBuilder,
-    private readonly reportService: ReportService,
-    private readonly datePipe: DatePipe,
+    private fb: FormBuilder,
+    private reportService: ReportService,
+    private datePipe: DatePipe,
+    private alert: AlertService
   ) {
     const now = new Date();
     this.form = this.fb.group({
@@ -164,6 +166,7 @@ export class ReportPage implements OnInit {
     if (data.length > 0) {
       this.reportService.exportToExcel(data, this.selectedYear, this.selectedMonth);
     } else {
+      this.alert.warning('ไม่มีข้อมูลการยืมในเดือนที่เลือก');
       alert('ไม่มีข้อมูลให้ส่งออก กรุณาเลือกช่วงเวลาที่มีข้อมูลก่อน');
     }
   }
@@ -177,6 +180,7 @@ export class ReportPage implements OnInit {
         this.selectedMonth,
       );
     } else {
+      this.alert.warning('ไม่มีข้อมูลการยืมในเดือนที่เลือก');
       alert('ไม่มีข้อมูลให้ส่งออก กรุณาเลือกช่วงเวลาที่มีข้อมูลก่อน');
     }
   }

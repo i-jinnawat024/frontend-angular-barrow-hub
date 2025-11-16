@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { RegistryBookService } from '../../registry-books/services/document.service';
+import { DocumentService } from '../../document/services/document.service';
 import { Borrow } from '../../../shared/models/borrow.model';
 import * as XLSX from 'xlsx';
 @Injectable({
   providedIn: 'root',
 })
 export class ReportService {
-  constructor(private readonly registryBookService: RegistryBookService) {}
+  constructor(private readonly documentService: DocumentService) {}
 
   getBorrowsByMonth(year: number, month: number): Observable<Borrow[]> {
-    return this.registryBookService.getBorrows().pipe(
+    return this.documentService.getBorrows().pipe(
       map((borrows) =>
         borrows.filter((borrow) => {
           const borrowDate = new Date(borrow.createdAt);
