@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild, ElementRef, input, effect } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output, input, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Html5Qrcode } from 'html5-qrcode';
 
@@ -15,8 +15,13 @@ export class QrScannerComponent implements OnInit, OnDestroy {
   @Output() close = new EventEmitter<void>();
 
   isScanning = input<boolean>(false);
+  continuousMode = input<boolean>(true);
+  scanCooldownMs = input<number>(1500);
+
   private html5QrCode: Html5Qrcode | null = null;
   protected scannerId = 'qr-scanner-' + Date.now();
+  private lastScannedText: string | null = null;
+  private lastScannedTime = 0;
 
   constructor() {
     effect(() => {
@@ -54,11 +59,7 @@ export class QrScannerComponent implements OnInit, OnDestroy {
           qrbox: { width: 250, height: 250 },
           aspectRatio: 1.0
         },
-        (decodedText) => {
-          // Success callback
-          this.scanSuccess.emit(decodedText);
-          this.stopScanning();
-        },
+        (decodedText) => this.handleScanSuccess(decodedText),
         (errorMessage) => {
           // Error callback - ignore for continuous scanning
         }
@@ -81,7 +82,28 @@ export class QrScannerComponent implements OnInit, OnDestroy {
         console.error('Error stopping scanner:', error);
       }
       this.html5QrCode = null;
+      this.resetScanHistory();
     }
+  }
+
+  private handleScanSuccess(decodedText: string): void {
+    const now = Date.now();
+    if (this.lastScannedText === decodedText && now - this.lastScannedTime < this.scanCooldownMs()) {
+      return;
+    }
+
+    this.lastScannedText = decodedText;
+    this.lastScannedTime = now;
+    this.scanSuccess.emit(decodedText);
+
+    if (!this.continuousMode()) {
+      this.stopScanning();
+    }
+  }
+
+  private resetScanHistory(): void {
+    this.lastScannedText = null;
+    this.lastScannedTime = 0;
   }
 
   onClose(): void {

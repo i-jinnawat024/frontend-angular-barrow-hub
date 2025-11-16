@@ -2,17 +2,14 @@ import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSelectChange } from '@angular/material/select';
 import {
-  AbstractControl,
   FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  ValidationErrors,
-  ValidatorFn,
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { RegistryBookService } from '../../services/document.service';
+import { DocumentService } from '../../services/document.service';
 import { ReturnCreateDto } from '../../../../shared/models/return.model';
 import { Borrow } from '../../../../shared/models/borrow.model';
 import { QrScannerComponent } from '../../../../shared/components/qr-scanner/qr-scanner.component';
@@ -43,7 +40,7 @@ export class ReturnPage implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   constructor(
     private readonly fb: FormBuilder,
-    private readonly registryBookService: RegistryBookService,
+    private readonly documentService: DocumentService,
     private readonly router: Router
   ) {
     this.selectedBorrowIdsControl = this.fb.nonNullable.control<number[]>([], {
@@ -85,7 +82,7 @@ export class ReturnPage implements OnInit {
   }
 
   loadActiveBorrows(): void {
-    this.registryBookService
+    this.documentService
       .getActiveBorrows()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -266,18 +263,6 @@ export class ReturnPage implements OnInit {
       selected.delete(borrowId);
     }
     this.updateSelectedBorrowIds(Array.from(selected));
-
-    // Update selected borrowers if needed
-    // const borrow = this.activeBorrows.find((b) => b.document.id === borrowId);
-    // if (borrow && !checked) {
-    //   const borrowerBorrows = this.getBorrowsByBorrower(borrow.name);
-    //   const selectedInBorrower = borrowerBorrows.some((b) => selected.has(b.document.id));
-    //   if (!selectedInBorrower) {
-    //     const current = this.selectedBorrowersControl.value ?? [];
-    //     const newSelected = current.filter((b) => b !== borrow.name);
-    //     this.selectedBorrowersControl.setValue(newSelected);
-    //   }
-    // }
   }
 
   selectAllBorrows(): void {
@@ -371,7 +356,7 @@ export class ReturnPage implements OnInit {
       return;
     }
 
-    this.registryBookService
+    this.documentService
       .createBulkReturns(returnDto)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -408,7 +393,7 @@ export class ReturnPage implements OnInit {
       return;
     }
 
-    this.registryBookService
+    this.documentService
       .getBorrowByBookId(normalizedId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
