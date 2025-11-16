@@ -18,12 +18,9 @@ export class ThemeService {
     if (this.isBrowser()) {
       const storedPreference = window.localStorage.getItem(this.storageKey) as ThemeMode | null;
 
-      let initialTheme: ThemeMode;
+      let initialTheme: ThemeMode = 'light';
       if (storedPreference === 'light' || storedPreference === 'dark') {
         initialTheme = storedPreference;
-      } else {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        initialTheme = prefersDark ? 'dark' : 'light';
       }
       
       this.themePreference.set(initialTheme);
