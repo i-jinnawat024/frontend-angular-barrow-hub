@@ -1,11 +1,28 @@
 import { CommonModule } from '@angular/common';
 import { Component, input, output } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+
+type SidebarIcon = 'dashboard' | 'registry' | 'borrow' | 'return' | 'report' | 'staff' | 'registry-book';
+
+interface SidebarNavItem {
+  label: string;
+  route: string;
+  icon: SidebarIcon;
+  description?: string;
+  badge?: string;
+  exact?: boolean;
+}
+
+interface SidebarNavGroup {
+  title?: string;
+  items: SidebarNavItem[];
+}
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink, RouterLinkActive, MatIconModule],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })
@@ -14,33 +31,87 @@ export class SidebarComponent {
   isCollapsed = input<boolean>(false);
   closeSidebar = output<void>();
 
-  protected readonly menuItems = [
+  protected readonly navGroups: SidebarNavGroup[] = [
     {
-      label: 'แดชบอร์ด',
-      route: '/dashboard'
+      title: 'Overview',
+      items: [
+        {
+          label: 'หน้าหลัก',
+          route: '/dashboard',
+          icon: 'dashboard',
+          description: 'ภาพรวมระบบ',
+          exact: true
+        }
+      ]
     },
     {
-      label: 'เอกสาร',
-      route: '/documents'
+      title: 'Catalog',
+      items: [
+        {
+          label: 'แจ้งการยืม',
+          route: '/registry-books/borrow',
+          icon: 'borrow',
+          description: 'จัดการการยืม',
+          exact: true
+        },
+        {
+          label: 'แจ้งการคืน',
+          route: '/registry-books/return',
+          icon: 'return',
+          description: 'จัดการการคืน',
+          exact: true,
+          badge: 'New'
+        }
+      ]
     },
     {
-      label: 'การยืม',
-      route: '/loans'
+      title: 'Manage',
+      items: [
+        {
+          label: 'รายการเล่มทะเบียน',
+          route: '/registry-books',
+          icon: 'registry-book',
+          description: 'จัดการทะเบียนเล่ม',
+          exact: true
+        },
+        {
+          label: 'รายชื่อบุคลากร',
+          route: '/staff',
+          icon: 'staff',
+          description: 'จัดการบุคลากร',
+          exact: false
+        }
+      ]
     },
     {
-      label: 'เจ้าหน้าที่',
-      route: '/staff'
+      title: 'Reports',
+      items: [
+        {
+          label: 'รายงาน',
+          route: '/reports',
+          icon: 'report',
+          description: 'รายงานสรุปข้อมูล',
+          exact: true
+        }
+      ]
     }
   ];
+
+  protected readonly currentUser = {
+    initials: 'JI',
+    name: 'Jinnawat Inyos',
+    email: 'user@example.com'
+  };
 
   protected onOverlayClick(): void {
     this.closeSidebar.emit();
   }
 
-  protected getSidebarWidth(): string {
-    if (!this.isOpen()) return '0';
-    if (this.isCollapsed()) return '4rem'; // 64px for collapsed
-    return '16rem'; // 256px for expanded
+  protected onNavigate(): void {
+    if (typeof window === 'undefined') return;
+
+    if (window.innerWidth < 768) {
+      this.closeSidebar.emit();
+    }
   }
 }
-

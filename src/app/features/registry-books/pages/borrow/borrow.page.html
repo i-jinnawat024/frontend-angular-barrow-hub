@@ -1,120 +1,292 @@
-<div class="container mx-auto px-4 py-8 max-w-2xl">
-  <!-- Header -->
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+  <!-- Progress Steps -->
   <div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">ยืมเล่มทะเบียน</h1>
-    <p class="mt-2 text-gray-600 dark:text-gray-400">กรอกข้อมูลเพื่อยืมเล่มทะเบียน</p>
+    <div class="flex items-center justify-center">
+      <div class="flex items-center">
+        <div class="flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold"
+          [class.bg-primary]="currentStep === 1" [class.text-white]="currentStep === 1"
+          [class.bg-emerald-500]="currentStep === 2" [class.text-white]="currentStep === 2">
+          @if (currentStep === 2) {
+          <span class="material-symbols-outlined text-base">check</span>
+          } @else { 1 }
+        </div>
+        <span class="ml-2 text-sm font-medium" [class.text-primary]="currentStep === 1">
+          เลือกเล่มทะเบียน
+        </span>
+      </div>
+
+      <div class="mx-4 h-0.5 w-16 bg-gray-300" [class.bg-emerald-500]="currentStep === 2"></div>
+
+      <div class="flex items-center">
+        <div class="flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold"
+          [class.bg-primary]="currentStep === 2" [class.text-white]="currentStep === 2"
+          [class.bg-gray-300]="currentStep === 1" [class.text-gray-600]="currentStep === 1">
+          2
+        </div>
+        <span class="ml-2 text-sm font-medium" [class.text-primary]="currentStep === 2">
+          กรอกข้อมูลผู้ยืม
+        </span>
+      </div>
+    </div>
   </div>
 
-  <!-- Form -->
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
-    <div class="space-y-6">
-      <!-- Registry Book -->
-      <div>
-        <label for="registryBookId" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          เล่มทะเบียน <span class="text-red-500">*</span>
-        </label>
-        <select
-          id="registryBookId"
-          formControlName="registryBookId"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-        >
-          <option value="">เลือกเล่มทะเบียน</option>
-          @for (book of availableBooks; track book.id) {
-            <option [value]="book.id">{{ book.bookNumber }} - {{ book.title }}</option>
-          }
-        </select>
-        @if (form.get('registryBookId')?.invalid && form.get('registryBookId')?.touched) {
-          <p class="mt-1 text-sm text-red-600">กรุณาเลือกเล่มทะเบียน</p>
-        }
-        @if (availableBooks.length === 0) {
-          <p class="mt-1 text-sm text-yellow-600">ไม่มีเล่มทะเบียนที่พร้อมใช้งาน</p>
-        }
-      </div>
-
-      <!-- Borrower Name -->
-      <div>
-        <label for="borrowerName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          ชื่อคนยืม <span class="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          id="borrowerName"
-          formControlName="borrowerName"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          placeholder="เช่น สมชาย ใจดี"
-        />
-        @if (form.get('borrowerName')?.invalid && form.get('borrowerName')?.touched) {
-          <p class="mt-1 text-sm text-red-600">กรุณากรอกชื่อคนยืม</p>
-        }
-      </div>
-
-      <!-- Borrow Date and Time -->
-      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <!-- Borrow Date -->
-        <div>
-          <label for="borrowedAt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            วันที่ยืม <span class="text-red-500">*</span>
-          </label>
-          <input
-            type="date"
-            id="borrowedAt"
-            formControlName="borrowedAt"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          />
-          @if (form.get('borrowedAt')?.invalid && form.get('borrowedAt')?.touched) {
-            <p class="mt-1 text-sm text-red-600">กรุณาเลือกวันที่ยืม</p>
-          }
+  <form [formGroup]="form" (ngSubmit)="onSubmit()"
+    class="bg-surface rounded-xl shadow-sm border border-subtle p-6 space-y-6">
+    <!-- Step 1: Select Books -->
+    @if (currentStep === 1) {
+    <section class="space-y-4">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="flex-1 min-w-0">
+          <h2 class="text-lg font-semibold text-primary mb-1">เลือกเล่มทะเบียนที่จะยืม</h2>
+          <p class="text-sm text-secondary">
+            ติ๊กเพื่อเลือกทีละเล่ม หรือสแกน QR เพื่อเพิ่มจากปกเล่มทะเบียนได้ทันที
+          </p>
         </div>
-
-        <!-- Borrow Time -->
-        <div>
-          <label for="borrowedTime" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            เวลาที่ยืม <span class="text-red-500">*</span>
-          </label>
-          <input
-            type="time"
-            id="borrowedTime"
-            formControlName="borrowedTime"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          />
-          @if (form.get('borrowedTime')?.invalid && form.get('borrowedTime')?.touched) {
-            <p class="mt-1 text-sm text-red-600">กรุณาเลือกเวลาที่ยืม</p>
-          }
+        <div class="flex flex-wrap gap-2 sm:gap-3">
+          <button type="button"
+            class="inline-flex items-center rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-emerald-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 cursor-pointer flex-shrink-0"
+            (click)="openScanner()">
+            <span class="material-icons mr-2 text-lg">qr_code_scanner</span>
+            สแกน QR
+          </button>
+          <button type="button" class="btn-secondary flex-shrink-0" (click)="selectAllDocument()"
+            [disabled]="availableBooks.length === 0">
+            <span class="material-icons mr-2 text-lg">checklist</span>
+            เลือกทั้งหมด
+          </button>
+          <button type="button"
+            class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-700 transition-all duration-200 hover:border-rose-600 hover:text-rose-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:border-rose-500 dark:hover:text-rose-300 dark:focus:ring-offset-gray-900 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-gray-300 disabled:hover:text-gray-700 dark:disabled:hover:border-gray-600 dark:disabled:hover:text-gray-200 flex-shrink-0"
+            (click)="clearSelection()" [disabled]="selectedDocumentIds.length === 0">
+            <span class="material-icons mr-2 text-lg">clear_all</span>
+            ล้างการเลือก
+          </button>
         </div>
       </div>
 
-      <!-- Reason -->
-      <div>
-        <label for="reason" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          เหตุผลยืม (ไม่บังคับ)
-        </label>
-        <textarea
-          id="reason"
-          formControlName="reason"
-          rows="3"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          placeholder="ระบุเหตุผลในการยืม (ถ้ามี)"
-        ></textarea>
+      <!-- Selected Books Summary - Fixed at top when scrolling -->
+      @if (selectedBooks.length) {
+      <div
+        class="sticky top-0 z-10 rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm shadow-sm dark:bg-emerald-900 dark:border-emerald-700">
+        <div class="flex items-start gap-3">
+          <span class="material-icons text-emerald-600 text-base mt-0.5 flex-shrink-0 dark:text-emerald-300">
+            check_circle
+          </span>
+          <div class="min-w-0 flex-1">
+            <span class="font-medium text-primary dark:text-emerald-100">
+              เลือกแล้ว {{ selectedBooks.length }} เล่ม
+            </span>
+            <div class="mt-1 text-emerald-700 text-xs font-mono truncate dark:text-emerald-300">
+              {{ selectedBookNumbers }}
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <!-- Actions -->
-    <div class="mt-6 flex items-center justify-end gap-3">
-      <button
-        type="button"
-        class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-        (click)="cancel()"
-      >
+      }
+
+      <!-- Books List with Fixed Height and Scroll -->
+      @if (availableBooks.length) {
+      <div class="rounded-xl border border-subtle bg-surface">
+        <div
+          class="flex flex-col gap-3 border-b border-subtle px-4 py-3 sm:flex-row sm:items-center sm:justify-between bg-surface-alt rounded-t-xl">
+          <div class="relative w-full sm:max-w-xs">
+            <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-base">
+              search
+            </span>
+            <input type="text" class="form-control pl-10 pr-9"
+              placeholder="ค้นหาเลขเล่มทะเบียนหรือชื่อผู้ถือครอง"
+              [value]="bookSearchTerm"
+              (input)="onBookSearch($event.target.value)" />
+            @if (bookSearchTerm) {
+            <button type="button"
+              class="absolute right-2 top-1/2 -translate-y-1/2 text-secondary hover:text-danger transition-colors"
+              (click)="clearBookSearch()">
+              <span class="material-icons text-sm">close</span>
+            </button>
+            }
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button type="button"
+              class="inline-flex items-center gap-1 rounded-lg border border-subtle px-3 py-2 text-sm font-medium text-secondary hover:text-primary hover:border-primary transition-colors"
+              [class.bg-surface]="bookSortField === 'documentId'"
+              (click)="changeBookSort('documentId')">
+              <span>จัดตามเลขเล่มทะเบียน</span>
+              <span class="material-icons text-base">{{ getBookSortIcon('documentId') }}</span>
+            </button>
+            <button type="button"
+              class="inline-flex items-center gap-1 rounded-lg border border-subtle px-3 py-2 text-sm font-medium text-secondary hover:text-primary hover:border-primary transition-colors"
+              [class.bg-surface]="bookSortField === 'name'"
+              (click)="changeBookSort('name')">
+              <span>จัดตามชื่อผู้ถือครอง</span>
+              <span class="material-icons text-base">{{ getBookSortIcon('name') }}</span>
+            </button>
+          </div>
+        </div>
+        <header class="hidden border-b border-subtle px-4 py-3 sm:flex bg-surface-alt">
+          <div class="w-12"></div>
+          <!-- <div class="w-32 sm:w-40 text-xs font-semibold uppercase tracking-wide text-secondary">
+            ?1??,??,,?,-?,??1??,s?,?,??,T
+          </div>
+          <div class="flex-1 text-xs font-semibold uppercase tracking-wide text-secondary">
+            ?,S?,??1^?,--?,T?,??,??,??,??,,?,?
+          </div> -->
+        </header>
+        <div class="max-h-96 overflow-y-auto">
+          @let bookList = filteredBooks;
+          @if (bookList.length) {
+          <ul class="divide-y divide-subtle">
+            @for (document of bookList; track document.id) {
+            <li class="group transition-colors duration-200 hover:bg-surface-hover">
+              <label class="flex items-center gap-3 px-4 py-3 cursor-pointer"
+                [class.bg-blue-50]="isDocumentSelected(document.id)">
+                <input type="checkbox"
+                  class="h-4 w-4 rounded border-subtle text-primary focus:ring-2 focus:ring-primary focus:ring-offset-0 bg-surface cursor-pointer transition-colors flex-shrink-0"
+                  [checked]="isDocumentSelected(document.id)"
+                  (change)="onDocumentSelectionChange(document.id, $event.target.checked)" />
+                <div class="w-32 sm:w-40 min-w-0">
+                  <div class="text-sm font-semibold text-primary font-mono truncate">
+                    {{ document.documentId }}
+                  </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm font-medium text-primary truncate">
+                    {{ document.firstName }} {{ document.lastName }}
+                  </div>
+                  <div class="text-xs text-secondary mt-1 flex items-center">
+                    <span class="material-icons mr-1 text-xs text-emerald-500">book</span>
+                    <!-- ?,z?,??1%?,-?,??1??,??1%?,??,??,? -->
+                  </div>
+                </div>
+              </label>
+            </li>
+            }
+          </ul>
+          } @else {
+          <div class="px-4 py-8 text-center text-sm text-secondary">
+            ????????????????????????????????
+          </div>
+          }
+        </div>
+      </div>
+      } @else {
+
+      <div class="rounded-xl border-2 border-dashed border-subtle bg-surface-alt px-6 py-12 text-center">
+        <span class="material-icons mx-auto text-3xl text-muted">menu_book</span>
+        <h3 class="mt-3 text-sm font-semibold text-primary">ไม่มีเล่มทะเบียนที่พร้อมให้ยืม</h3>
+        <p class="mt-1 text-sm text-secondary">ในขณะนี้ไม่มีหนังสือที่พร้อมให้ยืมได้</p>
+      </div>
+      } @if (form.get('selectedBookIds')?.invalid && form.get('selectedBookIds')?.touched) {
+      <div class="flex items-center gap-2 rounded-lg bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <span class="material-icons text-base">error</span>
+        <span>กรุณาเลือกเล่มทะเบียนอย่างน้อย 1 เล่ม</span>
+      </div>
+      }
+    </section>
+
+    <div class="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pt-4 border-t border-subtle">
+      <button type="button" class="btn-secondary cursor-pointer w-full sm:w-auto" (click)="cancel()">
         ยกเลิก
       </button>
-      <button
-        type="submit"
-        class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-        [disabled]="form.invalid || availableBooks.length === 0"
-      >
-        ยืมเล่มทะเบียน
+      <button type="button" class="btn-primary cursor-pointer inline-flex items-center w-full sm:w-auto justify-center"
+        [disabled]="!selectedDocumentIds.length" (click)="goToStep2()">
+        ขั้นตอนถัดไป
+        <span class="material-icons ml-1 text-base">arrow_forward</span>
       </button>
     </div>
-  </form>
-</div>
+    }
 
+    <!-- Step 2: Borrower Information -->
+    @if (currentStep === 2) {
+    <section class="space-y-6">
+      <!-- Selected Books Summary -->
+      <div class="rounded-lg bg-blue-50 border border-blue-200 px-4 py-3">
+        <div class="flex items-start gap-3">
+          <span class="material-icons text-blue-600 text-base mt-0.5 flex-shrink-0">info</span>
+          <div class="min-w-0 flex-1">
+            <span class="font-medium text-primary text-sm">กำลังยืม {{ selectedBooks.length }} เล่ม</span>
+            <div class="mt-1 text-blue-700 text-xs font-mono truncate">
+              {{ selectedBookNumbers }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-6">
+        <div>
+          <label for="userId" class="form-label">
+            ชื่อผู้ยืม <span class="text-red-500">*</span>
+          </label>
+          <select id="userId" formControlName="userId" class="form-control">
+            <option value="" disabled selected hidden>-- เลือกผู้ยืม --</option>
+
+            @for (user of staffOptions(); track user.id) {
+
+            <option [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
+
+            }
+          </select>
+
+          @if (!staffOptions().length) {
+
+          <p class="mt-1 text-sm text-muted">ไม่มีผู้ใช้งานในระบบ</p>
+
+          } @if (form.get('userId')?.invalid && form.get('userId')?.touched) {
+          <p class="mt-1 text-sm text-danger">กรุณากรอกชื่อผู้ยืม</p>
+          }
+        </div>
+
+        <!-- <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="borrowedAt" class="form-label">
+              วันที่ยืม <span class="text-red-500">*</span>
+            </label>
+            <input type="date" id="borrowedAt" formControlName="borrowedAt" class="form-control" />
+            @if (form.get('borrowedAt')?.invalid && form.get('borrowedAt')?.touched) {
+            <p class="mt-1 text-sm text-danger">กรุณาเลือกวันที่ยืม</p>
+            }
+          </div>
+
+          <div>
+            <label for="borrowedTime" class="form-label">
+              เวลาที่ยืม <span class="text-red-500">*</span>
+            </label>
+            <input type="time" id="borrowedTime" formControlName="borrowedTime" class="form-control" />
+            @if (form.get('borrowedTime')?.invalid && form.get('borrowedTime')?.touched) {
+            <p class="mt-1 text-sm text-danger">กรุณาเลือกเวลาที่ยืม</p>
+            }
+          </div>
+        </div> -->
+
+        <div>
+          <label for="reason" class="form-label">เหตุผลการยืม (ถ้ามี)</label>
+          <textarea id="reason" formControlName="reason" rows="3" class="form-control"
+            placeholder="บันทึกเหตุผลหรือรายละเอียดเพิ่มเติม"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <div class="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pt-4 border-t border-subtle">
+      <button type="button"
+        class="btn-secondary cursor-pointer inline-flex items-center w-full sm:w-auto justify-center"
+        (click)="goToStep1()">
+        <span class="material-icons mr-1 text-base">arrow_back</span>
+        ย้อนกลับ
+      </button>
+      <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+        <button type="button" class="btn-secondary cursor-pointer w-full sm:w-auto" (click)="cancel()">
+          ยกเลิก
+        </button>
+        <button type="submit" class="btn-primary cursor-pointer w-full sm:w-auto"
+          [disabled]="form.invalid || !selectedDocumentIds.length">
+          ยืมเล่มที่เลือก
+        </button>
+      </div>
+    </div>
+    }
+  </form>
+
+  @if (showScanner) {
+  <app-qr-scanner [isScanning]="true" (scanSuccess)="onScanSuccess($event)" (scanError)="onScanError($event)"
+    (close)="onScannerClose()"></app-qr-scanner>
+  }
+</div>

@@ -1,107 +1,136 @@
-<!-- Mobile Overlay -->
+<!-- Mobile overlay -->
 @if (isOpen()) {
-  <div
-    class="fixed inset-0 z-50 bg-black/50 transition-opacity md:hidden"
-    (click)="onOverlayClick()"
-    [class.opacity-0]="!isOpen()"
-    [class.pointer-events-none]="!isOpen()"
-  ></div>
+<div
+  class="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm transition-opacity md:hidden"
+  (click)="onOverlayClick()"
+></div>
 }
 
 <!-- Sidebar -->
 <aside
   id="app-sidebar"
-  class="fixed top-0 z-50 h-screen border-r border-gray-200 bg-white transition-all duration-300 ease-in-out dark:border-gray-700 dark:bg-gray-800"
+  class="group/sidebar fixed inset-y-0 left-0 z-50 flex h-full max-h-screen flex-col overflow-y-auto border border-subtle bg-surface text-primary shadow-xl transition-transform duration-300 ease-in-out md:h-screen md:shadow-none"
   [class.-translate-x-full]="!isOpen()"
   [class.translate-x-0]="isOpen()"
-  [style.width]="getSidebarWidth()"
+  [attr.data-collapsed]="isCollapsed()"
 >
-  <!-- Sidebar Header (Mobile) -->
-  <div class="flex h-16 items-center justify-between border-b border-gray-200 px-4 dark:border-gray-700 md:hidden">
-    <span class="text-lg font-semibold text-gray-900 dark:text-white">เมนู</span>
-    <button
-      type="button"
-      class="inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-      (click)="closeSidebar.emit()"
-      aria-label="ปิดเมนู"
-    >
-      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-      </svg>
-    </button>
-  </div>
-
-  <!-- Sidebar Content -->
-  <nav class="flex-1 space-y-1  px-3 py-4 md:px-2">
-    @for (item of menuItems; track item.route) {
-      <a
-        [routerLink]="item.route"
-        routerLinkActive="bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
-        [routerLinkActiveOptions]="{ exact: false }"
-        class="group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white md:px-2 md:justify-center"
-        [class.md:justify-start]="!isCollapsed()"
-        (click)="closeSidebar.emit()"
-        [title]="isCollapsed() ? item.label : ''"
-      >
-        @if (item.label === 'แดชบอร์ด') {
-          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-          </svg>
-        }
-        @if (item.label === 'เอกสาร') {
-          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-          </svg>
-        }
-        @if (item.label === 'การยืม') {
-          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-          </svg>
-        }
-        @if (item.label === 'เจ้าหน้าที่') {
-          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-          </svg>
-        }
-        <span 
-          class="transition-all duration-300 md:whitespace-nowrap"
-          [class.md:opacity-0]="isCollapsed()"
-          [class.md:max-w-0]="isCollapsed()"
-          [class.md:overflow-hidden]="isCollapsed()"
+  <div class="flex h-full flex-col">
+    <!-- Sidebar header -->
+    <div class="flex h-14 items-center justify-between border-b border-subtle px-4 md:h-16 md:px-3">
+      <div class="flex items-center gap-3">
+        <div
+          class="flex h-9 w-9 items-center justify-center rounded-md border border-subtle bg-[var(--color-primary)] text-sm font-semibold text-[var(--color-on-primary)]"
         >
-          {{ item.label }}
-        </span>
-        <!-- Tooltip for collapsed state -->
-        @if (isCollapsed()) {
-          <span 
-            class="absolute left-full ml-2 hidden whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-hover:block md:block"
-          >
-            {{ item.label }}
-          </span>
+          BH
+        </div>
+        @if (!isCollapsed()) {
+        <div class="flex flex-col text-primary transition-opacity duration-200">
+          <span class="text-sm font-semibold leading-tight">Barrow Hub</span>
+          <span class="text-xs text-muted">ระบบยืม-คืนเอกสาร</span>
+        </div>
         }
-      </a>
-    }
-  </nav>
-
-  <!-- Sidebar Footer (Optional) -->
-  <div class="border-t border-gray-200 p-4 dark:border-gray-700 md:p-2">
-    <div class="group relative flex items-center gap-3 md:justify-center" [class.md:justify-start]="!isCollapsed()">
-      <div class="h-10 w-10 flex-shrink-0 rounded-full bg-gray-300 dark:bg-gray-600"></div>
-      <div class="flex-1 transition-all duration-300 md:overflow-hidden" 
-           [class.md:max-w-0]="isCollapsed()"
-           [class.md:opacity-0]="isCollapsed()">
-        <p class="text-sm font-medium text-gray-900 dark:text-white">ผู้ใช้งาน</p>
-        <p class="text-xs text-gray-500 dark:text-gray-400">user@example.com</p>
       </div>
-      <!-- Tooltip for collapsed footer -->
-      @if (isCollapsed()) {
-        <span 
-          class="absolute left-full top-1/2 z-50 ml-2 hidden -translate-y-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-hover:block md:block"
+      <button
+        type="button"
+        class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-subtle text-muted transition hover:bg-surface-hover hover:text-[var(--color-text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-info)] md:hidden"
+        (click)="closeSidebar.emit()"
+        aria-label="Close navigation menu"
+      >
+        <svg
+          class="h-4 w-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
         >
-          ผู้ใช้งาน
-        </span>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Sidebar content -->
+    <div class="flex-1 px-2 py-4">
+      @for (group of navGroups; track group.title) {
+      <div class="mb-6 last:mb-0">
+        @if (!isCollapsed() && group.title) {
+        <p class="px-3 text-xs font-semibold uppercase tracking-wide text-muted">
+          {{ group.title }}
+        </p>
+        }
+        <nav class="mt-2 grid gap-1">
+          @for (item of group.items; track item.route) {
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="bg-surface-alt text-primary"
+            [routerLinkActiveOptions]="item.exact === false ? { exact: false } : { exact: true }"
+            class="group relative flex items-center gap-3 rounded-lg py-2 text-sm font-medium text-muted transition hover:bg-surface-hover hover:text-[var(--color-text-primary)]"
+            [class.justify-center]="isCollapsed()"
+            [class.px-2]="isCollapsed()"
+            [class.px-3]="!isCollapsed()"
+            (click)="onNavigate()"
+          >
+            <span
+              class="flex h-9 w-9 items-center justify-center rounded-md border border-transparent bg-surface-alt text-primary transition group-hover:bg-[var(--color-surface-hover)]"
+            >
+              @switch (item.icon) { @case ('dashboard') {
+              <mat-icon class="material-symbols-outlined"> dashboard </mat-icon>
+              } @case ('registry') {
+              <mat-icon class="material-symbols-outlined"> exit_to_app </mat-icon>
+              } @case ('borrow') {
+              <mat-icon class="material-symbols-outlined"> exit_to_app </mat-icon>
+              } @case ('registry-book') {
+              <mat-icon class="material-symbols-outlined"> book_5 </mat-icon>
+              } @case ('return') {
+              <mat-icon class="material-symbols-outlined"> undo </mat-icon>
+              } @case ('report') {
+              <mat-icon class="material-symbols-outlined"> docs </mat-icon>
+              } @case ('staff') {
+              <mat-icon class="material-symbols-outlined"> group </mat-icon>
+              } }
+            </span>
+            @if (!isCollapsed()) {
+            <span class="flex flex-1 flex-col truncate">
+              <span class="truncate">{{ item.label }}</span>
+              @if (item.description) {
+              <span class="truncate text-xs font-normal text-muted">
+                {{ item.description }}
+              </span>
+              }
+            </span>
+            @if (item.badge) {
+            <span
+              class="ml-auto inline-flex items-center rounded-full bg-[var(--color-primary)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-on-primary)]"
+            >
+              {{ item.badge }}
+            </span>
+            } }
+          </a>
+          }
+        </nav>
+      </div>
       }
     </div>
+
+    <!-- Sidebar footer -->
+    <!-- <div class="border-t border-subtle p-1">
+      <button
+        type="button"
+        class="group relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition hover:bg-surface-hover cursor-pointer"
+      >
+        <div
+          class="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary)] text-sm font-semibold text-[var(--color-on-primary)]"
+        >
+          {{ currentUser.initials }}
+        </div>
+
+        @if (!isCollapsed()) {
+        <div class="flex flex-1 flex-col text-sm">
+          <span class="font-medium text-primary">{{ currentUser.name }}</span>
+          <span class="text-xs text-muted">{{ currentUser.email }}</span>
+        </div>
+        <mat-icon class="material-symbols-outlined"> chevron_right </mat-icon>
+        }
+      </button>
+    </div> -->
   </div>
 </aside>
-

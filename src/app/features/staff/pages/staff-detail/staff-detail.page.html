@@ -1,0 +1,86 @@
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+  <div class="mb-6 flex items-center justify-between">
+    <button
+      type="button"
+      class="inline-flex items-center text-sm font-medium text-secondary hover:text-[var(--color-text-primary)]"
+      (click)="goBack()"
+    >
+      <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      ย้อนกลับ
+    </button>
+    <div class="flex items-center gap-3">
+      <button
+        type="button"
+        class="btn-secondary cursor-pointer"
+        (click)="viewBorrowHistory()"
+      >
+        <mat-icon>dehaze</mat-icon>
+        ดูประวัติการยืม
+      </button>
+      <button
+        type="button"
+        class="btn-primary cursor-pointer"
+        (click)="editStaff()"
+      >
+       <mat-icon class="material-symbols-outlined text-white">edit_square</mat-icon>
+        แก้ไขข้อมูล
+      </button>
+    </div>
+  </div>
+
+  @if (staff) {
+    <div class="bg-surface rounded-lg shadow border border-subtle overflow-hidden">
+      <div class="px-6 py-5 border-b border-subtle bg-surface-alt flex items-center">
+        <div class="h-16 w-16 flex-shrink-0 rounded-full avatar-placeholder flex items-center justify-center">
+          <span class="text-2xl font-medium text-secondary">
+            {{ staff.firstName.charAt(0) }}
+          </span>
+        </div>
+      </div>
+
+      <div class="px-6 py-5">
+        <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div>
+            <dt class="text-sm font-medium text-muted">อีเมล</dt>
+            <dd class="mt-1 text-sm text-primary">{{ staff.email }}</dd>
+          </div>
+
+          <div>
+            <dt class="text-sm font-medium text-muted">เบอร์โทรศัพท์</dt>
+            <dd class="mt-1 text-sm text-primary">{{ staff.telNumber || '-' }}</dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-muted">สถานะ</dt>
+            <dd class="mt-1">
+              @if (staff.isActive) {
+                <span class="badge badge-success">ใช้งานอยู่</span>
+              } @else {
+                <span class="badge badge-neutral">ปิดใช้งาน</span>
+              }
+            </dd>
+          </div>
+
+          <div>
+            <dt class="text-sm font-medium text-muted">วันที่สร้าง</dt>
+            <dd class="mt-1 text-sm text-primary">
+              {{ staff.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+            </dd>
+          </div>
+
+          <div>
+            <dt class="text-sm font-medium text-muted">แก้ไขล่าสุด</dt>
+            <dd class="mt-1 text-sm text-primary">
+              {{ staff.updatedAt | date: 'dd/MM/yyyy HH:mm' }}
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  } @else {
+    <div class="rounded-lg border border-dashed border-subtle px-6 py-12 text-center text-muted">
+      ไม่พบข้อมูลเจ้าหน้าที่
+    </div>
+  }
+</div>
