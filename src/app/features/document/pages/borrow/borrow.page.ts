@@ -11,7 +11,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { RegistryBookService } from '../../services/document.service';
+import { DocumentService } from '../../services/document.service';
 import { BorrowCreateDto } from '../../../../shared/models/borrow.model';
 import { Document } from '../../../../shared/models/registry-book.model';
 import { QrScannerComponent } from '../../../../shared/components/qr-scanner/qr-scanner.component';
@@ -49,7 +49,7 @@ export class BorrowPage implements OnInit {
 
   constructor(
     private readonly fb: FormBuilder,
-    private readonly registryBookService: RegistryBookService,
+    private readonly documentService: DocumentService,
     private readonly router: Router,
     private readonly datePipe: DatePipe,
     private staffService: StaffService
@@ -168,8 +168,8 @@ export class BorrowPage implements OnInit {
   }
 
   loadAvailableBooks(): void {
-    this.registryBookService
-      .getRegistryBooks()
+    this.documentService
+      .getDocuments()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (books) => {
@@ -243,8 +243,8 @@ export class BorrowPage implements OnInit {
       return;
     }
 
-    this.registryBookService
-      .getRegistryBookById(Number(normalizedId))
+    this.documentService
+      .getDocumentById(Number(normalizedId))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (book) => {
@@ -303,7 +303,7 @@ export class BorrowPage implements OnInit {
       documentId: this.selectedDocumentIds,
       description: formValue.reason?.trim() || undefined,
     };
-    this.registryBookService
+    this.documentService
       .createBulkBorrows(borrowDtos)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -345,6 +345,6 @@ export class BorrowPage implements OnInit {
         return;
       }
     }
-    this.router.navigate(['/registry-books']);
+    this.router.navigate(['/documents']);
   }
 }

@@ -12,7 +12,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { RegistryBookService } from '../../services/document.service';
+import { DocumentService } from '../../services/document.service';
 import { Document } from '../../../../shared/models/registry-book.model';
 import {
   SortState,
@@ -25,6 +25,7 @@ import { readTabularFile } from '../../../../shared/utils/csv-utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver'
+import { AlertService } from '../../../../shared/services/alert.service';
 
 type RegistryBookStatus = Document['status'];
 
@@ -39,14 +40,14 @@ interface RegistryBookImportPreviewRow {
 }
 
 @Component({
-  selector: 'app-registry-book-list',
+  selector: 'app-document-list',
   standalone: true,
   imports: [CommonModule, MatIconModule],
-  templateUrl: './registry-book-list.page.html',
-  styleUrl: './registry-book-list.page.scss',
+  templateUrl: './document-list.page.html',
+  styleUrl: './document-list.page.scss',
 })
-export class RegistryBookListPage implements OnInit {
-  private readonly registryBooks = signal<Document[]>([]);
+export class DocumentListPage implements OnInit {
+  private readonly documents = signal<Document[]>([]);
   protected readonly searchTerm = signal('');
   protected readonly sortState = signal<SortState>({ ...defaultSortState });
   private readonly isDesktopScreen = signal(this.checkIsDesktop());
@@ -68,7 +69,7 @@ export class RegistryBookListPage implements OnInit {
     const total = this.importPreview().length;
     return total > 10 ? total - 10 : 0;
   });
-  protected readonly templateDownloadUrl = '/samples/registry-books-template.xlsx';
+  protected readonly templateDownloadUrl = '/samples/documents-template.xlsx';
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly columns: Array<{
@@ -109,7 +110,7 @@ export class RegistryBookListPage implements OnInit {
   ];
 
   protected readonly filteredRegistryBooks = computed(() => {
-    const raw = this.registryBooks();
+    const raw = this.documents();
     const term = this.searchTerm().trim().toLowerCase();
 
     const filtered = term
@@ -139,7 +140,7 @@ export class RegistryBookListPage implements OnInit {
   });
 
   protected readonly registryBookCount = computed(
-    () => this.registryBooks().length,
+    () => this.documents().length,
   );
 
   protected readonly hasSearchTerm = computed(
@@ -147,8 +148,9 @@ export class RegistryBookListPage implements OnInit {
   );
 
   constructor(
-    private readonly registryBookService: RegistryBookService,
+    private readonly documentService: DocumentService,
     private readonly router: Router,
+    private readonly alert: AlertService,
   ) {}
 
   @ViewChild('registryImportInput') private registryImportInput?: ElementRef<HTMLInputElement>;
@@ -167,13 +169,13 @@ export class RegistryBookListPage implements OnInit {
   }
 
   loadRegistryBooks(): void {
-    this.registryBookService
-      .getRegistryBooks()
+    this.documentService
+      .getDocuments()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (books) => this.registryBooks.set(books),
+        next: (books) => this.documents.set(books),
         error: (error) =>
-          console.error('Failed to load registry books', error),
+          console.error('Failed to load documents', error),
       });
   }
 
@@ -182,28 +184,28 @@ export class RegistryBookListPage implements OnInit {
       return;
     }
 
-    this.registryBookService
+    this.documentService
       .deleteRegistryBook(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => this.loadRegistryBooks(),
         error: (error) => {
-          console.error('Failed to delete registry book', error);
-          window.alert('ไม่สามารถลบทะเบียนเอกสารได้ กรุณาลองใหม่อีกครั้ง');
+          console.error('Failed to delete document', error);
+          this.alert.error('ไม่สามารถลบเอกสารได้','กรุณาลองใหม่อีกครั้ง');
         },
       });
   }
 
   viewDetails(id: number): void {
-    this.router.navigate(['/registry-books', id]);
+    this.router.navigate(['/document', id]);
   }
 
-  editRegistryBook(id: number): void {
-    this.router.navigate(['/registry-books', id, 'edit']);
+  editDocument(id: number): void {
+    this.router.navigate(['/document', id, 'edit']);
   }
 
-  createRegistryBook(): void {
-    this.router.navigate(['/registry-books', 'create']);
+  createDocument(): void {
+    this.router.navigate(['/documents', 'create']);
   }
 
   protected onSearchTermChange(event: Event): void {
@@ -291,8 +293,8 @@ export class RegistryBookListPage implements OnInit {
       lastName: row.lastName,
     }));
 
-    this.registryBookService
-      .importRegistryBooks(payload)
+    this.documentService
+      .importDocuments(payload)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) => {
@@ -308,12 +310,12 @@ export class RegistryBookListPage implements OnInit {
 �,��,��,��,?�,��,��,-�,�1^�,,�1%�,��,��1?�,T�,��1^�,-�,؅,^�,��,?�,,�1%�,-�,��,1�,��,<�1%�,3: ${duplicated}`;
           }
 
-          window.alert(message);
+          this.alert.success(message);
           this.isImporting.set(false);
         },
         error: (error) => {
           console.error('Failed to import document', error);
-          window.alert('ไม่สามารถนำเข้าทะเบียนเอกสารได้ กรุณาลองใหม่อีกครั้ง');
+          this.alert.error('ไม่สามารถนำเข้าได้',error.status === 409 ? 'มีเลขเล่มทะเบียนซ้ำในไฟล์' : 'กรุณาตรวจสอบไฟล์ Template ก่อนอัปโหลด');
           this.isImporting.set(false);
         },
       });

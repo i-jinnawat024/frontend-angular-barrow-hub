@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { RegistryBookService } from '../../services/document.service';
+import { DocumentService } from '../../services/document.service';
 import { Document } from '../../../../shared/models/registry-book.model';
 import { QrBarcodeService } from '../../../../shared/services/qr-barcode.service';
 import { MatIcon } from "@angular/material/icon";
@@ -10,13 +10,13 @@ import { EMPTY } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-registry-book-detail',
+  selector: 'app-document-detail',
   standalone: true,
   imports: [CommonModule, MatIcon],
-  templateUrl: './registry-book-detail.page.html',
-  styleUrl: './registry-book-detail.page.scss',
+  templateUrl: './document-detail.page.html',
+  styleUrl: './document-detail.page.scss',
 })
-export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy {
+export class DocumentDetailPage implements OnInit, AfterViewInit, OnDestroy {
   document: Document | undefined;
   qrCodeDataUrl: string | null = null;
   private readonly destroyRef = inject(DestroyRef);
@@ -24,7 +24,7 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
   private id: number | null = null;
   
   constructor(
-    private readonly registryBookService: RegistryBookService,
+    private readonly documentService: DocumentService,
     private readonly router: Router,
     private readonly route: ActivatedRoute,
     private readonly qrBarcodeService: QrBarcodeService,
@@ -37,16 +37,16 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
           const id = params.get('id');
           this.id = Number(id);
           if (!id) {
-            this.router.navigate(['/registry-books']);
+            this.router.navigate(['/documents']);
             return EMPTY;
           }
-          return this.registryBookService.getRegistryBookById(this.id);
+          return this.documentService.getDocumentById(this.id);
         }),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: (book) => this.handleRegistryBook(book),
-        error: () => this.router.navigate(['/registry-books']),
+        error: () => this.router.navigate(['/documents']),
       });
   }
 
@@ -105,18 +105,18 @@ export class RegistryBookDetailPage implements OnInit, AfterViewInit, OnDestroy 
 
   editDocument(): void {
     if (this.document) {
-      this.router.navigate(['/registry-books', this.document.id, 'edit']);
+      this.router.navigate(['/document', this.document.id, 'edit']);
     }
   }
 
   goBack(): void {
-    this.router.navigate(['/registry-books']);
+    this.router.navigate(['/documents']);
   }
 
   viewBorrowHistory(): void {
     if (this.document) {
       this.router.navigate([
-        '/registry-books',
+        '/document',
         this.document.id,
         'history',
       ]);

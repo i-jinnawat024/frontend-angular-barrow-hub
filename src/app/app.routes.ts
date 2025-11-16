@@ -24,52 +24,52 @@ export const routes: Routes = [
         pathMatch: 'full',
       },
       {
-        path: 'registry-books',
+        path: 'documents',
         loadComponent: () =>
-          import('./features/registry-books/pages/document-list/registry-book-list.page').then(
-            (m) => m.RegistryBookListPage,
+          import('./features/document/pages/document-list/document-list.page').then(
+            (m) => m.DocumentListPage,
           ),
       },
       {
-        path: 'registry-books/create',
+        path: 'documents/create',
         loadComponent: () =>
-          import('./features/registry-books/pages/registry-book-form/registry-book-form.page').then(
-            (m) => m.RegistryBookFormPage,
+          import('./features/document/pages/document-form/document-form.page').then(
+            (m) => m.DocumentFormPage,
           ),
       },
       {
-        path: 'registry-books/borrow',
+        path: 'documents/borrow',
         loadComponent: () =>
-          import('./features/registry-books/pages/borrow/borrow.page').then(
+          import('./features/document/pages/borrow/borrow.page').then(
             (m) => m.BorrowPage,
           ),
       },
       {
-        path: 'registry-books/return',
+        path: 'documents/return',
         loadComponent: () =>
-          import('./features/registry-books/pages/return/return.page').then(
+          import('./features/document/pages/return/return.page').then(
             (m) => m.ReturnPage,
           ),
       },
       {
-        path: 'registry-books/:id/edit',
+        path: 'document/:id/edit',
         loadComponent: () =>
-          import('./features/registry-books/pages/registry-book-form/registry-book-form.page').then(
-            (m) => m.RegistryBookFormPage,
+          import('./features/document/pages/document-form/document-form.page').then(
+            (m) => m.DocumentFormPage,
           ),
       },
       {
-        path: 'registry-books/:id/history',
+        path: 'document/:id/history',
         loadComponent: () =>
-          import('./features/registry-books/pages/registry-book-history/registry-book-history.page').then(
-            (m) => m.RegistryBookHistoryPage,
+          import('./features/document/pages/document-history/document-history.page').then(
+            (m) => m.DocumentHistoryPage,
           ),
       },
       {
-        path: 'registry-books/:id',
+        path: 'document/:id',
         loadComponent: () =>
-          import('./features/registry-books/pages/registry-book-detail/registry-book-detail.page').then(
-            (m) => m.RegistryBookDetailPage,
+          import('./features/document/pages/document-detail/documentdetail.page').then(
+            (m) => m.DocumentDetailPage,
           ),
       },
       {

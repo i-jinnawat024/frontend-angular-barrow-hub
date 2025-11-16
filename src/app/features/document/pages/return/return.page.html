@@ -194,17 +194,17 @@
 
       <div class="rounded-xl border border-subtle bg-surface">
         <div class="max-h-[500px] overflow-y-auto space-y-3 p-4">
-          @if (getFilteredBorrows().length) { @for (borrow of getFilteredBorrows(); track borrow.document.id)
+          @if (getFilteredBorrows().length) { @for (borrow of getFilteredBorrows(); track borrow.document?.id)
           {
 
           <label
             class="flex flex-col gap-3 rounded-lg border border-subtle px-3 py-4 cursor-pointer transition hover:border-primary focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2"
-            [class.bg-emerald-50]="isBorrowSelected(borrow.document.id)">
+            [class.bg-emerald-50]="isBorrowSelected(borrow.document?.id)">
             <div class="flex flex-wrap items-start gap-3">
               <input type="checkbox"
                 class="h-4 w-4 mt-0.5 rounded border-subtle text-emerald-600 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0 bg-surface cursor-pointer transition-colors flex-shrink-0"
-                [checked]="isBorrowSelected(borrow.document.id)"
-                (change)="onBorrowSelectionChange(borrow.document.id, $event.target.checked)" />
+                [checked]="isBorrowSelected(borrow.document!.id)"
+                (change)="onBorrowSelectionChange(borrow.document!.id, $event.target.checked)" />
 
               <div class="flex-1 min-w-0">
                 <div class="text-sm font-semibold text-primary line-clamp-2">
@@ -224,7 +224,7 @@
                 </p>
               </div>
 
-              <div class="text-xs font-mono text-secondary">#{{ borrow.document.documentId }}</div>
+              <div class="text-xs font-mono text-secondary">#{{ borrow.document?.documentId }}</div>
             </div>
 
             <div class="grid gap-3 text-xs text-secondary sm:grid-cols-2">
