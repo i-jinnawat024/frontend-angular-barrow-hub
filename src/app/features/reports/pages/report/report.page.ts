@@ -41,13 +41,13 @@ export class ReportPage implements OnInit {
       label: 'เลขเล่มทะเบียน',
       property: 'documentId',
       sortable: true,
-      accessor: (borrow) => borrow.document.documentId,
+      accessor: (borrow) => borrow.document?.documentId || '-',
     },
     {
       label: 'ชื่อ-นามสกุล',
       property: 'title',
       sortable: true,
-      accessor: (borrow) => `${borrow.document.firstName} ${borrow.document.lastName}`,
+      accessor: (borrow) => `${borrow.document?.firstName} ${borrow.document?.lastName}`,
     },
     {
       label: 'ผู้ยืม',
@@ -82,10 +82,10 @@ export class ReportPage implements OnInit {
   ];
 
   private readonly searchAccessors: Array<(borrow: Borrow) => unknown> = [
-    (borrow) => borrow.document.documentId,
-    (borrow) => `${borrow.document.firstName} ${borrow.document.lastName}`,
-    (borrow) => borrow.document.firstName,
-    (borrow) => borrow.description ?? '',
+    (borrow) => borrow.document?.documentId || '-',
+    (borrow) => `${borrow.document?.firstName || '-'} ${borrow.document?.lastName || '-'}`,
+    (borrow) => borrow.name,
+    (borrow) => borrow.description ?? '-',
     (borrow) => borrow.status,
   ];
 

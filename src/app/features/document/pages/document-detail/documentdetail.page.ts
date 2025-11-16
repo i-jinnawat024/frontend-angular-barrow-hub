@@ -105,7 +105,7 @@ export class DocumentDetailPage implements OnInit, AfterViewInit, OnDestroy {
 
   editDocument(): void {
     if (this.document) {
-      this.router.navigate(['/documents', this.document.id, 'edit']);
+      this.router.navigate(['/document', this.document.id, 'edit']);
     }
   }
 
@@ -116,7 +116,7 @@ export class DocumentDetailPage implements OnInit, AfterViewInit, OnDestroy {
   viewBorrowHistory(): void {
     if (this.document) {
       this.router.navigate([
-        '/documents',
+        '/document',
         this.document.id,
         'history',
       ]);
