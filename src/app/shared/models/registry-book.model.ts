@@ -10,7 +10,7 @@ export interface Document {
   deletedAt?: Date| null | undefined;
 }
 
-export interface RegistryBookCreateDto {
+export interface DocumentCreateDto {
   documentId: number;
   firstName: string;
   lastName: string;

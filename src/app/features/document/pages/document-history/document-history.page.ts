@@ -1,7 +1,7 @@
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { RegistryBookService } from '../../services/document.service';
+import { DocumentService } from '../../services/document.service';
 import { Document } from '../../../../shared/models/registry-book.model';
 import { Borrow } from '../../../../shared/models/borrow.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -10,19 +10,19 @@ import { switchMap, tap } from 'rxjs/operators';
 import { ThaiDatePipe } from '../../../../shared/pipes/thai-date.pipe';
 
 @Component({
-  selector: 'app-registry-book-history',
+  selector: 'app-document-history',
   standalone: true,
   imports: [CommonModule, ThaiDatePipe],
-  templateUrl: './registry-book-history.page.html',
-  styleUrl: './registry-book-history.page.scss',
+  templateUrl: './document-history.page.html',
+  styleUrl: './document-history.page.scss',
 })
-export class RegistryBookHistoryPage implements OnInit {
+export class DocumentHistoryPage implements OnInit {
   document: Document | undefined;
   borrowHistory: Borrow[] = [];
   private readonly destroyRef = inject(DestroyRef);
 
   constructor(
-    private readonly registryBookService: RegistryBookService,
+    private readonly documentService: DocumentService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
   ) {}
@@ -37,11 +37,11 @@ ngOnInit(): void {
           return EMPTY;
         }
 
-        return this.registryBookService.getRegistryBookById(id).pipe(
+        return this.documentService.getDocumentById(id).pipe(
           tap((document) => {
             this.document = document;
           }),
-          switchMap(() => this.registryBookService.getBorrowHistoryByDocumentId(id)),
+          switchMap(() => this.documentService.getBorrowHistoryByDocumentId(id)),
           tap((history) => console.log('history =', history))
         );
       }),
