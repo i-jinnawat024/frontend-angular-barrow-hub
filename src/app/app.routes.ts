@@ -45,7 +45,7 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'registry-books/return',
+        path: 'documents/return',
         loadComponent: () =>
           import('./features/registry-books/pages/return/return.page').then(
             (m) => m.ReturnPage,
