@@ -49,14 +49,14 @@ export class SidebarComponent {
       items: [
         {
           label: 'แจ้งการยืม',
-          route: '/registry-books/borrow',
+          route: '/documents/borrow',
           icon: 'borrow',
           description: 'จัดการการยืม',
           exact: true
         },
         {
           label: 'แจ้งการคืน',
-          route: '/registry-books/return',
+          route: '/documents/return',
           icon: 'return',
           description: 'จัดการการคืน',
           exact: true,
@@ -69,7 +69,7 @@ export class SidebarComponent {
       items: [
         {
           label: 'รายการเล่มทะเบียน',
-          route: '/registry-books',
+          route: '/documents',
           icon: 'registry-book',
           description: 'จัดการทะเบียนเล่ม',
           exact: true
@@ -109,7 +109,6 @@ export class SidebarComponent {
 
   protected onNavigate(): void {
     if (typeof window === 'undefined') return;
-
     if (window.innerWidth < 768) {
       this.closeSidebar.emit();
     }

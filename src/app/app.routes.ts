@@ -45,7 +45,7 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'document/return',
+        path: 'documents/return',
         loadComponent: () =>
           import('./features/document/pages/return/return.page').then(
             (m) => m.ReturnPage,

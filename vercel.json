@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build:dev",
+  "buildCommand": "node scripts/vercel-build.js",
   "outputDirectory": "dist/frontend-angular-barrow-hub/browser",
   "framework": "angular",
   "routes": [

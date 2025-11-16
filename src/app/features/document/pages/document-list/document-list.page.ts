@@ -69,7 +69,7 @@ export class DocumentListPage implements OnInit {
     const total = this.importPreview().length;
     return total > 10 ? total - 10 : 0;
   });
-  protected readonly templateDownloadUrl = '/samples/registry-books-template.xlsx';
+  protected readonly templateDownloadUrl = '/samples/documents-template.xlsx';
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly columns: Array<{
@@ -197,11 +197,11 @@ export class DocumentListPage implements OnInit {
   }
 
   viewDetails(id: number): void {
-    this.router.navigate(['/documents', id]);
+    this.router.navigate(['/document', id]);
   }
 
   editDocument(id: number): void {
-    this.router.navigate(['/documents', id, 'edit']);
+    this.router.navigate(['/document', id, 'edit']);
   }
 
   createDocument(): void {
