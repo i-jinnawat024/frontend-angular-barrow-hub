@@ -1,0 +1,9 @@
+{
+  "buildCommand": "node scripts/vercel-build.js",
+  "outputDirectory": "dist/frontend-angular-barrow-hub/browser",
+  "framework": "angular",
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/.*", "dest": "/index.html" }
+  ]
+}

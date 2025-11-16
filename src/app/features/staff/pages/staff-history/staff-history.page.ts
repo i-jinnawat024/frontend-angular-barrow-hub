@@ -2,7 +2,7 @@ import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { StaffService } from '../../services/staff.service';
-import { RegistryBookService } from '../../../registry-books/services/document.service';
+import { DocumentService } from '../../../document/services/document.service';
 import { Staff } from '../../../../shared/models/staff.model';
 import { Borrow } from '../../../../shared/models/borrow.model';
 import { MatIcon } from "@angular/material/icon";
@@ -22,7 +22,7 @@ export class StaffHistoryPage implements OnInit {
 
   constructor(
     private readonly staffService: StaffService,
-    private readonly registryBookService: RegistryBookService,
+    private readonly documentService: DocumentService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
   ) {}
@@ -66,7 +66,7 @@ export class StaffHistoryPage implements OnInit {
 
     const fullName = `${this.staff.firstName} ${this.staff.lastName}`.trim();
 
-    this.registryBookService
+    this.documentService
       .getBorrowHistoryByStaffName(fullName)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
