@@ -379,7 +379,7 @@ export class ReturnPage implements OnInit {
       });
   }
   cancel(): void {
-    this.router.navigate(['/registry-books']);
+    this.router.navigate(['/documents']);
   }
 
   openScanner(): void {

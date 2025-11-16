@@ -69,7 +69,7 @@ export class DocumentListPage implements OnInit {
     const total = this.importPreview().length;
     return total > 10 ? total - 10 : 0;
   });
-  protected readonly templateDownloadUrl = '/samples/registry-books-template.xlsx';
+  protected readonly templateDownloadUrl = '/samples/documents-template.xlsx';
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly columns: Array<{

@@ -33,7 +33,7 @@ ngOnInit(): void {
       switchMap((params) => {
         const id = Number(params.get('id'));
         if (!id) {
-          this.router.navigate(['/registry-books']);
+          this.router.navigate(['/documents']);
           return EMPTY;
         }
 
@@ -58,9 +58,9 @@ ngOnInit(): void {
 
   goBack(): void {
     if (this.document) {
-      this.router.navigate(['/registry-books', this.document.documentId]);
+      this.router.navigate(['/documents', this.document.documentId]);
     } else {
-      this.router.navigate(['/registry-books']);
+      this.router.navigate(['/documents']);
     }
   }
 }

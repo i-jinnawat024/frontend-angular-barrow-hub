@@ -12,7 +12,7 @@ import {
 import { AlertService } from '../../../../shared/services/alert.service';
 
 @Component({
-  selector: 'app-registry-book-form',
+  selector: 'app-documents-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './document-form.page.html',
@@ -74,7 +74,7 @@ export class DocumentFormPage implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (book) => this.patchForm(book),
-        error: () => this.router.navigate(['/registry-books']),
+        error: () => this.router.navigate(['/documents']),
       });
   }
 
@@ -95,7 +95,7 @@ export class DocumentFormPage implements OnInit {
           next: () =>
             this.alert
               .success('บันทึกข้อมูลสำเร็จ', 'ทะเบียนเอกสารถูกบันทึกเรียบร้อยแล้ว')
-              .then(() => this.router.navigate(['/registry-books'])),
+              .then(() => this.router.navigate(['/documents'])),
           error: (error) => {
             console.error('Failed to update document', error.error);
             this.alert.error(
@@ -112,7 +112,7 @@ export class DocumentFormPage implements OnInit {
           next: () =>
             this.alert
               .success('บันทึกข้อมูลสำเร็จ', 'ทะเบียนเอกสารถูกบันทึกเรียบร้อยแล้ว')
-              .then(() => this.router.navigate(['/registry-books'])),
+              .then(() => this.router.navigate(['/documents'])),
           error: (error) => {
             console.error('Failed to create document', error.error);
             this.alert.error(
@@ -156,6 +156,6 @@ export class DocumentFormPage implements OnInit {
   }
 
   cancel(): void {
-    this.router.navigate([`/registry-books`]);
+    this.router.navigate([`/documents-books`]);
   }
 }
