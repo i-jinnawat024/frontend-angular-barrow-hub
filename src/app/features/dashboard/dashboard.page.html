@@ -28,7 +28,7 @@
       <div>
         <p class="text-sm font-medium text-green-600 dark:text-green-300">บุคลากรทั้งหมด</p>
         <p class="text-3xl font-bold text-green-900 dark:text-green-100 mt-2">
-          {{ stats().totalStaff }}
+          {{ stats().totalUser }}
         </p>
       </div>
       <div class="p-3 bg-green-500 rounded-full shadow-md">
@@ -41,9 +41,9 @@
   <div class="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900 dark:to-orange-800 rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border border-orange-200 dark:border-orange-700">
     <div class="flex items-center justify-between">
       <div>
-        <p class="text-sm font-medium text-orange-600 dark:text-orange-300">เอกสารถูกยืม</p>
+        <p class="text-sm font-medium text-orange-600 dark:text-orange-300">เอกสารที่กำลังถูกยืม</p>
         <p class="text-3xl font-bold text-orange-900 dark:text-orange-100 mt-2">
-          {{ stats().borrowedDocuments }}
+          {{ stats().totalHistories }}
         </p>
       </div>
       <div class="p-3 bg-orange-500 rounded-full shadow-md">
@@ -83,7 +83,7 @@
       </div>
     </div>
 
-    @if (filteredLoans().length > 0) {
+    @if (filteredHistories().length > 0) {
     <div class="overflow-x-auto">
       <table class="w-full text-left text-sm text-primary rtl:text-right">
         <caption
@@ -127,40 +127,40 @@
           </tr>
         </thead>
         <tbody>
-          @for (loan of filteredLoans(); track loan.id) {
+          @for (history of filteredHistories(); track history.id) {
           <tr class="border-b border-subtle bg-surface transition hover:bg-surface-hover">
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="flex flex-col">
                 <div class="text-sm font-medium text-primary">
-                  {{ loan.document.first_name + ' ' + loan.document.last_name }}
+                  {{ history.document.firstName + ' ' + history.document.lastName }}
                 </div>
                 <div class="text-sm text-muted">
-                  {{ loan.document.documentNumber }}
+                  {{ history.document.documentId }}
                 </div>
               </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="flex flex-col">
                 <div class="text-sm font-medium text-primary">
-                  {{ loan.borrower.firstName + ' ' + loan.borrower.lastName }}
+                  {{ history.name }}
                 </div>
                 <div class="text-sm text-muted">
-                  <!-- {{ loan.borrower.position }} -->
+                  <!-- {{ history.borrower.position }} -->
                 </div>
               </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-muted">
-              {{ loan.borrowedAt | date : 'dd/MM/yyyy' }}
+              {{ history.createdAt | date : 'dd/MM/yyyy' }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-muted">
-              {{ getDaysDifference(loan.borrowedAt) }} วัน
+              {{ getDaysDifference(history.createdAt) }} วัน
             </td>
           </tr>
           }
         </tbody>
       </table>
     </div>
-    } @else if (totalActiveLoans() === 0 && !hasSearchTerm()) {
+    } @else if (getActiveLoans().length === 0 && !hasSearchTerm()) {
     <div class="p-12 text-center">
       <mat-icon class="material-symbols-outlined"> inventory_2 </mat-icon>
       <h3 class="mt-2 text-sm font-medium text-primary">ยังไม่มีรายการยืม</h3>

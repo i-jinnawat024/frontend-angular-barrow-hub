@@ -23,7 +23,8 @@ import {
   toSearchableString,
 } from '../../../../shared/utils/table-utils';
 import { readTabularFile } from '../../../../shared/utils/csv-utils';
-
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 interface StaffImportPreviewRow {
   rowNumber: number;
   firstName: string;
@@ -51,22 +52,15 @@ export class StaffListPage implements OnInit {
   protected readonly importErrors = signal<string[]>([]);
   protected readonly importFileName = signal<string | null>(null);
   protected readonly isImporting = signal(false);
-  protected readonly hasImportPreview = computed(
-    () => this.importPreview().length > 0,
-  );
-  protected readonly hasImportErrors = computed(
-    () => this.importErrors().length > 0,
-  );
-  protected readonly importPreviewSample = computed(() =>
-    this.importPreview().slice(0, 10),
-  );
+  protected readonly hasImportPreview = computed(() => this.importPreview().length > 0);
+  protected readonly hasImportErrors = computed(() => this.importErrors().length > 0);
+  protected readonly importPreviewSample = computed(() => this.importPreview().slice(0, 10));
   protected readonly importPreviewRemaining = computed(() => {
     const total = this.importPreview().length;
     return total > 10 ? total - 10 : 0;
   });
   protected readonly templateDownloadUrl = '/samples/staff-template.xlsx';
   private readonly destroyRef = inject(DestroyRef);
-
 
   protected readonly columns: Array<{
     label: string;
@@ -79,6 +73,12 @@ export class StaffListPage implements OnInit {
       property: 'name',
       sortable: true,
       accessor: (member) => member.firstName + ' ' + member.lastName,
+    },
+    {
+      label: 'อีเมล',
+      property: 'email',
+      sortable: false,
+      accessor: (member) => member.email,
     },
     {
       label: 'เบอร์โทร',
@@ -112,8 +112,8 @@ export class StaffListPage implements OnInit {
     const filtered = term
       ? raw.filter((member) =>
           this.searchAccessors.some((accessor) =>
-            toSearchableString(accessor(member)).includes(term),
-          ),
+            toSearchableString(accessor(member)).includes(term)
+          )
         )
       : raw;
 
@@ -123,7 +123,7 @@ export class StaffListPage implements OnInit {
     }
 
     const column = this.columns.find(
-      (col) => col.property === sort.active && col.sortable && col.accessor,
+      (col) => col.property === sort.active && col.sortable && col.accessor
     );
 
     if (!column?.accessor) {
@@ -131,20 +131,15 @@ export class StaffListPage implements OnInit {
     }
 
     return [...filtered].sort((a, b) =>
-      compareValues(column.accessor!(a), column.accessor!(b), sort.direction),
+      compareValues(column.accessor!(a), column.accessor!(b), sort.direction)
     );
   });
 
   protected readonly staffCount = computed(() => this.staffMembers().length);
 
-  protected readonly hasSearchTerm = computed(
-    () => this.searchTerm().trim().length > 0,
-  );
+  protected readonly hasSearchTerm = computed(() => this.searchTerm().trim().length > 0);
 
-  constructor(
-    private readonly staffService: StaffService,
-    private readonly router: Router,
-  ) {}
+  constructor(private readonly staffService: StaffService, private readonly router: Router) {}
 
   @ViewChild('staffImportInput') private staffImportInput?: ElementRef<HTMLInputElement>;
 
@@ -158,8 +153,7 @@ export class StaffListPage implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (staff) => this.staffMembers.set(staff),
-        error: (error) =>
-          console.error('Failed to load staff list from API', error),
+        error: (error) => console.error('Failed to load staff list from API', error),
       });
   }
 
@@ -308,9 +302,7 @@ export class StaffListPage implements OnInit {
       });
   }
 
-  private parseStaffImport(
-    rows: string[][],
-  ): { rows: StaffImportPreviewRow[]; errors: string[] } {
+  private parseStaffImport(rows: string[][]): { rows: StaffImportPreviewRow[]; errors: string[] } {
     if (rows.length === 0) {
       return {
         rows: [],
@@ -318,20 +310,17 @@ export class StaffListPage implements OnInit {
       };
     }
 
-    const headers = rows[0].map((cell) =>
-      this.normalizeHeader(String(cell ?? '')),
-    );
-    const nameIndex = this.findHeaderIndex(headers, ['ชื่อ-นามสกุล', 'ชื่อและนามสกุล']);
+    const headers = rows[0].map((cell) => this.normalizeHeader(String(cell ?? '')));
+    const firstNameIndex = this.findHeaderIndex(headers, ['ชื่อ']);
+    const lastNameIndex = this.findHeaderIndex(headers, ['นามสกุล']);
     const emailIndex = this.findHeaderIndex(headers, ['อีเมล', 'อีเมล์', 'email']);
     const phoneIndex = this.findHeaderIndex(headers, ['เบอร์โทร', 'เบอร์โทรศัพท์', 'โทรศัพท์']);
-    const positionIndex = this.findHeaderIndex(headers, ['ตำแหน่ง']);
-    const departmentIndex = this.findHeaderIndex(headers, ['หน่วยงาน', 'แผนก']);
     const statusIndex = this.findHeaderIndex(headers, ['สถานะ']);
 
     const errors: string[] = [];
 
-    if (nameIndex === -1 || emailIndex === -1 || positionIndex === -1) {
-      errors.push('ไม่พบคอลัมน์ "ชื่อ-นามสกุล", "อีเมล" หรือ "ตำแหน่ง" ในไฟล์');
+    if (firstNameIndex === -1 || lastNameIndex === -1 || emailIndex === -1) {
+      errors.push('ไม่พบคอลัมน์ "ชื่อ", "นามสกุล", "อีเมล" ในไฟล์');
       return { rows: [], errors };
     }
 
@@ -346,27 +335,25 @@ export class StaffListPage implements OnInit {
         continue;
       }
 
-      const name = String(row[nameIndex] ?? '').trim();
+      const firstName = String(row[firstNameIndex] ?? '').trim();
+      const lastName = String(row[lastNameIndex] ?? '').trim();
+      
       const email = String(row[emailIndex] ?? '').trim();
       const phone = phoneIndex !== -1 ? String(row[phoneIndex] ?? '').trim() : '';
-      const position = String(row[positionIndex] ?? '').trim();
-      const department =
-        departmentIndex !== -1 ? String(row[departmentIndex] ?? '').trim() : '';
-      const statusRaw =
-        statusIndex !== -1 ? String(row[statusIndex] ?? '').trim() : '';
+      const statusRaw = statusIndex !== -1 ? String(row[statusIndex] ?? '').trim() : '';
 
-      if (!name || !email || !position) {
-        errors.push(`แถวที่ ${rowNumber}: ต้องระบุชื่อ-นามสกุล, อีเมล และตำแหน่ง`);
+      if (!firstName || !lastName || !email) {
+        errors.push(`แถวที่ ${rowNumber}: ต้องระบุชื่อ, นามสกุล และอีเมล`);
         continue;
       }
 
-      if (!this.isValidEmail(email)) {
-        errors.push(`แถวที่ ${rowNumber}: อีเมล "${email}" ไม่ถูกต้อง`);
-        continue;
-      }
+      // if (!this.isValidEmail(email)) {
+      //   errors.push(`แถวที่ ${rowNumber}: อีเมล "${email}" ไม่ถูกต้อง`);
+      //   continue;
+      // }
 
       const normalizedEmail = email.toLowerCase();
-      if (seenEmails.has(normalizedEmail)) {
+      if (seenEmails.has(normalizedEmail) && email !== '-') {
         errors.push(`แถวที่ ${rowNumber}: อีเมล "${email}" ซ้ำกับข้อมูลก่อนหน้าในไฟล์`);
         continue;
       }
@@ -376,7 +363,7 @@ export class StaffListPage implements OnInit {
         const statusValue = this.normalizeStaffStatus(statusRaw);
         if (statusValue === null) {
           errors.push(
-            `แถวที่ ${rowNumber}: ไม่สามารถตีความสถานะ "${statusRaw}" ได้ กรุณาใช้คำว่า เปิดใช้งาน หรือ ปิดใช้งาน`,
+            `แถวที่ ${rowNumber}: ไม่สามารถตีความสถานะ "${statusRaw}" ได้ กรุณาใช้คำว่า เปิดใช้งาน หรือ ปิดใช้งาน`
           );
           continue;
         }
@@ -386,8 +373,8 @@ export class StaffListPage implements OnInit {
       seenEmails.add(normalizedEmail);
       previewRows.push({
         rowNumber,
-        firstName: name.split(' ')[0],
-        lastName: name.split(' ')[1],
+        firstName,
+        lastName,
         email,
         telNumber: phone ? Number(phone) : undefined,
         password: '',
@@ -403,7 +390,10 @@ export class StaffListPage implements OnInit {
   }
 
   private normalizeHeader(header: string): string {
-    return header.replace(/\s+/g, '').replace(/\uFEFF/g, '').toLowerCase();
+    return header
+      .replace(/\s+/g, '')
+      .replace(/\uFEFF/g, '')
+      .toLowerCase();
   }
 
   private findHeaderIndex(headers: string[], expectedHeaders: string[]): number {
@@ -412,7 +402,16 @@ export class StaffListPage implements OnInit {
 
   private normalizeStaffStatus(value: string): boolean | null {
     const normalized = value.trim().toLowerCase();
-    const trueValues = ['เปิดใช้งาน', 'ใช้งาน', 'ใช้งานอยู่', 'พร้อมใช้งาน', 'active', 'true', '1', 'yes'];
+    const trueValues = [
+      'เปิดใช้งาน',
+      'ใช้งาน',
+      'ใช้งานอยู่',
+      'พร้อมใช้งาน',
+      'active',
+      'true',
+      '1',
+      'yes',
+    ];
     const falseValues = ['ปิดใช้งาน', 'ไม่ใช้งาน', 'หยุดใช้', 'inactive', 'false', '0', 'no'];
 
     if (trueValues.includes(normalized)) {
@@ -437,5 +436,30 @@ export class StaffListPage implements OnInit {
 
   private checkIsDesktop(): boolean {
     return typeof window !== 'undefined' && window.innerWidth >= 768;
+  }
+  exportUserToExcel() {
+    const data = this.filteredStaff().map((member) => ({
+      ชื่อ: `${member.firstName}`,
+      นามสกุล: `${member.lastName}`,
+      อีเมล: member.email || '-',
+      เบอร์โทร: member.telNumber || '-',
+      สถานะ: member.isActive ? 'ใช้งานอยู่' : 'ปิดใช้งาน',
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+
+    // Auto width (ปรับให้พอดี)
+    const colWidths = Object.keys(data[0]).map((key) => ({ wch: Math.max(key.length, 12) }));
+    worksheet['!cols'] = colWidths.map((width) => ({ ...width, wpx: width.wch * 10 }));
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'RegistryBooks');
+
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+
+    saveAs(blob, `user-${new Date().toISOString().slice(0, 10)}.xlsx`);
   }
 }
