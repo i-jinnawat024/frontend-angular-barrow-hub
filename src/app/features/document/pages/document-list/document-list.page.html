@@ -10,7 +10,7 @@
         type="button"
         class="btn-primary cursor-pointer"
         mat-button
-        (click)="createRegistryBook()"
+        (click)="createDocument()"
       >
         <mat-icon style="font-size: 18px; width: 18px; height: 18px">add</mat-icon>
         @if (this.isDesktopView()) {
@@ -253,7 +253,7 @@
                     <button
                       type="button"
                       class="text-success hover:text-success-strong cursor-pointer"
-                      (click)="editRegistryBook(book.id)"
+                      (click)="editDocument(book.id)"
                       title="แก้ไข"
                     >
                       <mat-icon

@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RegistryBookService } from '../../services/document.service';
+import { DocumentService } from '../../services/document.service';
 import {
   Document,
-  RegistryBookCreateDto,
+  DocumentCreateDto,
   DocumentUpdateDto,
 } from '../../../../shared/models/registry-book.model';
 import { AlertService } from '../../../../shared/services/alert.service';
@@ -15,10 +15,10 @@ import { AlertService } from '../../../../shared/services/alert.service';
   selector: 'app-registry-book-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './registry-book-form.page.html',
-  styleUrl: './registry-book-form.page.scss',
+  templateUrl: './document-form.page.html',
+  styleUrl: './document-form.page.scss',
 })
-export class RegistryBookFormPage implements OnInit {
+export class DocumentFormPage implements OnInit {
   form: FormGroup;
   isEditMode = false;
   id: string | null = null;
@@ -26,7 +26,7 @@ export class RegistryBookFormPage implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private registryBookService: RegistryBookService,
+    private documentService: DocumentService,
     private alert: AlertService,
     private router: Router,
     private route: ActivatedRoute
@@ -69,7 +69,7 @@ export class RegistryBookFormPage implements OnInit {
       return;
     }
 
-    this.registryBookService
+    this.documentService
       .getDocumentById(Number(this.id))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -88,31 +88,43 @@ export class RegistryBookFormPage implements OnInit {
 
     if (this.isEditMode && this.id) {
       const updateDto: DocumentUpdateDto = { ...dto, id: Number(this.id) };
-      this.registryBookService
+      this.documentService
         .updateDocument(this.id, updateDto)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
-          next: () => this.router.navigate(['/registry-books']),
+          next: () =>
+            this.alert
+              .success('บันทึกข้อมูลสำเร็จ', 'ทะเบียนเอกสารถูกบันทึกเรียบร้อยแล้ว')
+              .then(() => this.router.navigate(['/registry-books'])),
           error: (error) => {
-            console.error('Failed to update registry book', error);
-            this.alert.error('เกิดข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง');
+            console.error('Failed to update document', error.error);
+            this.alert.error(
+              'เกิดข้อผิดพลาด',
+              error.error.message ?? 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง'
+            );
           },
         });
     } else {
-      this.registryBookService
+      this.documentService
         .createDocument([dto])
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
-          next: () => this.router.navigate(['/registry-books']),
+          next: () =>
+            this.alert
+              .success('บันทึกข้อมูลสำเร็จ', 'ทะเบียนเอกสารถูกบันทึกเรียบร้อยแล้ว')
+              .then(() => this.router.navigate(['/registry-books'])),
           error: (error) => {
-            console.error('Failed to create registry book', error.error);
-            this.alert.error('เกิดข้อผิดพลาด', error.error.message ?? 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง');
+            console.error('Failed to create document', error.error);
+            this.alert.error(
+              'เกิดข้อผิดพลาด',
+              error.error.message ?? 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง'
+            );
           },
         });
     }
   }
 
-  private mapFormToDto(): RegistryBookCreateDto {
+  private mapFormToDto(): DocumentCreateDto {
     const value = this.form.value as {
       documentId: number;
       firstName: string;

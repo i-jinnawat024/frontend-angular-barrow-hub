@@ -12,7 +12,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { RegistryBookService } from '../../services/document.service';
+import { DocumentService } from '../../services/document.service';
 import { Document } from '../../../../shared/models/registry-book.model';
 import {
   SortState,
@@ -40,14 +40,14 @@ interface RegistryBookImportPreviewRow {
 }
 
 @Component({
-  selector: 'app-registry-book-list',
+  selector: 'app-document-list',
   standalone: true,
   imports: [CommonModule, MatIconModule],
-  templateUrl: './registry-book-list.page.html',
-  styleUrl: './registry-book-list.page.scss',
+  templateUrl: './document-list.page.html',
+  styleUrl: './document-list.page.scss',
 })
-export class RegistryBookListPage implements OnInit {
-  private readonly registryBooks = signal<Document[]>([]);
+export class DocumentListPage implements OnInit {
+  private readonly documents = signal<Document[]>([]);
   protected readonly searchTerm = signal('');
   protected readonly sortState = signal<SortState>({ ...defaultSortState });
   private readonly isDesktopScreen = signal(this.checkIsDesktop());
@@ -110,7 +110,7 @@ export class RegistryBookListPage implements OnInit {
   ];
 
   protected readonly filteredRegistryBooks = computed(() => {
-    const raw = this.registryBooks();
+    const raw = this.documents();
     const term = this.searchTerm().trim().toLowerCase();
 
     const filtered = term
@@ -140,7 +140,7 @@ export class RegistryBookListPage implements OnInit {
   });
 
   protected readonly registryBookCount = computed(
-    () => this.registryBooks().length,
+    () => this.documents().length,
   );
 
   protected readonly hasSearchTerm = computed(
@@ -148,7 +148,7 @@ export class RegistryBookListPage implements OnInit {
   );
 
   constructor(
-    private readonly registryBookService: RegistryBookService,
+    private readonly documentService: DocumentService,
     private readonly router: Router,
     private readonly alert: AlertService,
   ) {}
@@ -169,13 +169,13 @@ export class RegistryBookListPage implements OnInit {
   }
 
   loadRegistryBooks(): void {
-    this.registryBookService
+    this.documentService
       .getDocuments()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (books) => this.registryBooks.set(books),
+        next: (books) => this.documents.set(books),
         error: (error) =>
-          console.error('Failed to load registry books', error),
+          console.error('Failed to load documents', error),
       });
   }
 
@@ -184,28 +184,28 @@ export class RegistryBookListPage implements OnInit {
       return;
     }
 
-    this.registryBookService
+    this.documentService
       .deleteRegistryBook(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => this.loadRegistryBooks(),
         error: (error) => {
-          console.error('Failed to delete registry book', error);
-          this.alert.error('ไม่สามารถลบทะเบียนเอกสารได้','กรุณาลองใหม่อีกครั้ง');
+          console.error('Failed to delete document', error);
+          this.alert.error('ไม่สามารถลบเอกสารได้','กรุณาลองใหม่อีกครั้ง');
         },
       });
   }
 
   viewDetails(id: number): void {
-    this.router.navigate(['/registry-books', id]);
+    this.router.navigate(['/documents', id]);
   }
 
-  editRegistryBook(id: number): void {
-    this.router.navigate(['/registry-books', id, 'edit']);
+  editDocument(id: number): void {
+    this.router.navigate(['/documents', id, 'edit']);
   }
 
-  createRegistryBook(): void {
-    this.router.navigate(['/registry-books', 'create']);
+  createDocument(): void {
+    this.router.navigate(['/documents', 'create']);
   }
 
   protected onSearchTermChange(event: Event): void {
@@ -293,7 +293,7 @@ export class RegistryBookListPage implements OnInit {
       lastName: row.lastName,
     }));
 
-    this.registryBookService
+    this.documentService
       .importDocuments(payload)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

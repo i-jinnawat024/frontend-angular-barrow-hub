@@ -7,7 +7,7 @@ import { environment } from '../../../../environments/environment';
 import { Borrow, BorrowCreateDto } from '../../../shared/models/borrow.model';
 import {
   Document,
-  RegistryBookCreateDto,
+  DocumentCreateDto,
   DocumentUpdateDto,
 } from '../../../shared/models/registry-book.model';
 import { Return, ReturnCreateDto } from '../../../shared/models/return.model';
@@ -40,7 +40,7 @@ export interface RegistryBookImportResult {
 @Injectable({
   providedIn: 'root',
 })
-export class RegistryBookService {
+export class DocumentService {
   private readonly documentUrl = `${environment.apiBaseUrl}/documents`;
   private readonly historyUrl = `${environment.apiBaseUrl}/history`;
 
@@ -61,7 +61,7 @@ export class RegistryBookService {
       .pipe(map((response) => this.mapDocument(response.result)));
   }
 
-  createDocument(dto: RegistryBookCreateDto[]): Observable<Document> {
+  createDocument(dto: DocumentCreateDto[]): Observable<Document> {
     return this.http
       .post<ApiResponse<DocumentApiResponse>>(this.documentUrl, dto)
       .pipe(map((response) => this.mapDocument(response.result)));
@@ -79,7 +79,7 @@ export class RegistryBookService {
       .pipe(map(() => undefined));
   }
 
-  importDocuments(dto: Omit<RegistryBookCreateDto, 'status'>[]): Observable<RegistryBookImportResult> {
+  importDocuments(dto: Omit<DocumentCreateDto, 'status'>[]): Observable<RegistryBookImportResult> {
     return this.http
       .post<ApiResponse<RegistryBookImportResult>>(`${this.documentUrl}`, dto)
       .pipe(map((response) => response.result));
