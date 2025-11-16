@@ -1,0 +1,5 @@
+{
+  "buildCommand": "npm run build:dev",
+  "outputDirectory": "dist/frontend-angular-barrow-hub",
+  "framework": "angular"
+}
