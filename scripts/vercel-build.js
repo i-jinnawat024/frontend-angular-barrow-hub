@@ -1,6 +1,7 @@
 const { execSync } = require('node:child_process');
 
-const env = process.env.NODE_ENV || 'production';
+// ใช้ตัวนี้!!  ไม่ใช่ NODE_ENV
+const vercelEnv = process.env.VERCEL_ENV || 'production';
 
 const configByEnv = {
   production: 'build:prod',
@@ -8,9 +9,9 @@ const configByEnv = {
   development: 'build:local',
 };
 
-const script = configByEnv[env] || 'build:local';
+const script = configByEnv[vercelEnv] || 'build:prod';
 
-console.log(`Detected NODE_ENV=${env}. Running npm run ${script}.`);
+console.log(`Detected VERCEL_ENV=${vercelEnv}. Running npm run ${script}.`);
 
 execSync(`npm run ${script}`, {
   stdio: 'inherit',
