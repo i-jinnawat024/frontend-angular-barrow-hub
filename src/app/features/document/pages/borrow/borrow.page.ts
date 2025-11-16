@@ -345,6 +345,6 @@ export class BorrowPage implements OnInit {
         return;
       }
     }
-    this.router.navigate(['/registry-books']);
+    this.router.navigate(['/documents']);
   }
 }
