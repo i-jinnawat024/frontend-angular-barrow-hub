@@ -163,10 +163,10 @@ export class DocumentService {
       );
   }
 
-  getBorrowHistoryByStaffName(staffName: string): Observable<Borrow[]> {
+  getBorrowHistoryByUserId(userId: string): Observable<Borrow[]> {
     return this.http
       .get<ApiResponse<BorrowApiResponse[] | null>>(
-        `${this.historyUrl}/history/staff/${encodeURIComponent(staffName)}`
+        `${this.historyUrl}/user?userId=${userId}`
       )
       .pipe(
         map((response) => response.result ?? []),

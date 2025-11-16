@@ -197,11 +197,11 @@ export class DocumentListPage implements OnInit {
   }
 
   viewDetails(id: number): void {
-    this.router.navigate(['/documents', id]);
+    this.router.navigate(['/document', id]);
   }
 
   editDocument(id: number): void {
-    this.router.navigate(['/documents', id, 'edit']);
+    this.router.navigate(['/document', id, 'edit']);
   }
 
   createDocument(): void {

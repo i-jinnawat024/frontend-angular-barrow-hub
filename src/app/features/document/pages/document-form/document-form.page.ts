@@ -156,6 +156,6 @@ export class DocumentFormPage implements OnInit {
   }
 
   cancel(): void {
-    this.router.navigate([`/documents-books`]);
+    this.router.navigate([`/documents`]);
   }
 }
