@@ -1,2 +1,14 @@
-// Sidebar specific styles
+#app-sidebar {
+  width: min(20rem, 92vw);
+}
+
+@media (min-width: 768px) {
+  #app-sidebar {
+    width: 16rem;
+  }
+
+  #app-sidebar[data-collapsed='true'] {
+    width: 4rem;
+  }
+}
 

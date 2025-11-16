@@ -1,111 +1,79 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+import { environment } from '../../../../environments/environment';
 import { Staff, StaffCreateDto, StaffUpdateDto } from '../../../shared/models/staff.model';
+import { ApiResponse } from '../../../shared/models/api-response.model';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class StaffService {
-  // Mock data
-  private staff: Staff[] = [
-    {
-      id: '1',
-      name: 'สมชาย ใจดี',
-      email: 'somchai@example.com',
-      phone: '081-234-5678',
-      position: 'ผู้จัดการ',
-      department: 'ฝ่ายบริหาร',
-      isActive: true,
-      createdAt: new Date('2024-01-15'),
-      updatedAt: new Date('2024-01-15')
-    },
-    {
-      id: '2',
-      name: 'สมหญิง รักงาน',
-      email: 'somying@example.com',
-      phone: '082-345-6789',
-      position: 'เจ้าหน้าที่เอกสาร',
-      department: 'ฝ่ายเอกสาร',
-      isActive: true,
-      createdAt: new Date('2024-02-01'),
-      updatedAt: new Date('2024-02-01')
-    },
-    {
-      id: '3',
-      name: 'วิชัย เก่งมาก',
-      email: 'wichai@example.com',
-      phone: '083-456-7890',
-      position: 'นักวิเคราะห์',
-      department: 'ฝ่ายแผนงาน',
-      isActive: true,
-      createdAt: new Date('2024-02-10'),
-      updatedAt: new Date('2024-02-10')
-    },
-    {
-      id: '4',
-      name: 'มาลี สวยงาม',
-      email: 'malee@example.com',
-      phone: '084-567-8901',
-      position: 'เจ้าหน้าที่ประสานงาน',
-      department: 'ฝ่ายประสานงาน',
-      isActive: true,
-      createdAt: new Date('2024-03-01'),
-      updatedAt: new Date('2024-03-01')
-    },
-    {
-      id: '5',
-      name: 'ประเสริฐ ดีมาก',
-      email: 'prasert@example.com',
-      phone: '085-678-9012',
-      position: 'ผู้ช่วยผู้จัดการ',
-      department: 'ฝ่ายบริหาร',
-      isActive: false,
-      createdAt: new Date('2024-03-15'),
-      updatedAt: new Date('2024-03-20')
-    }
-  ];
-
-  getStaff(): Staff[] {
-    return this.staff;
-  }
-
-  getActiveStaff(): Staff[] {
-    return this.staff.filter(s => s.isActive);
-  }
-
-  getStaffById(id: string): Staff | undefined {
-    return this.staff.find(s => s.id === id);
-  }
-
-  createStaff(dto: StaffCreateDto): Staff {
-    const newStaff: Staff = {
-      id: Date.now().toString(),
-      ...dto,
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    this.staff.push(newStaff);
-    return newStaff;
-  }
-
-  updateStaff(id: string, dto: StaffUpdateDto): Staff | null {
-    const index = this.staff.findIndex(s => s.id === id);
-    if (index === -1) return null;
-
-    this.staff[index] = {
-      ...this.staff[index],
-      ...dto,
-      updatedAt: new Date()
-    };
-    return this.staff[index];
-  }
-
-  deleteStaff(id: string): boolean {
-    const index = this.staff.findIndex(s => s.id === id);
-    if (index === -1) return false;
-    
-    this.staff.splice(index, 1);
-    return true;
-  }
+interface StaffApiResponse extends Omit<Staff, 'createdAt' | 'updatedAt'> {
+  createdAt?: string | null;
+  updatedAt?: string | null;
 }
 
+export interface StaffImportResult {
+  imported: number;
+  skipped: number;
+  duplicateEmails: string[];
+}
+
+@Injectable({
+  providedIn: 'root',
+})
+export class StaffService {
+  private readonly userUrl = `${environment.apiBaseUrl}/users`;
+
+  constructor(private readonly http: HttpClient) {}
+
+  getStaff(): Observable<Staff[]> {
+    return this.http.get<ApiResponse<StaffApiResponse[] | null>>(this.userUrl).pipe(
+      map((response) => response.result ?? []),
+      map((staff) => staff.map((member) => this.mapStaff(member))),
+    );
+  }
+
+  getActiveStaff(): Observable<Staff[]> {
+    return this.getStaff().pipe(
+      map((staff) => staff.filter((member) => member.isActive)),
+    );
+  }
+
+  getStaffById(id: string): Observable<Staff> {
+    return this.http
+      .get<ApiResponse<StaffApiResponse>>(`${this.userUrl}/${id}`)
+      .pipe(map((response) => this.mapStaff(response.result)));
+  }
+
+  createStaff(dto: StaffCreateDto): Observable<Staff> {
+    return this.http
+      .post<ApiResponse<StaffApiResponse>>(this.userUrl, dto)
+      .pipe(map((response) => this.mapStaff(response.result)));
+  }
+
+  updateStaff(id: string, dto: StaffUpdateDto): Observable<Staff> {
+    return this.http
+      .put<ApiResponse<StaffApiResponse>>(`${this.userUrl}/${id}`, dto)
+      .pipe(map((response) => this.mapStaff(response.result)));
+  }
+
+  deleteStaff(id: string): Observable<void> {
+    return this.http
+      .delete<ApiResponse<null>>(`${this.userUrl}/${id}`)
+      .pipe(map(() => undefined));
+  }
+
+  importStaff(rows: StaffCreateDto[]): Observable<StaffImportResult> {
+    return this.http
+      .post<ApiResponse<StaffImportResult>>(`${this.userUrl}/bulk`,rows)
+      .pipe(map((response) => response.result));
+  }
+
+  private mapStaff(member: StaffApiResponse): Staff {
+    return {
+      ...member,
+      createdAt: member.createdAt ? new Date(member.createdAt) : undefined,
+      updatedAt: member.updatedAt ? new Date(member.updatedAt) : undefined,
+    };
+  }
+}

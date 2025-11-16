@@ -1,10 +1,10 @@
-export interface Document {
+export interface IDocument {
   id: string;
-  title: string;
+  first_name: string;
+  last_name: string;
   documentNumber: string;
-  description?: string;
-  status: 'available' | 'borrowed' | 'archived';
+  status: 'ACTIVE' | 'BORROWED' | 'ARCHIVED';
   createdAt: Date;
   updatedAt: Date;
+  deletedAt?: Date | null;
 }
-

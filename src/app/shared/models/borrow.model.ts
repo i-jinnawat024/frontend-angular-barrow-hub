@@ -1,19 +1,19 @@
-import { RegistryBook } from './registry-book.model';
+import { Document } from './registry-book.model';
 
 export interface Borrow {
   id: string;
-  registryBook: RegistryBook;
-  borrowerName: string;
-  borrowedAt: Date;
-  reason?: string;
-  status: 'active' | 'returned';
-  returnedAt?: Date;
+  document: Document;
+  name: string;
+  userId?: string;
+  description?: string;
+  status: 'BORROWED' | 'RETURNED';
+  createdAt: Date;
+  updatedAt?: Date | null;
+  // deletedAt?: Date | null;
 }
 
 export interface BorrowCreateDto {
-  registryBookId: string;
-  borrowerName: string;
-  borrowedAt: Date;
-  reason?: string;
+  userId: string;
+  documentId: number[];
+  description?: string;
 }
-
