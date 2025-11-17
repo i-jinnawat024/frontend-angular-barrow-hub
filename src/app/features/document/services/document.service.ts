@@ -75,7 +75,7 @@ export class DocumentService {
 
   deleteRegistryBook(id: number): Observable<void> {
     return this.http
-      .delete<ApiResponse<null>>(`${this.documentUrl}/${id}`)
+      .delete<ApiResponse<null>>(`${environment.apiBaseUrl}/documents/${id}`)
       .pipe(map(() => undefined));
   }
 
