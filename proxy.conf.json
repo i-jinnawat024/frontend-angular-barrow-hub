@@ -1,0 +1,9 @@
+{
+  "/api": {
+    "target": "https://api-dev-borrow.ijinhub.com",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}
+

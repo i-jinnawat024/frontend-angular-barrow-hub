@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal, ViewChild } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import {
   AbstractControl,
@@ -33,6 +33,8 @@ type SortDirection = 'asc' | 'desc';
   providers: [DatePipe],
 })
 export class BorrowPage implements OnInit {
+  @ViewChild(QrScannerComponent) qrScanner!: QrScannerComponent;
+  
   form: FormGroup;
   availableBooks: Document[] = [];
   showScanner = false;
@@ -43,6 +45,7 @@ export class BorrowPage implements OnInit {
   protected bookSearchTerm = '';
   protected bookSortField: BookSortField = 'documentId';
   protected bookSortDirection: SortDirection = 'asc';
+  protected readonly isMobileDevice = signal(this.checkIsMobileDevice());
 
 
   private readonly selectedDocumentIdsControl: FormControl<number[]>;
@@ -72,6 +75,32 @@ export class BorrowPage implements OnInit {
   ngOnInit(): void {
     this.loadAvailableBooks();
     this.loadUsers();
+    
+    // Update mobile detection on resize
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', () => {
+        this.isMobileDevice.set(this.checkIsMobileDevice());
+      });
+    }
+  }
+
+  private checkIsMobileDevice(): boolean {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      return false;
+    }
+    
+    // Check user agent for mobile devices
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+    const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
+    const isMobileUserAgent = mobileRegex.test(userAgent);
+    
+    // Also check screen width (mobile typically < 768px)
+    const isMobileScreen = window.innerWidth < 768;
+    
+    // Check if device has touch capability
+    const hasTouchScreen = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    
+    return isMobileUserAgent || (isMobileScreen && hasTouchScreen);
   }
 
   loadUsers(): void {
@@ -240,6 +269,10 @@ export class BorrowPage implements OnInit {
     const normalizedId = decodedText.trim();
     if (!normalizedId) {
       alert('ไม่พบเล่มทะเบียนที่ตรงกับ QR code นี้');
+      // Mark as processed to prevent re-scanning
+      if (this.qrScanner) {
+        this.qrScanner.markAsProcessed(decodedText);
+      }
       return;
     }
 
@@ -250,11 +283,19 @@ export class BorrowPage implements OnInit {
         next: (book) => {
           if (book.status !== 'ACTIVE') {
             alert(`เล่มทะเบียน ${book.documentId} ไม่พร้อมให้ยืม (สถานะ: ${book.status})`);
+            // Mark as processed to prevent re-scanning
+            if (this.qrScanner) {
+              this.qrScanner.markAsProcessed(decodedText);
+            }
             return;
           }
 
           if (this.isDocumentSelected(book.id)) {
             alert(`เล่มทะเบียน ${book.documentId} ถูกเลือกไปแล้ว`);
+            // Mark as processed to prevent re-scanning
+            if (this.qrScanner) {
+              this.qrScanner.markAsProcessed(decodedText);
+            }
             return;
           }
 
@@ -263,8 +304,19 @@ export class BorrowPage implements OnInit {
           selected.add(book.id);
           this.updateSelectedDocumentIds(Array.from(selected));
           alert(`✅ เพิ่มเล่มทะเบียน ${book.documentId} แล้ว`);
+          
+          // Mark as processed after successful addition to prevent re-scanning
+          if (this.qrScanner) {
+            this.qrScanner.markAsProcessed(decodedText);
+          }
         },
-        error: () => alert('ไม่พบเล่มทะเบียนที่ตรงกับ QR code นี้'),
+        error: () => {
+          alert('ไม่พบเล่มทะเบียนที่ตรงกับ QR code นี้');
+          // Mark as processed to prevent re-scanning invalid codes
+          if (this.qrScanner) {
+            this.qrScanner.markAsProcessed(decodedText);
+          }
+        },
       });
   }
 

@@ -1,5 +1,6 @@
+// Environment for development with proxy (use /api instead of full URL)
 export const environment = {
   production: false,
-  // Use relative path to leverage Vercel rewrites/proxy for CORS
   apiBaseUrl: '/api',
 };
+
