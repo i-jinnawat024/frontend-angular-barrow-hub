@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, ViewChild, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSelectChange } from '@angular/material/select';
 import {
@@ -27,6 +27,8 @@ type SortDirection = 'asc' | 'desc';
   styleUrl: './return.page.scss',
 })
 export class ReturnPage implements OnInit {
+  @ViewChild(QrScannerComponent) qrScanner!: QrScannerComponent;
+  
   form: FormGroup;
   activeBorrows: Borrow[] = [];
   uniqueBorrowers: string[] = [];
@@ -38,6 +40,7 @@ export class ReturnPage implements OnInit {
   selectedBorrowersControl = new FormControl<string[]>([], { nonNullable: true });
   private readonly selectedBorrowIdsControl: FormControl<number[]>;
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly isMobileDevice = signal(this.checkIsMobileDevice());
   constructor(
     private readonly fb: FormBuilder,
     private readonly documentService: DocumentService,
@@ -54,6 +57,32 @@ export class ReturnPage implements OnInit {
 
   ngOnInit(): void {
     this.loadActiveBorrows();
+    
+    // Update mobile detection on resize
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', () => {
+        this.isMobileDevice.set(this.checkIsMobileDevice());
+      });
+    }
+  }
+
+  private checkIsMobileDevice(): boolean {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      return false;
+    }
+    
+    // Check user agent for mobile devices
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+    const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
+    const isMobileUserAgent = mobileRegex.test(userAgent);
+    
+    // Also check screen width (mobile typically < 768px)
+    const isMobileScreen = window.innerWidth < 768;
+    
+    // Check if device has touch capability
+    const hasTouchScreen = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    
+    return isMobileUserAgent || (isMobileScreen && hasTouchScreen);
   }
 
   get selectedBorrowIds(): number[] {
@@ -394,6 +423,10 @@ export class ReturnPage implements OnInit {
     const normalizedId = decodedText.trim();
     if (!normalizedId) {
       alert('QR นี้ไม่ตรงกับข้อมูลการยืมที่ยังไม่คืน');
+      // Mark as processed to prevent re-scanning
+      if (this.qrScanner) {
+        this.qrScanner.markAsProcessed(decodedText);
+      }
       return;
     }
 
@@ -404,6 +437,10 @@ export class ReturnPage implements OnInit {
         next: (borrow) => {
           if (!borrow || borrow.status !== 'BORROWED') {
             alert('QR นี้ไม่ตรงกับข้อมูลการยืมที่ยังไม่คืน');
+            // Mark as processed to prevent re-scanning
+            if (this.qrScanner) {
+              this.qrScanner.markAsProcessed(decodedText);
+            }
             return;
           }
 
@@ -414,8 +451,19 @@ export class ReturnPage implements OnInit {
           if (!current.includes(borrow.name)) {
             this.selectedBorrowersControl.setValue([...current, borrow.name]);
           }
+          
+          // Mark as processed after successful addition to prevent re-scanning
+          if (this.qrScanner) {
+            this.qrScanner.markAsProcessed(decodedText);
+          }
         },
-        error: () => alert('QR นี้ไม่ตรงกับข้อมูลการยืมที่ยังไม่คืน'),
+        error: () => {
+          alert('QR นี้ไม่ตรงกับข้อมูลการยืมที่ยังไม่คืน');
+          // Mark as processed to prevent re-scanning invalid codes
+          if (this.qrScanner) {
+            this.qrScanner.markAsProcessed(decodedText);
+          }
+        },
       });
   }
 

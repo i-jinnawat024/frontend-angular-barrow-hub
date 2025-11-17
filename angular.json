@@ -87,7 +87,8 @@
               "buildTarget": "frontend-angular-barrow-hub:build:production"
             },
             "dev": {
-              "buildTarget": "frontend-angular-barrow-hub:build:dev"
+              "buildTarget": "frontend-angular-barrow-hub:build:dev",
+              "proxyConfig": "proxy.conf.json"
             },
             "local": {
               "buildTarget": "frontend-angular-barrow-hub:build:local"
