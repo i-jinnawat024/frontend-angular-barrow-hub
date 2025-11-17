@@ -32,6 +32,17 @@ export class AlertService {
     return this.fire('info', title, text);
   }
 
+  yesNo(title: string, text?: string) {
+    return Swal.fire({
+      icon: 'question',
+      title,
+      text,
+      showCancelButton: true,
+      confirmButtonText: this.defaultConfirmText,
+      cancelButtonText: 'ยกเลิก'
+    });
+  }
+
   toast(options: { title: string; text?: string; icon?: SweetAlertIcon; timer?: number }) {
     const { title, text, icon = 'success', timer = 2000 } = options;
     return Swal.fire({

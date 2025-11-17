@@ -25,6 +25,7 @@ import {
 import { readTabularFile } from '../../../../shared/utils/csv-utils';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { AlertService } from '../../../../shared/services/alert.service';
 interface StaffImportPreviewRow {
   rowNumber: number;
   firstName: string;
@@ -139,7 +140,11 @@ export class StaffListPage implements OnInit {
 
   protected readonly hasSearchTerm = computed(() => this.searchTerm().trim().length > 0);
 
-  constructor(private readonly staffService: StaffService, private readonly router: Router) {}
+  constructor(
+    private readonly staffService: StaffService,
+    private readonly router: Router,
+    private readonly alertService: AlertService
+  ) {}
 
   @ViewChild('staffImportInput') private staffImportInput?: ElementRef<HTMLInputElement>;
 
@@ -157,22 +162,30 @@ export class StaffListPage implements OnInit {
       });
   }
 
-  deleteStaff(id: string): void {
-    if (!confirm('ต้องการลบบุคลากรรายการนี้หรือไม่?')) {
-      return;
-    }
+ deleteStaff(id: string): void {
+  this.alertService
+    .yesNo('ลบบุคลากร', 'ต้องการลบบุคลากรรายการนี้หรือไม่?')
+    .then((result) => {
+      if (!result.isConfirmed) {
+        return;
+      }
 
-    this.staffService
-      .deleteStaff(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => this.loadStaff(),
-        error: (error) => {
-          console.error('Failed to delete staff member', error);
-          window.alert('ไม่สามารถลบบุคลากรได้ กรุณาลองใหม่อีกครั้ง');
-        },
-      });
-  }
+      this.staffService
+        .deleteStaff(id)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.alertService.success('ลบบุคลากรสำเร็จ');
+            this.loadStaff();
+          },
+          error: (error) => {
+            console.error('Failed to delete staff member', error);
+            window.alert('ไม่สามารถลบบุคลากรได้ กรุณาลองใหม่อีกครั้ง');
+          },
+        });
+    });
+}
+
 
   viewDetails(id: string): void {
     this.router.navigate(['/staff', id]);
@@ -345,7 +358,7 @@ export class StaffListPage implements OnInit {
 
       const firstName = String(row[firstNameIndex] ?? '').trim();
       const lastName = String(row[lastNameIndex] ?? '').trim();
-      
+
       const email = String(row[emailIndex] ?? '').trim();
       const phone = phoneIndex !== -1 ? String(row[phoneIndex] ?? '').trim() : '';
       const statusRaw = statusIndex !== -1 ? String(row[statusIndex] ?? '').trim() : '';
