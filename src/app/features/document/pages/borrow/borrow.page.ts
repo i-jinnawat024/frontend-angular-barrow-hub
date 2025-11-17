@@ -316,7 +316,12 @@ export class BorrowPage implements OnInit {
     if (!this.form.valid || !this.selectedDocumentIds.length) {
       this.form.markAllAsTouched();
       this.selectedDocumentIdsControl.updateValueAndValidity();
-      alert('�,?�,��,,�,"�,��,?�,��,-�,?�,,�1%�,-�,��,1�,��1��,��1%�,,�,��,s�,-�1%�,���,T');
+      Swal.fire({
+        icon: 'warning',
+        title: 'กรุณากรอกข้อมูลให้ครบถ้วน',
+        text: 'กรุณาตรวจสอบข้อมูลที่กรอกให้ถูกต้องและครบถ้วน',
+        confirmButtonText: 'ตกลง',
+      });
       return;
     }
 
@@ -328,7 +333,12 @@ export class BorrowPage implements OnInit {
     const userId = formValue.userId;
     if (!userId) {
       this.form.get('userId')?.markAsTouched();
-      alert('�,?�,��,,�,"�,��,?�,��,-�,?�,S�,��1^�,-�,o�,1�1%�,��,��,�');
+      Swal.fire({
+        icon: 'warning',
+        title: 'กรุณาเลือกผู้ยืม',
+        text: 'กรุณาเลือกชื่อผู้ยืม',
+        confirmButtonText: 'ตกลง',
+      });
       return;
     }
 

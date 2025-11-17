@@ -282,7 +282,15 @@ export class StaffListPage implements OnInit {
           this.loadStaff();
           this.resetImportState();
 
-          let message = `�,T�,3�1?�,,�1%�,��,,�1%�,-�,��,1�,��,s�,,�,,�,��,��,?�,��,��,3�1?�,��1؅,^ ${result.imported} �,��,��,��,?�,��,�`;
+          let message = `นำเข้าข้อมูลบุคลากรสำเร็จ นำเข้า ${result.imported} รายการ`;
+          if (result.duplicateEmails.length > 0) {
+            const duplicated = Array.from(new Set(result.duplicateEmails))
+              .filter((value) => value.trim().length > 0)
+              .join(', ');
+            message += `
+อีเมลที่ซ้ำกันและไม่ถูกนำเข้า: ${duplicated}`;
+          }
+          // let message = `�,T�,3�1?�,,�1%�,��,,�1%�,-�,��,1�,��,s�,,�,,�,��,��,?�,��,��,3�1?�,��1؅,^ ${result.imported} �,��,��,��,?�,��,�`;
           if (result.duplicateEmails.length > 0) {
             const duplicated = Array.from(new Set(result.duplicateEmails))
               .filter((value) => value.trim().length > 0)
