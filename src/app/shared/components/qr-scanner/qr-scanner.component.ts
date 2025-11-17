@@ -24,7 +24,7 @@ export class QrScannerComponent implements OnDestroy {
   private lastScannedTime = 0;
   hasPermission = false;
   hasDevices = false;
-  currentDevice: MediaDeviceInfo | null = null;
+  currentDevice: MediaDeviceInfo | undefined = undefined;
   availableDevices: MediaDeviceInfo[] = [];
 
   constructor() {
@@ -57,9 +57,19 @@ export class QrScannerComponent implements OnDestroy {
     }
   }
 
-  onHasPermission(has: boolean): void {
-    this.hasPermission = has;
-    if (!has) {
+  onHasPermission(has: boolean | Event): void {
+    // Handle different event types from ZXing scanner
+    let hasPermission = false;
+    if (typeof has === 'boolean') {
+      hasPermission = has;
+    } else if (has instanceof Event) {
+      // If it's an Event object, extract the value
+      const target = has.target as any;
+      hasPermission = target?.hasPermission ?? target?.value ?? false;
+    }
+    
+    this.hasPermission = hasPermission;
+    if (!hasPermission) {
       this.scanError.emit('ไม่ได้รับอนุญาตให้เข้าถึงกล้อง');
     }
   }

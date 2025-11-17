@@ -19,7 +19,7 @@
       @if (isScanning()) {
         <zxing-scanner
           [enable]="isScanning()"
-          [device]="currentDevice"
+          [device]="currentDevice || undefined"
           [formats]="allowedFormats"
           (camerasFound)="onCamerasFound($event)"
           (hasPermission)="onHasPermission($event)"
