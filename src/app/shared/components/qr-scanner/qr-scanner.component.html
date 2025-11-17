@@ -15,7 +15,40 @@
     </div>
 
     <!-- Scanner Container -->
-    <div [id]="scannerId" class="w-full mb-4 rounded-lg overflow-hidden"></div>
+    <div class="w-full mb-4 rounded-lg overflow-hidden bg-black">
+      @if (isScanning()) {
+        <zxing-scanner
+          [enable]="isScanning()"
+          [device]="currentDevice"
+          [formats]="allowedFormats"
+          (camerasFound)="onCamerasFound($event)"
+          (hasPermission)="onHasPermission($event)"
+          (scanSuccess)="onScanSuccess($event)"
+          (scanError)="onScanError($event)"
+          (deviceChange)="onDeviceChange($event)"
+          class="w-full"
+          style="max-height: 400px;"
+        ></zxing-scanner>
+      }
+      
+      @if (!hasPermission && isScanning()) {
+        <div class="flex items-center justify-center p-8 text-white">
+          <div class="text-center">
+            <p class="mb-2">ไม่ได้รับอนุญาตให้เข้าถึงกล้อง</p>
+            <p class="text-sm text-gray-400">กรุณาอนุญาตให้เข้าถึงกล้องในเบราว์เซอร์</p>
+          </div>
+        </div>
+      }
+      
+      @if (!hasDevices && isScanning()) {
+        <div class="flex items-center justify-center p-8 text-white">
+          <div class="text-center">
+            <p class="mb-2">ไม่พบกล้อง</p>
+            <p class="text-sm text-gray-400">กรุณาตรวจสอบการเชื่อมต่อกล้อง</p>
+          </div>
+        </div>
+      }
+    </div>
 
     <!-- Instructions -->
     <p class="text-sm text-gray-600 dark:text-gray-400 text-center mb-4">

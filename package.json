@@ -36,6 +36,7 @@
     "@tailwindcss/postcss": "^4.1.16",
     "@types/jsbarcode": "^3.11.4",
     "@types/qrcode": "^1.5.6",
+    "@zxing/ngx-scanner": "^20.0.0",
     "file-saver": "^2.0.5",
     "flowbite": "^3.1.2",
     "html5-qrcode": "^2.3.8",
