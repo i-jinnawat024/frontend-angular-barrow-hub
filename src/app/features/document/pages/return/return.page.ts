@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject, ViewChild, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSelectChange } from '@angular/material/select';
 import {
@@ -40,7 +40,7 @@ export class ReturnPage implements OnInit {
   selectedBorrowersControl = new FormControl<string[]>([], { nonNullable: true });
   private readonly selectedBorrowIdsControl: FormControl<number[]>;
   private readonly destroyRef = inject(DestroyRef);
-  protected readonly isMobileDevice = signal(this.checkIsMobileDevice());
+  
   constructor(
     private readonly fb: FormBuilder,
     private readonly documentService: DocumentService,
@@ -57,32 +57,6 @@ export class ReturnPage implements OnInit {
 
   ngOnInit(): void {
     this.loadActiveBorrows();
-    
-    // Update mobile detection on resize
-    if (typeof window !== 'undefined') {
-      window.addEventListener('resize', () => {
-        this.isMobileDevice.set(this.checkIsMobileDevice());
-      });
-    }
-  }
-
-  private checkIsMobileDevice(): boolean {
-    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
-      return false;
-    }
-    
-    // Check user agent for mobile devices
-    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
-    const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
-    const isMobileUserAgent = mobileRegex.test(userAgent);
-    
-    // Also check screen width (mobile typically < 768px)
-    const isMobileScreen = window.innerWidth < 768;
-    
-    // Check if device has touch capability
-    const hasTouchScreen = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    
-    return isMobileUserAgent || (isMobileScreen && hasTouchScreen);
   }
 
   get selectedBorrowIds(): number[] {

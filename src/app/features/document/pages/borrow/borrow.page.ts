@@ -45,8 +45,6 @@ export class BorrowPage implements OnInit {
   protected bookSearchTerm = '';
   protected bookSortField: BookSortField = 'documentId';
   protected bookSortDirection: SortDirection = 'asc';
-  protected readonly isMobileDevice = signal(this.checkIsMobileDevice());
-
 
   private readonly selectedDocumentIdsControl: FormControl<number[]>;
 
@@ -75,32 +73,6 @@ export class BorrowPage implements OnInit {
   ngOnInit(): void {
     this.loadAvailableBooks();
     this.loadUsers();
-    
-    // Update mobile detection on resize
-    if (typeof window !== 'undefined') {
-      window.addEventListener('resize', () => {
-        this.isMobileDevice.set(this.checkIsMobileDevice());
-      });
-    }
-  }
-
-  private checkIsMobileDevice(): boolean {
-    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
-      return false;
-    }
-    
-    // Check user agent for mobile devices
-    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
-    const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
-    const isMobileUserAgent = mobileRegex.test(userAgent);
-    
-    // Also check screen width (mobile typically < 768px)
-    const isMobileScreen = window.innerWidth < 768;
-    
-    // Check if device has touch capability
-    const hasTouchScreen = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    
-    return isMobileUserAgent || (isMobileScreen && hasTouchScreen);
   }
 
   loadUsers(): void {
