@@ -437,34 +437,43 @@ export class ReturnPage implements OnInit {
         next: (borrow) => {
           if (!borrow || borrow.status !== 'BORROWED') {
             alert('QR นี้ไม่ตรงกับข้อมูลการยืมที่ยังไม่คืน');
-            // Mark as processed to prevent re-scanning
-            if (this.qrScanner) {
-              this.qrScanner.markAsProcessed(decodedText);
-            }
+            this.qrScanner?.markAsProcessed(decodedText);
             return;
           }
-
+      
+          // -----------------------------
+          // 1) เช็คว่ามีอยู่แล้วหรือยัง
+          // -----------------------------
+          const exists = this.selectedBorrowIds.includes(borrow.document.id);
+          if (exists) {
+            alert(`⚠️ เล่มทะเบียน ${borrow.document.documentId} ถูกเพิ่มแล้ว`);
+            this.qrScanner?.markAsProcessed(decodedText);
+            return;
+          }
+      
+          // -----------------------------
+          // 2) ถ้ายังไม่มี → เพิ่มใหม่
+          // -----------------------------
           const selected = new Set(this.selectedBorrowIds);
-          selected.add(borrow.document?.id || 0);
+          selected.add(borrow.document.id || 0);
           this.updateSelectedBorrowIds(Array.from(selected));
+      
           const current = this.selectedBorrowersControl.value ?? [];
           if (!current.includes(borrow.name)) {
             this.selectedBorrowersControl.setValue([...current, borrow.name]);
           }
-          
-          // Mark as processed after successful addition to prevent re-scanning
-          if (this.qrScanner) {
-            this.qrScanner.markAsProcessed(decodedText);
-          }
+      
+          alert(`✅ เพิ่มเล่มทะเบียน ${borrow.document.documentId} แล้ว`);
+          this.qrScanner?.markAsProcessed(decodedText);
         },
-        error: () => {
+      
+        error: (error) => {
+          console.error('Failed to get borrow by book id', error);
           alert('QR นี้ไม่ตรงกับข้อมูลการยืมที่ยังไม่คืน');
-          // Mark as processed to prevent re-scanning invalid codes
-          if (this.qrScanner) {
-            this.qrScanner.markAsProcessed(decodedText);
-          }
+          this.qrScanner?.markAsProcessed(decodedText);
         },
       });
+      
   }
 
   onScanError(error: string): void {
