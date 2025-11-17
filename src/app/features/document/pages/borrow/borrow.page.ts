@@ -220,7 +220,12 @@ export class BorrowPage implements OnInit {
   goToStep2(): void {
     if (!this.selectedDocumentIds.length) {
       this.selectedDocumentIdsControl.markAsTouched();
-      alert('กรุณาเลือกเล่มทะเบียนอย่างน้อย 1 เล่ม');
+      Swal.fire({
+        icon: 'warning',
+        title: 'กรุณาเลือกเล่มทะเบียน',
+        text: 'กรุณาเลือกเล่มทะเบียนอย่างน้อย 1 เล่ม',
+        confirmButtonText: 'ตกลง',
+      });
       return;
     }
     this.currentStep = 2;
@@ -240,7 +245,12 @@ export class BorrowPage implements OnInit {
   onScanSuccess(decodedText: string): void {
     const normalizedId = decodedText.trim();
     if (!normalizedId) {
-      alert('ไม่พบเล่มทะเบียนที่ตรงกับ QR code นี้');
+      Swal.fire({
+        icon: 'error',
+        title: 'ไม่พบเล่มทะเบียน',
+        text: 'ไม่พบเล่มทะเบียนที่ตรงกับ QR code นี้',
+        confirmButtonText: 'ตกลง',
+      });
       // Mark as processed to prevent re-scanning
       if (this.qrScanner) {
         this.qrScanner.markAsProcessed(decodedText);
@@ -306,7 +316,12 @@ export class BorrowPage implements OnInit {
     if (!this.form.valid || !this.selectedDocumentIds.length) {
       this.form.markAllAsTouched();
       this.selectedDocumentIdsControl.updateValueAndValidity();
-      alert('�,?�,��,,�,"�,��,?�,��,-�,?�,,�1%�,-�,��,1�,��1��,��1%�,,�,��,s�,-�1%�,���,T');
+      Swal.fire({
+        icon: 'warning',
+        title: 'กรุณากรอกข้อมูลให้ครบถ้วน',
+        text: 'กรุณาตรวจสอบข้อมูลที่กรอกให้ถูกต้องและครบถ้วน',
+        confirmButtonText: 'ตกลง',
+      });
       return;
     }
 
@@ -318,7 +333,12 @@ export class BorrowPage implements OnInit {
     const userId = formValue.userId;
     if (!userId) {
       this.form.get('userId')?.markAsTouched();
-      alert('�,?�,��,,�,"�,��,?�,��,-�,?�,S�,��1^�,-�,o�,1�1%�,��,��,�');
+      Swal.fire({
+        icon: 'warning',
+        title: 'กรุณาเลือกผู้ยืม',
+        text: 'กรุณาเลือกชื่อผู้ยืม',
+        confirmButtonText: 'ตกลง',
+      });
       return;
     }
 
