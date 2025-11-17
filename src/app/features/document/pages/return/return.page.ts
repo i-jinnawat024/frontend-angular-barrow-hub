@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSelectChange } from '@angular/material/select';
 import {
@@ -27,6 +27,8 @@ type SortDirection = 'asc' | 'desc';
   styleUrl: './return.page.scss',
 })
 export class ReturnPage implements OnInit {
+  @ViewChild(QrScannerComponent) qrScanner!: QrScannerComponent;
+  
   form: FormGroup;
   activeBorrows: Borrow[] = [];
   uniqueBorrowers: string[] = [];
@@ -394,6 +396,10 @@ export class ReturnPage implements OnInit {
     const normalizedId = decodedText.trim();
     if (!normalizedId) {
       alert('QR นี้ไม่ตรงกับข้อมูลการยืมที่ยังไม่คืน');
+      // Mark as processed to prevent re-scanning
+      if (this.qrScanner) {
+        this.qrScanner.markAsProcessed(decodedText);
+      }
       return;
     }
 
@@ -404,6 +410,10 @@ export class ReturnPage implements OnInit {
         next: (borrow) => {
           if (!borrow || borrow.status !== 'BORROWED') {
             alert('QR นี้ไม่ตรงกับข้อมูลการยืมที่ยังไม่คืน');
+            // Mark as processed to prevent re-scanning
+            if (this.qrScanner) {
+              this.qrScanner.markAsProcessed(decodedText);
+            }
             return;
           }
 
@@ -414,8 +424,19 @@ export class ReturnPage implements OnInit {
           if (!current.includes(borrow.name)) {
             this.selectedBorrowersControl.setValue([...current, borrow.name]);
           }
+          
+          // Mark as processed after successful addition to prevent re-scanning
+          if (this.qrScanner) {
+            this.qrScanner.markAsProcessed(decodedText);
+          }
         },
-        error: () => alert('QR นี้ไม่ตรงกับข้อมูลการยืมที่ยังไม่คืน'),
+        error: () => {
+          alert('QR นี้ไม่ตรงกับข้อมูลการยืมที่ยังไม่คืน');
+          // Mark as processed to prevent re-scanning invalid codes
+          if (this.qrScanner) {
+            this.qrScanner.markAsProcessed(decodedText);
+          }
+        },
       });
   }
 

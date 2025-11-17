@@ -22,6 +22,8 @@ export class QrScannerComponent implements OnDestroy {
   allowedFormats = [BarcodeFormat.QR_CODE];
   private lastScannedText: string | null = null;
   private lastScannedTime = 0;
+  private processedCodes = new Set<string>(); // Track processed QR codes
+  private processingCooldownMs = 5000; // 5 seconds cooldown after successful processing
   hasPermission = false;
   hasDevices = false;
   currentDevice: MediaDeviceInfo | undefined = undefined;
@@ -77,20 +79,56 @@ export class QrScannerComponent implements OnDestroy {
   onScanSuccess(result: string | Result): void {
     // Extract text from Result object if needed, otherwise use string directly
     const decodedText = typeof result === 'string' ? result : result.getText();
+    const normalizedText = decodedText.trim();
     
-    const now = Date.now();
-    if (this.lastScannedText === decodedText && now - this.lastScannedTime < this.scanCooldownMs()) {
+    if (!normalizedText) {
       return;
     }
 
-    this.lastScannedText = decodedText;
+    const now = Date.now();
+    
+    // Check if this code was recently processed (longer cooldown)
+    if (this.processedCodes.has(normalizedText)) {
+      return;
+    }
+    
+    // Check basic cooldown to prevent rapid duplicate scans
+    if (this.lastScannedText === normalizedText && now - this.lastScannedTime < this.scanCooldownMs()) {
+      return;
+    }
+
+    this.lastScannedText = normalizedText;
     this.lastScannedTime = now;
-    this.scanSuccess.emit(decodedText);
+    this.scanSuccess.emit(normalizedText);
 
     if (!this.continuousMode()) {
       // In non-continuous mode, close scanner after successful scan
       this.onClose();
     }
+  }
+
+  /**
+   * Mark a QR code as processed to prevent re-scanning for a period of time
+   * Call this method from parent component after successfully processing a QR code
+   */
+  markAsProcessed(qrCode: string): void {
+    const normalizedText = qrCode.trim();
+    if (normalizedText) {
+      this.processedCodes.add(normalizedText);
+      // Remove from processed list after cooldown period
+      setTimeout(() => {
+        this.processedCodes.delete(normalizedText);
+      }, this.processingCooldownMs);
+    }
+  }
+
+  /**
+   * Clear all processed codes (useful when closing scanner or resetting)
+   */
+  clearProcessedCodes(): void {
+    this.processedCodes.clear();
+    this.lastScannedText = null;
+    this.lastScannedTime = 0;
   }
 
   onScanError(error: any): void {
@@ -109,6 +147,7 @@ export class QrScannerComponent implements OnDestroy {
   }
 
   onClose(): void {
+    this.clearProcessedCodes();
     this.close.emit();
   }
 }
