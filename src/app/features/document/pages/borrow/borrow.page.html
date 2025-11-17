@@ -43,12 +43,20 @@
           </p>
         </div>
         <div class="flex flex-wrap gap-2 sm:gap-3">
-          <button type="button"
-            class="inline-flex items-center rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-emerald-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 cursor-pointer flex-shrink-0"
-            (click)="openScanner()">
-            <span class="material-icons mr-2 text-lg">qr_code_scanner</span>
-            สแกน QR
-          </button>
+          @if (isMobileDevice()) {
+            <button type="button"
+              class="inline-flex items-center rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-emerald-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 cursor-pointer flex-shrink-0"
+              (click)="openScanner()">
+              <span class="material-icons mr-2 text-lg">qr_code_scanner</span>
+              สแกน QR
+            </button>
+          } @else {
+            <div class="inline-flex items-center rounded-lg bg-gray-400 px-3 py-2 text-sm font-semibold text-white cursor-not-allowed flex-shrink-0 opacity-60"
+              title="QR Scanner ใช้งานได้เฉพาะบน mobile device">
+              <span class="material-icons mr-2 text-lg">qr_code_scanner</span>
+              สแกน QR (เฉพาะ Mobile)
+            </div>
+          }
           <button type="button" class="btn-secondary flex-shrink-0" (click)="selectAllDocument()"
             [disabled]="availableBooks.length === 0">
             <span class="material-icons mr-2 text-lg">checklist</span>
