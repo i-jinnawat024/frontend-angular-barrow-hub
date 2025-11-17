@@ -1,11 +1,12 @@
 import { Component, EventEmitter, OnDestroy, Output, input, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Html5Qrcode } from 'html5-qrcode';
+import { ZXingScannerModule } from '@zxing/ngx-scanner';
+import { BarcodeFormat, Result } from '@zxing/library';
 
 @Component({
   selector: 'app-qr-scanner',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ZXingScannerModule],
   templateUrl: './qr-scanner.component.html',
   styleUrl: './qr-scanner.component.scss'
 })
@@ -18,76 +19,55 @@ export class QrScannerComponent implements OnDestroy {
   continuousMode = input<boolean>(true);
   scanCooldownMs = input<number>(1500);
 
-  private html5QrCode: Html5Qrcode | null = null;
-  protected scannerId = 'qr-scanner-' + Date.now();
+  allowedFormats = [BarcodeFormat.QR_CODE];
   private lastScannedText: string | null = null;
   private lastScannedTime = 0;
-  private startInProgress = false;
+  hasPermission = false;
+  hasDevices = false;
+  currentDevice: MediaDeviceInfo | null = null;
+  availableDevices: MediaDeviceInfo[] = [];
 
   constructor() {
     effect(() => {
       if (this.isScanning()) {
-        // Wait for view to be ready
-        setTimeout(() => this.startScanning(), 100);
-      } else {
-        this.stopScanning();
+        this.checkPermissions();
       }
     });
   }
 
   ngOnDestroy(): void {
-    this.stopScanning();
+    // Cleanup handled by ZXing scanner component
   }
 
-  async startScanning(): Promise<void> {
-    if (this.startInProgress) {
-      return;
-    }
+  onCamerasFound(devices: MediaDeviceInfo[]): void {
+    this.availableDevices = devices;
+    this.hasDevices = devices && devices.length > 0;
 
-    this.startInProgress = true;
-    try {
-      // Stop any existing scanner first
-      await this.stopScanning();
+    // Prefer back camera (environment facing)
+    const backCamera = devices.find(device => 
+      device.label.toLowerCase().includes('back') || 
+      device.label.toLowerCase().includes('rear') ||
+      device.label.toLowerCase().includes('environment')
+    );
 
-      this.html5QrCode = new Html5Qrcode(this.scannerId);
-
-      await this.html5QrCode.start(
-        { facingMode: 'environment' }, // Use back camera
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0
-        },
-        (decodedText) => this.handleScanSuccess(decodedText),
-        () => {
-          // Error callback - ignore for continuous scanning
-        }
-      );
-    } catch (error: any) {
-      console.error('Error starting scanner:', error);
-      this.scanError.emit(error.message || 'ไม่สามารถเปิดกล้องได้');
-    } finally {
-      this.startInProgress = false;
+    if (backCamera) {
+      this.currentDevice = backCamera;
+    } else if (devices.length > 0) {
+      this.currentDevice = devices[0];
     }
   }
 
-  async stopScanning(): Promise<void> {
-    if (this.html5QrCode) {
-      try {
-        const state = this.html5QrCode.getState();
-        if (state !== 0) { // NOT_STARTED = 0
-          await this.html5QrCode.stop();
-          await this.html5QrCode.clear();
-        }
-      } catch (error) {
-        console.error('Error stopping scanner:', error);
-      }
-      this.html5QrCode = null;
-      this.resetScanHistory();
+  onHasPermission(has: boolean): void {
+    this.hasPermission = has;
+    if (!has) {
+      this.scanError.emit('ไม่ได้รับอนุญาตให้เข้าถึงกล้อง');
     }
   }
 
-  private handleScanSuccess(decodedText: string): void {
+  onScanSuccess(result: string | Result): void {
+    // Extract text from Result object if needed, otherwise use string directly
+    const decodedText = typeof result === 'string' ? result : result.getText();
+    
     const now = Date.now();
     if (this.lastScannedText === decodedText && now - this.lastScannedTime < this.scanCooldownMs()) {
       return;
@@ -98,18 +78,29 @@ export class QrScannerComponent implements OnDestroy {
     this.scanSuccess.emit(decodedText);
 
     if (!this.continuousMode()) {
-      this.stopScanning();
+      // In non-continuous mode, close scanner after successful scan
+      this.onClose();
     }
   }
 
-  private resetScanHistory(): void {
-    this.lastScannedText = null;
-    this.lastScannedTime = 0;
+  onScanError(error: any): void {
+    // Ignore scan errors for continuous scanning, only emit critical errors
+    if (error && error.message && !error.message.includes('No QR code')) {
+      console.error('Scan error:', error);
+    }
+  }
+
+  onDeviceChange(device: MediaDeviceInfo): void {
+    this.currentDevice = device;
+  }
+
+  private checkPermissions(): void {
+    // Permissions are checked by ZXing scanner component
   }
 
   onClose(): void {
-    this.stopScanning();
     this.close.emit();
   }
 }
+
 
