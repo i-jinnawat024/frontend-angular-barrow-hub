@@ -155,20 +155,12 @@
           </p>
         </div>
         <div class="flex flex-wrap gap-2">
-          @if (isMobileDevice()) {
-            <button type="button"
-              class="inline-flex items-center rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-emerald-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 cursor-pointer flex-shrink-0"
-              (click)="openScanner()">
-              <span class="material-icons mr-2 text-lg">qr_code_scanner</span>
-              สแกน QR
-            </button>
-          } @else {
-            <div class="inline-flex items-center rounded-lg bg-gray-400 px-3 py-2 text-sm font-semibold text-white cursor-not-allowed flex-shrink-0 opacity-60"
-              title="QR Scanner ใช้งานได้เฉพาะบน mobile device">
-              <span class="material-icons mr-2 text-lg">qr_code_scanner</span>
-              สแกน QR (เฉพาะ Mobile)
-            </div>
-          }
+          <button type="button"
+            class="inline-flex items-center rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-emerald-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 cursor-pointer flex-shrink-0"
+            (click)="openScanner()">
+            <span class="material-icons mr-2 text-lg">qr_code_scanner</span>
+            สแกน QR
+          </button>
           <button type="button" class="btn-secondary flex-shrink-0" (click)="selectAllBorrows()"
             [disabled]="getFilteredBorrows().length === 0">
             <span class="material-icons mr-2 text-lg">checklist</span>
@@ -207,7 +199,7 @@
 
           <label
             class="flex flex-col gap-3 rounded-lg border border-subtle px-3 py-4 cursor-pointer transition hover:border-primary focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2"
-            [class.bg-emerald-50]="isBorrowSelected(borrow.document?.id)">
+            [class.bg-emerald-50]="isBorrowSelected(borrow.document.id)">
             <div class="flex flex-wrap items-start gap-3">
               <input type="checkbox"
                 class="h-4 w-4 mt-0.5 rounded border-subtle text-emerald-600 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0 bg-surface cursor-pointer transition-colors flex-shrink-0"
@@ -232,7 +224,7 @@
                 </p>
               </div>
 
-              <div class="text-xs font-mono text-secondary">#{{ borrow.document?.documentId }}</div>
+              <div class="text-xs font-mono text-secondary">#{{ borrow.document.documentId }}</div>
             </div>
 
             <div class="grid gap-3 text-xs text-secondary sm:grid-cols-2">

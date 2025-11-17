@@ -84,55 +84,60 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div class="text-center border border-subtle rounded-lg p-6 bg-surface-alt">
-            <p class="text-xs font-medium text-muted mb-2">QR Code</p>
-            @if (qrCodeDataUrl) {
-              <div class="inline-block p-4 bg-surface rounded-lg border border-subtle">
-                <img
-                  [src]="qrCodeDataUrl"
-                  alt="QR Code"
-                  class="w-48 h-48 mx-auto"
-                />
-                <button
-                  type="button"
-                  id="btn-print-qr"
-                  class="btn-secondary mt-3 inline-flex items-center justify-center cursor-pointer"
-                  (click)="printQrCode()"
-                  [disabled]="!qrCodeDataUrl"
-                >
-                  <mat-icon class="material-symbols-outlined text-white">print</mat-icon>
-                  พิมพ์ QR Code
-                </button>
-              </div>
-            } @else {
-              <div class="w-48 h-48 mx-auto bg-muted rounded-lg flex items-center justify-center">
-                <p class="text-xs text-muted">กำลังสร้าง QR Code...</p>
-              </div>
-            }
-          </div>
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+  <div class="text-center border border-subtle rounded-lg p-6 bg-surface-alt">
+    <p class="text-xs font-medium text-muted mb-2">QR Code</p>
 
-          <div class="text-center border border-subtle rounded-lg p-6 bg-surface-alt">
-            <p class="text-xs font-medium text-muted mb-2">Barcode</p>
-            <div class="inline-block p-4 bg-surface rounded-lg border border-subtle">
-              <div
-                [id]="'barcode-' + document!.id"
-                class="min-h-[100px] flex items-center justify-center"
-              >
-                <p class="text-xs text-muted">กำลังสร้าง Barcode...</p>
-              </div>
-              <button
-                type="button"
-                id="btn-print-barcode"
-                class="btn-primary mt-3 inline-flex items-center justify-center cursor-pointer"
-                (click)="printBarcode()"
-              >
-                <mat-icon class="material-symbols-outlined text-white" >print</mat-icon>
-                พิมพ์ Barcode
-              </button>
-            </div>
-          </div>
-        </div>
+    @if (qrCodeDataUrl) {
+      <div
+        class="inline-block p-4 bg-surface rounded-lg border border-subtle cursor-pointer group"
+        (click)="openQrPreview()"
+      >
+        <img
+          [src]="qrCodeDataUrl"
+          alt="QR Code"
+          class="w-56 h-56 mx-auto transition-transform duration-300 group-hover:scale-105"
+        />
+
+        <button
+          type="button"
+          id="btn-print-qr"
+          class="btn-secondary mt-4 inline-flex items-center justify-center cursor-pointer"
+          (click)="printQrCode(); $event.stopPropagation();"
+        >
+          <mat-icon class="material-symbols-outlined text-white">print</mat-icon>
+          พิมพ์ QR Code
+        </button>
+      </div>
+    } @else {
+      <div class="w-56 h-56 mx-auto bg-muted rounded-lg flex items-center justify-center">
+        <p class="text-xs text-muted">กำลังสร้าง QR Code...</p>
+      </div>
+    }
+  </div>
+</div>
+  @if (showQrPreview) {
+  <div
+    class="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+    (click)="closeQrPreview()"
+  >
+    <div class="relative">
+      <img
+        [src]="qrCodeDataUrl"
+        class="max-w-[90vw] max-h-[90vh] rounded-lg shadow-xl"
+        alt="QR Code Preview"
+      />
+
+      <!-- <button
+        class="absolute top-2 right-2 bg-white text-black rounded-full p-2 shadow"
+        (click)="closeQrPreview(); $event.stopPropagation();"
+      >
+        ✕
+      </button> -->
+    </div>
+  </div>
+}
+
       </div>
     </div>
   } @else {
