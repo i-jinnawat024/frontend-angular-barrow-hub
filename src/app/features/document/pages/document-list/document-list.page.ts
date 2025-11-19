@@ -69,7 +69,7 @@ export class DocumentListPage implements OnInit {
     const total = this.importPreview().length;
     return total > 10 ? total - 10 : 0;
   });
-  protected readonly templateDownloadUrl = '/samples/registry-books-template.xlsx';
+  protected readonly templateDownloadUrl = '/samples/documents-template.xlsx';
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly columns: Array<{
@@ -197,11 +197,11 @@ export class DocumentListPage implements OnInit {
   }
 
   viewDetails(id: number): void {
-    this.router.navigate(['/documents', id]);
+    this.router.navigate(['/document', id]);
   }
 
   editDocument(id: number): void {
-    this.router.navigate(['/documents', id, 'edit']);
+    this.router.navigate(['/document', id, 'edit']);
   }
 
   createDocument(): void {
@@ -382,6 +382,7 @@ export class DocumentListPage implements OnInit {
         continue;
       }
 
+      // Default status is ACTIVE if status field is empty or not provided
       let status: Document['status'] = 'ACTIVE';
       if (statusRaw) {
         const normalizedStatus = this.normalizeRegistryBookStatus(statusRaw);
@@ -456,10 +457,19 @@ export class DocumentListPage implements OnInit {
       'สถานะ': this.mapStatus(book.status),
     }));
 
-    const worksheet = XLSX.utils.json_to_sheet(data);
+    // กำหนด header columns
+    const headers = ['เลขเล่มทะเบียน', 'ชื่อ', 'นามสกุล', 'สถานะ'];
+    
+    // ถ้าไม่มีข้อมูล ให้สร้าง worksheet ที่มีแค่ header
+    let worksheet: XLSX.WorkSheet;
+    if (data.length === 0) {
+      worksheet = XLSX.utils.aoa_to_sheet([headers]);
+    } else {
+      worksheet = XLSX.utils.json_to_sheet(data);
+    }
 
     // Auto width (ปรับให้พอดี)
-    const colWidths = Object.keys(data[0]).map(key => ({ wch: Math.max(key.length, 12) }));
+    const colWidths = headers.map(key => ({ wch: Math.max(key.length, 12) }));
     worksheet['!cols'] = colWidths;
 
     const workbook = XLSX.utils.book_new();

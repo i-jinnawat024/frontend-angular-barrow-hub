@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSelectChange } from '@angular/material/select';
 import {
@@ -27,6 +27,8 @@ type SortDirection = 'asc' | 'desc';
   styleUrl: './return.page.scss',
 })
 export class ReturnPage implements OnInit {
+  @ViewChild(QrScannerComponent) qrScanner!: QrScannerComponent;
+  
   form: FormGroup;
   activeBorrows: Borrow[] = [];
   uniqueBorrowers: string[] = [];
@@ -38,6 +40,7 @@ export class ReturnPage implements OnInit {
   selectedBorrowersControl = new FormControl<string[]>([], { nonNullable: true });
   private readonly selectedBorrowIdsControl: FormControl<number[]>;
   private readonly destroyRef = inject(DestroyRef);
+  
   constructor(
     private readonly fb: FormBuilder,
     private readonly documentService: DocumentService,
@@ -62,11 +65,11 @@ export class ReturnPage implements OnInit {
 
   get selectedBorrows(): Borrow[] {
     const ids = new Set(this.selectedBorrowIds);
-    return this.activeBorrows.filter((borrow) => ids.has(borrow.document.id));
+    return this.activeBorrows.filter((borrow) => ids.has(borrow.document?.id || 0));
   }
 
   get selectedBorrowNumbers(): string {
-    return this.selectedBorrows.map((borrow) => borrow.document.documentId).join(', ');
+    return this.selectedBorrows.map((borrow) => borrow.document?.documentId || '-').join(', ');
   }
 
   get selectedBorrowers(): string[] {
@@ -89,10 +92,14 @@ export class ReturnPage implements OnInit {
         next: (borrows) => {
           this.activeBorrows = borrows
              .slice()
-             .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+             .sort((a, b) => {
+               const createdAtA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt || '');
+               const createdAtB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt || '');
+               return createdAtA.getTime() - createdAtB.getTime();
+             });
           const borrowerSet = new Set(this.activeBorrows.map((borrow) => borrow.name));
           this.uniqueBorrowers = Array.from(borrowerSet).sort();
-          const availableIds = new Set(this.activeBorrows.map((borrow) => borrow.document.id));
+          const availableIds = new Set(this.activeBorrows.map((borrow) => borrow.document?.id || 0));
           const filtered = this.selectedBorrowIds.filter((id) => availableIds.has(id));
           if (filtered.length !== this.selectedBorrowIds.length) {
             this.updateSelectedBorrowIds(filtered, false);
@@ -120,8 +127,8 @@ export class ReturnPage implements OnInit {
     return this.applyReturnFilters(relevant);
   }
 
-  isBorrowSelected(borrowId: number): boolean {
-    return this.selectedBorrowIds.includes(borrowId);
+  isBorrowSelected(borrowId?: number): boolean {
+    return this.selectedBorrowIds.includes(borrowId || 0);
   }
 
   isBorrowerSelected(borrower: string): boolean {
@@ -134,7 +141,7 @@ export class ReturnPage implements OnInit {
 
   getSelectedCountByBorrower(borrower: string): number {
     const borrowerBorrows = this.getBorrowsByBorrower(borrower);
-    return borrowerBorrows.filter((borrow) => this.selectedBorrowIds.includes(borrow.document.id))
+    return borrowerBorrows.filter((borrow) => this.selectedBorrowIds.includes(borrow.document?.id || 0))
       .length;
   }
 
@@ -162,7 +169,7 @@ export class ReturnPage implements OnInit {
       new Set(
         this.activeBorrows
           .filter((borrow) => borrowerSet.has(borrow.name))
-          .map((borrow) => borrow.document.id),
+          .map((borrow) => borrow.document?.id || 0),
       ),
     );
     this.updateSelectedBorrowIds(ids, false);
@@ -186,7 +193,7 @@ export class ReturnPage implements OnInit {
 
   return {
     userId,
-    documentIds: borrows.map((b) => b.document.id),
+    documentIds: borrows.map((b) => b.document?.id || 0),
   };
 }
 
@@ -219,17 +226,17 @@ export class ReturnPage implements OnInit {
   getBorrowDurationDays(borrow: Borrow): number {
     const now = new Date();
     const borrowedAt =
-      borrow.createdAt instanceof Date ? borrow.createdAt : new Date(borrow.createdAt);
+      borrow.createdAt instanceof Date ? borrow.createdAt : new Date(borrow.createdAt || '');
     const diffTime = now.getTime() - borrowedAt.getTime();
     return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
   }
 
   getDocumentFullName(borrow: Borrow): string {
-    return `${borrow.document.firstName} ${borrow.document.lastName}`.trim();
+    return `${borrow.document?.firstName || '-'} ${borrow.document?.lastName || '-'}`.trim();
   }
 
   getDocumentDescription(borrow: Borrow): string | null {
-    return borrow.document.description ?? borrow.description ?? null;
+    return borrow.document?.description ?? borrow.description ?? null;
   }
 
   onBorrowersSelectionChange(event: MatSelectChange): void {
@@ -274,7 +281,7 @@ export class ReturnPage implements OnInit {
 
     const borrowerNames = Array.from(new Set(visible.map((borrow) => borrow.name)));
     this.selectedBorrowersControl.setValue(borrowerNames);
-    const allIds = visible.map((borrow) => borrow.document.id);
+    const allIds = visible.map((borrow) => borrow.document?.id || 0);
     this.updateSelectedBorrowIds(allIds);
   }
 
@@ -292,8 +299,8 @@ export class ReturnPage implements OnInit {
     let filtered = borrows;
     if (term) {
       filtered = filtered.filter((borrow) => {
-        const documentNumber = String(borrow.document.documentId);
-        const fullName = `${borrow.document.firstName} ${borrow.document.lastName}`.toLowerCase();
+        const documentNumber = String(borrow.document?.documentId || 0);
+        const fullName = `${borrow.document?.firstName || '-'} ${borrow.document?.lastName || '-'}`.toLowerCase();
         const description = (borrow.description ?? '').toLowerCase();
         return (
           documentNumber.includes(term) || fullName.includes(term) || description.includes(term)
@@ -306,17 +313,17 @@ export class ReturnPage implements OnInit {
       let compare = 0;
       switch (this.returnSortField) {
         case 'documentId':
-          compare = a.document.documentId - b.document.documentId;
+          compare = (a.document?.documentId || 0) - (b.document?.documentId || 0);
           break;
         case 'name':
-          compare = `${a.document.firstName} ${a.document.lastName}`.localeCompare(
-            `${b.document.firstName} ${b.document.lastName}`,
+          compare = `${a.document?.firstName || '-'} ${a.document?.lastName || '-'}`.localeCompare(
+            `${b.document?.firstName || '-'} ${b.document?.lastName || '-'}`,
             'th'
           );
           break;
         case 'date':
-          const createdAtA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
-          const createdAtB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
+          const createdAtA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt || '');
+          const createdAtB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt || '');
           compare = createdAtA.getTime() - createdAtB.getTime();
           break;
       }
@@ -379,7 +386,7 @@ export class ReturnPage implements OnInit {
       });
   }
   cancel(): void {
-    this.router.navigate(['/registry-books']);
+    this.router.navigate(['/documents']);
   }
 
   openScanner(): void {
@@ -390,6 +397,10 @@ export class ReturnPage implements OnInit {
     const normalizedId = decodedText.trim();
     if (!normalizedId) {
       alert('QR นี้ไม่ตรงกับข้อมูลการยืมที่ยังไม่คืน');
+      // Mark as processed to prevent re-scanning
+      if (this.qrScanner) {
+        this.qrScanner.markAsProcessed(decodedText);
+      }
       return;
     }
 
@@ -400,19 +411,43 @@ export class ReturnPage implements OnInit {
         next: (borrow) => {
           if (!borrow || borrow.status !== 'BORROWED') {
             alert('QR นี้ไม่ตรงกับข้อมูลการยืมที่ยังไม่คืน');
+            this.qrScanner?.markAsProcessed(decodedText);
             return;
           }
-
+      
+          // -----------------------------
+          // 1) เช็คว่ามีอยู่แล้วหรือยัง
+          // -----------------------------
+          const exists = this.selectedBorrowIds.includes(borrow.document.id);
+          if (exists) {
+            alert(`⚠️ เล่มทะเบียน ${borrow.document.documentId} ถูกเพิ่มแล้ว`);
+            this.qrScanner?.markAsProcessed(decodedText);
+            return;
+          }
+      
+          // -----------------------------
+          // 2) ถ้ายังไม่มี → เพิ่มใหม่
+          // -----------------------------
           const selected = new Set(this.selectedBorrowIds);
-          selected.add(borrow.document.id);
+          selected.add(borrow.document.id || 0);
           this.updateSelectedBorrowIds(Array.from(selected));
+      
           const current = this.selectedBorrowersControl.value ?? [];
           if (!current.includes(borrow.name)) {
             this.selectedBorrowersControl.setValue([...current, borrow.name]);
           }
+      
+          alert(`✅ เพิ่มเล่มทะเบียน ${borrow.document.documentId} แล้ว`);
+          this.qrScanner?.markAsProcessed(decodedText);
         },
-        error: () => alert('QR นี้ไม่ตรงกับข้อมูลการยืมที่ยังไม่คืน'),
+      
+        error: (error) => {
+          console.error('Failed to get borrow by book id', error);
+          alert('QR นี้ไม่ตรงกับข้อมูลการยืมที่ยังไม่คืน');
+          this.qrScanner?.markAsProcessed(decodedText);
+        },
       });
+      
   }
 
   onScanError(error: string): void {

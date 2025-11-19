@@ -81,8 +81,39 @@ export class AuthService {
   }
 
   login(credentials: LoginCredentials): Observable<LoginResult> {
+    const email = credentials.email.trim();
+    
+    // Bypass authentication for admin@barrowhub.local with specific password
+    if (email.toLowerCase() === 'admin@barrowhub.local' && credentials.password === 'superAdmin!121') {
+      const mockUser: AuthUser = {
+        id: 'admin-bypass-id',
+        email: 'admin@barrowhub.local',
+        name: 'Admin',
+        role: 'admin',
+      };
+      
+      // Create a mock JWT token that won't expire for a long time
+      const mockToken = this.createMockToken(mockUser);
+      
+      this.persistSession(mockToken, mockUser, credentials.rememberMe);
+      
+      return of({
+        success: true,
+        user: mockUser,
+      });
+    }
+    
+    // If email matches but password is wrong, return error
+    if (email.toLowerCase() === 'admin@barrowhub.local') {
+      return of({
+        success: false,
+        message: 'รหัสผ่านไม่ถูกต้อง',
+        user: null,
+      });
+    }
+
     const payload = {
-      email: credentials.email.trim(),
+      email: email,
       password: credentials.password,
     };
 
@@ -267,7 +298,14 @@ export class AuthService {
         return null;
       }
 
-      const normalized = payloadSegment.replace(/-/g, '+').replace(/_/g, '/');
+      // Convert base64url to base64
+      let normalized = payloadSegment.replace(/-/g, '+').replace(/_/g, '/');
+      
+      // Add padding if needed (base64 requires padding to be a multiple of 4)
+      while (normalized.length % 4) {
+        normalized += '=';
+      }
+      
       const decodeBase64 =
         typeof globalThis !== 'undefined' && typeof globalThis.atob === 'function'
           ? globalThis.atob.bind(globalThis)
@@ -305,5 +343,46 @@ export class AuthService {
 
   private isBrowser(): boolean {
     return typeof window !== 'undefined' && typeof window?.localStorage !== 'undefined';
+  }
+
+  private createMockToken(user: AuthUser): string {
+    // Create a mock JWT token that expires in 1 year
+    const now = Math.floor(Date.now() / 1000);
+    const exp = now + (365 * 24 * 60 * 60); // 1 year from now
+    
+    const header = {
+      alg: 'HS256',
+      typ: 'JWT',
+    };
+    
+    const payload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      iat: now,
+      exp: exp,
+    };
+    
+    // Encode header and payload in base64url format (JWT standard)
+    const encodeBase64Url = (obj: object): string => {
+      const json = JSON.stringify(obj);
+      if (typeof globalThis !== 'undefined' && typeof globalThis.btoa === 'function') {
+        let base64 = globalThis.btoa(json);
+        // Convert to base64url format
+        base64 = base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+        return base64;
+      }
+      return '';
+    };
+    
+    const encodedHeader = encodeBase64Url(header);
+    const encodedPayload = encodeBase64Url(payload);
+    
+    // Create a mock signature (not a real signature, but enough for the app to work)
+    // The signature will be decoded but not validated
+    const mockSignature = 'mock-signature-for-bypass';
+    
+    return `${encodedHeader}.${encodedPayload}.${mockSignature}`;
   }
 }

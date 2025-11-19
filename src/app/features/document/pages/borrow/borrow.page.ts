@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal, ViewChild } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import {
   AbstractControl,
@@ -33,6 +33,8 @@ type SortDirection = 'asc' | 'desc';
   providers: [DatePipe],
 })
 export class BorrowPage implements OnInit {
+  @ViewChild(QrScannerComponent) qrScanner!: QrScannerComponent;
+  
   form: FormGroup;
   availableBooks: Document[] = [];
   showScanner = false;
@@ -43,7 +45,6 @@ export class BorrowPage implements OnInit {
   protected bookSearchTerm = '';
   protected bookSortField: BookSortField = 'documentId';
   protected bookSortDirection: SortDirection = 'asc';
-
 
   private readonly selectedDocumentIdsControl: FormControl<number[]>;
 
@@ -219,7 +220,12 @@ export class BorrowPage implements OnInit {
   goToStep2(): void {
     if (!this.selectedDocumentIds.length) {
       this.selectedDocumentIdsControl.markAsTouched();
-      alert('กรุณาเลือกเล่มทะเบียนอย่างน้อย 1 เล่ม');
+      Swal.fire({
+        icon: 'warning',
+        title: 'กรุณาเลือกเล่มทะเบียน',
+        text: 'กรุณาเลือกเล่มทะเบียนอย่างน้อย 1 เล่ม',
+        confirmButtonText: 'ตกลง',
+      });
       return;
     }
     this.currentStep = 2;
@@ -239,7 +245,16 @@ export class BorrowPage implements OnInit {
   onScanSuccess(decodedText: string): void {
     const normalizedId = decodedText.trim();
     if (!normalizedId) {
-      alert('ไม่พบเล่มทะเบียนที่ตรงกับ QR code นี้');
+      Swal.fire({
+        icon: 'error',
+        title: 'ไม่พบเล่มทะเบียน',
+        text: 'ไม่พบเล่มทะเบียนที่ตรงกับ QR code นี้',
+        confirmButtonText: 'ตกลง',
+      });
+      // Mark as processed to prevent re-scanning
+      if (this.qrScanner) {
+        this.qrScanner.markAsProcessed(decodedText);
+      }
       return;
     }
 
@@ -250,11 +265,19 @@ export class BorrowPage implements OnInit {
         next: (book) => {
           if (book.status !== 'ACTIVE') {
             alert(`เล่มทะเบียน ${book.documentId} ไม่พร้อมให้ยืม (สถานะ: ${book.status})`);
+            // Mark as processed to prevent re-scanning
+            if (this.qrScanner) {
+              this.qrScanner.markAsProcessed(decodedText);
+            }
             return;
           }
 
           if (this.isDocumentSelected(book.id)) {
             alert(`เล่มทะเบียน ${book.documentId} ถูกเลือกไปแล้ว`);
+            // Mark as processed to prevent re-scanning
+            if (this.qrScanner) {
+              this.qrScanner.markAsProcessed(decodedText);
+            }
             return;
           }
 
@@ -263,8 +286,19 @@ export class BorrowPage implements OnInit {
           selected.add(book.id);
           this.updateSelectedDocumentIds(Array.from(selected));
           alert(`✅ เพิ่มเล่มทะเบียน ${book.documentId} แล้ว`);
+          
+          // Mark as processed after successful addition to prevent re-scanning
+          if (this.qrScanner) {
+            this.qrScanner.markAsProcessed(decodedText);
+          }
         },
-        error: () => alert('ไม่พบเล่มทะเบียนที่ตรงกับ QR code นี้'),
+        error: () => {
+          alert('ไม่พบเล่มทะเบียนที่ตรงกับ QR code นี้');
+          // Mark as processed to prevent re-scanning invalid codes
+          if (this.qrScanner) {
+            this.qrScanner.markAsProcessed(decodedText);
+          }
+        },
       });
   }
 
@@ -282,7 +316,12 @@ export class BorrowPage implements OnInit {
     if (!this.form.valid || !this.selectedDocumentIds.length) {
       this.form.markAllAsTouched();
       this.selectedDocumentIdsControl.updateValueAndValidity();
-      alert('�,?�,��,,�,"�,��,?�,��,-�,?�,,�1%�,-�,��,1�,��1��,��1%�,,�,��,s�,-�1%�,���,T');
+      Swal.fire({
+        icon: 'warning',
+        title: 'กรุณากรอกข้อมูลให้ครบถ้วน',
+        text: 'กรุณาตรวจสอบข้อมูลที่กรอกให้ถูกต้องและครบถ้วน',
+        confirmButtonText: 'ตกลง',
+      });
       return;
     }
 
@@ -294,7 +333,12 @@ export class BorrowPage implements OnInit {
     const userId = formValue.userId;
     if (!userId) {
       this.form.get('userId')?.markAsTouched();
-      alert('�,?�,��,,�,"�,��,?�,��,-�,?�,S�,��1^�,-�,o�,1�1%�,��,��,�');
+      Swal.fire({
+        icon: 'warning',
+        title: 'กรุณาเลือกผู้ยืม',
+        text: 'กรุณาเลือกชื่อผู้ยืม',
+        confirmButtonText: 'ตกลง',
+      });
       return;
     }
 
@@ -345,6 +389,6 @@ export class BorrowPage implements OnInit {
         return;
       }
     }
-    this.router.navigate(['/registry-books']);
+    this.router.navigate(['/documents']);
   }
 }

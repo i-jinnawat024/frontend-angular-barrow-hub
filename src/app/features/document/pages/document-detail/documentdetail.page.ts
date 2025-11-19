@@ -37,7 +37,7 @@ export class DocumentDetailPage implements OnInit, AfterViewInit, OnDestroy {
           const id = params.get('id');
           this.id = Number(id);
           if (!id) {
-            this.router.navigate(['/registry-books']);
+            this.router.navigate(['/documents']);
             return EMPTY;
           }
           return this.documentService.getDocumentById(this.id);
@@ -46,7 +46,7 @@ export class DocumentDetailPage implements OnInit, AfterViewInit, OnDestroy {
       )
       .subscribe({
         next: (book) => this.handleRegistryBook(book),
-        error: () => this.router.navigate(['/registry-books']),
+        error: () => this.router.navigate(['/documents']),
       });
   }
 
@@ -105,18 +105,18 @@ export class DocumentDetailPage implements OnInit, AfterViewInit, OnDestroy {
 
   editDocument(): void {
     if (this.document) {
-      this.router.navigate(['/registry-books', this.document.id, 'edit']);
+      this.router.navigate(['/document', this.document.id, 'edit']);
     }
   }
 
   goBack(): void {
-    this.router.navigate(['/registry-books']);
+    this.router.navigate(['/documents']);
   }
 
   viewBorrowHistory(): void {
     if (this.document) {
       this.router.navigate([
-        '/registry-books',
+        '/document',
         this.document.id,
         'history',
       ]);
@@ -240,5 +240,15 @@ export class DocumentDetailPage implements OnInit, AfterViewInit, OnDestroy {
       printWindow.close();
     }, 250);
   }
+
+  showQrPreview = false;
+
+openQrPreview() {
+  this.showQrPreview = true;
+}
+
+closeQrPreview() {
+  this.showQrPreview = false;
+}
 
 }

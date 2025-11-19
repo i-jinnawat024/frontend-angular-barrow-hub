@@ -20,14 +20,14 @@ interface DocumentApiResponse extends Omit<Document, 'createdAt' | 'updatedAt' |
 }
 
 interface BorrowApiResponse
-  extends Omit<Borrow, 'document' | 'createdAt' | 'updatedAt' | 'deletedAt'> {
+  extends Omit<Borrow, 'document'  | 'updatedAt' | 'deletedAt'> {
   document: DocumentApiResponse;
-  createdAt: string;
   updatedAt?: string | null;
 }
 
-interface ReturnApiResponse extends Omit<Return, 'returnedAt' | 'borrow'> {
+interface ReturnApiResponse extends Omit<Return, 'returnedAt' | 'borrow' | 'createdAt'> {
   returnedAt: string;
+  createdAt: string;
   borrow: BorrowApiResponse;
 }
 
@@ -75,7 +75,7 @@ export class DocumentService {
 
   deleteRegistryBook(id: number): Observable<void> {
     return this.http
-      .delete<ApiResponse<null>>(`${this.documentUrl}/${id}`)
+      .delete<ApiResponse<null>>(`${environment.apiBaseUrl}/documents/${id}`)
       .pipe(map(() => undefined));
   }
 
@@ -149,14 +149,15 @@ export class DocumentService {
       );
   }
 
-  getBorrowByBookId(bookId: string): Observable<Borrow | null> {
+  getBorrowByBookId(bookId: string): Observable<Omit<Borrow, 'updatedAt'> | null> {
     return this.http
-      .get<ApiResponse<BorrowApiResponse | null>>(
-        `${this.historyUrl}/by-book/${encodeURIComponent(bookId)}`
+      .get<ApiResponse<BorrowApiResponse[] | null>>(
+        `${this.historyUrl}/document?documentId=${bookId}`
       )
       .pipe(
-        map((response) => (response.result ? this.mapBorrow(response.result) : null)),
+        map((response) => (response.result ? this.mapBorrow(response.result[0]) : null)),
         catchError((error) => {
+          console.error('Failed to get borrow by book id', error);
           if (error?.status === 404) {
             return of(null);
           }
@@ -165,10 +166,10 @@ export class DocumentService {
       );
   }
 
-  getBorrowHistoryByStaffName(staffName: string): Observable<Borrow[]> {
+  getBorrowHistoryByUserId(userId: string): Observable<Borrow[]> {
     return this.http
       .get<ApiResponse<BorrowApiResponse[] | null>>(
-        `${this.historyUrl}/history/staff/${encodeURIComponent(staffName)}`
+        `${this.historyUrl}/user?userId=${userId}`
       )
       .pipe(
         map((response) => response.result ?? []),
@@ -209,6 +210,7 @@ export class DocumentService {
   }
 
   private mapReturn(record: ReturnApiResponse): Return {
+    console.log(record);
     return {
       ...record,
       borrow: this.mapBorrow(record.borrow),
