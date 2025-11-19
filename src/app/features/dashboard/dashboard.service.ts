@@ -10,20 +10,20 @@ import { Staff } from '../../shared/models/staff.model';
 import { ApiResponse } from '../../shared/models/api-response.model';
 
 export interface DashboardStats {
-   totalHistories: number,
-      totalDocuments: number,
-      totalUser: number,
-      histories: any,
+  totalHistories: number;
+  totalDocuments: number;
+  totalUser: number;
+  histories: any;
 }
 export interface IHistories {
-  historyId: number,
-  documentId: number,
-  documentName: string,
-  borrowerId: number,
-  borrowerName: string,
-  borrowedAt: string,
-  expectedReturnAt: string,
-  returnedAt?: string | null,
+  historyId: number;
+  documentId: number;
+  documentName: string;
+  borrowerId: number;
+  borrowerName: string;
+  borrowedAt: string;
+  expectedReturnAt: string;
+  returnedAt?: string | null;
 }
 type DocumentApiResponse = Omit<IDocument, 'createdAt' | 'updatedAt' | 'deletedAt'> & {
   createdAt: string;
@@ -43,7 +43,7 @@ type LoanApiResponse = Omit<
   borrowedAt: string;
   expectedReturnAt: string;
   returnedAt?: string | null;
-  document: DocumentApiResponse;
+  document: DocumentApiResponse | null;
   borrower: StaffApiResponse;
 };
 
@@ -72,16 +72,14 @@ export class DashboardService {
   }
 
   loadStats(): Observable<DashboardStats> {
-    return this.http
-      .get<ApiResponse<DashboardStatsResponse>>(`${this.dashboardUrl}`)
-      .pipe(
-        map((response) => this.mapStatsResponse(response.result) ),
-        tap((stats) => this.stats.set(stats)),
-        catchError((error) => {
-          console.error('Failed to load dashboard stats', error);
-          return of(this.stats());
-        }),
-      );
+    return this.http.get<ApiResponse<DashboardStatsResponse>>(`${this.dashboardUrl}`).pipe(
+      map((response) => this.mapStatsResponse(response.result)),
+      tap((stats) => this.stats.set(stats)),
+      catchError((error) => {
+        console.error('Failed to load dashboard stats', error);
+        return of(this.stats());
+      })
+    );
   }
 
   refresh(): void {
@@ -97,9 +95,11 @@ export class DashboardService {
       totalDocuments: response.totalDocuments,
       totalUser: response.totalUser,
       totalHistories: response.totalHistories,
-      histories: response.histories.map((borrowed) => this.mapBorrowd(borrowed)),
+      histories: response.histories
+        .filter((borrowed) => borrowed.document != null)
+        .map((borrowed) => this.mapBorrowd(borrowed)),
     };
-    return result
+    return result;
   }
 
   private mapBorrowd(loan: LoanApiResponse): Loan {
@@ -111,7 +111,10 @@ export class DashboardService {
     };
   }
 
-  private mapDocument(document: DocumentApiResponse): IDocument {
+  private mapDocument(document: DocumentApiResponse | null): IDocument {
+    if (!document) {
+      throw new Error('Document is null or undefined');
+    }
     return {
       ...document,
       createdAt: new Date(document.createdAt),
@@ -119,5 +122,4 @@ export class DashboardService {
       deletedAt: document.deletedAt ? new Date(document.deletedAt) : null,
     };
   }
-
 }
