@@ -379,6 +379,7 @@ export class StaffListPage implements OnInit {
         continue;
       }
 
+      // Default status is active (true) if status field is empty or not provided
       let isActive = true;
       if (statusRaw) {
         const statusValue = this.normalizeStaffStatus(statusRaw);
@@ -467,10 +468,19 @@ export class StaffListPage implements OnInit {
       สถานะ: member.isActive ? 'ใช้งานอยู่' : 'ปิดใช้งาน',
     }));
 
-    const worksheet = XLSX.utils.json_to_sheet(data);
+    // กำหนด header columns
+    const headers = ['ชื่อ', 'นามสกุล', 'อีเมล', 'เบอร์โทร', 'สถานะ'];
+    
+    // ถ้าไม่มีข้อมูล ให้สร้าง worksheet ที่มีแค่ header
+    let worksheet: XLSX.WorkSheet;
+    if (data.length === 0) {
+      worksheet = XLSX.utils.aoa_to_sheet([headers]);
+    } else {
+      worksheet = XLSX.utils.json_to_sheet(data);
+    }
 
     // Auto width (ปรับให้พอดี)
-    const colWidths = Object.keys(data[0]).map((key) => ({ wch: Math.max(key.length, 12) }));
+    const colWidths = headers.map((key) => ({ wch: Math.max(key.length, 12) }));
     worksheet['!cols'] = colWidths.map((width) => ({ ...width, wpx: width.wch * 10 }));
 
     const workbook = XLSX.utils.book_new();
