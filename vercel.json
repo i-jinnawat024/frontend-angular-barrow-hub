@@ -6,10 +6,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://api-dev-borrow.ijinhub.com/api/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
-  ],
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/.*", "dest": "/index.html" }
   ]
 }
