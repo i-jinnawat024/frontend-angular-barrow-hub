@@ -25,6 +25,7 @@ import {
 import { readTabularFile } from '../../../../shared/utils/csv-utils';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { AlertService } from '../../../../shared/services/alert.service';
 interface StaffImportPreviewRow {
   rowNumber: number;
   firstName: string;
@@ -139,7 +140,11 @@ export class StaffListPage implements OnInit {
 
   protected readonly hasSearchTerm = computed(() => this.searchTerm().trim().length > 0);
 
-  constructor(private readonly staffService: StaffService, private readonly router: Router) {}
+  constructor(
+    private readonly staffService: StaffService,
+    private readonly router: Router,
+    private readonly alertService: AlertService
+  ) {}
 
   @ViewChild('staffImportInput') private staffImportInput?: ElementRef<HTMLInputElement>;
 
@@ -157,22 +162,30 @@ export class StaffListPage implements OnInit {
       });
   }
 
-  deleteStaff(id: string): void {
-    if (!confirm('ต้องการลบบุคลากรรายการนี้หรือไม่?')) {
-      return;
-    }
+ deleteStaff(id: string): void {
+  this.alertService
+    .yesNo('ลบบุคลากร', 'ต้องการลบบุคลากรรายการนี้หรือไม่?')
+    .then((result) => {
+      if (!result.isConfirmed) {
+        return;
+      }
 
-    this.staffService
-      .deleteStaff(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => this.loadStaff(),
-        error: (error) => {
-          console.error('Failed to delete staff member', error);
-          window.alert('ไม่สามารถลบบุคลากรได้ กรุณาลองใหม่อีกครั้ง');
-        },
-      });
-  }
+      this.staffService
+        .deleteStaff(id)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.alertService.success('ลบบุคลากรสำเร็จ');
+            this.loadStaff();
+          },
+          error: (error) => {
+            console.error('Failed to delete staff member', error);
+            window.alert('ไม่สามารถลบบุคลากรได้ กรุณาลองใหม่อีกครั้ง');
+          },
+        });
+    });
+}
+
 
   viewDetails(id: string): void {
     this.router.navigate(['/staff', id]);
@@ -282,7 +295,15 @@ export class StaffListPage implements OnInit {
           this.loadStaff();
           this.resetImportState();
 
-          let message = `�,T�,3�1?�,,�1%�,��,,�1%�,-�,��,1�,��,s�,,�,,�,��,��,?�,��,��,3�1?�,��1؅,^ ${result.imported} �,��,��,��,?�,��,�`;
+          let message = `นำเข้าข้อมูลบุคลากรสำเร็จ นำเข้า ${result.imported} รายการ`;
+          if (result.duplicateEmails.length > 0) {
+            const duplicated = Array.from(new Set(result.duplicateEmails))
+              .filter((value) => value.trim().length > 0)
+              .join(', ');
+            message += `
+อีเมลที่ซ้ำกันและไม่ถูกนำเข้า: ${duplicated}`;
+          }
+          // let message = `�,T�,3�1?�,,�1%�,��,,�1%�,-�,��,1�,��,s�,,�,,�,��,��,?�,��,��,3�1?�,��1؅,^ ${result.imported} �,��,��,��,?�,��,�`;
           if (result.duplicateEmails.length > 0) {
             const duplicated = Array.from(new Set(result.duplicateEmails))
               .filter((value) => value.trim().length > 0)
@@ -337,7 +358,7 @@ export class StaffListPage implements OnInit {
 
       const firstName = String(row[firstNameIndex] ?? '').trim();
       const lastName = String(row[lastNameIndex] ?? '').trim();
-      
+
       const email = String(row[emailIndex] ?? '').trim();
       const phone = phoneIndex !== -1 ? String(row[phoneIndex] ?? '').trim() : '';
       const statusRaw = statusIndex !== -1 ? String(row[statusIndex] ?? '').trim() : '';
@@ -358,6 +379,7 @@ export class StaffListPage implements OnInit {
         continue;
       }
 
+      // Default status is active (true) if status field is empty or not provided
       let isActive = true;
       if (statusRaw) {
         const statusValue = this.normalizeStaffStatus(statusRaw);
@@ -446,10 +468,19 @@ export class StaffListPage implements OnInit {
       สถานะ: member.isActive ? 'ใช้งานอยู่' : 'ปิดใช้งาน',
     }));
 
-    const worksheet = XLSX.utils.json_to_sheet(data);
+    // กำหนด header columns
+    const headers = ['ชื่อ', 'นามสกุล', 'อีเมล', 'เบอร์โทร', 'สถานะ'];
+    
+    // ถ้าไม่มีข้อมูล ให้สร้าง worksheet ที่มีแค่ header
+    let worksheet: XLSX.WorkSheet;
+    if (data.length === 0) {
+      worksheet = XLSX.utils.aoa_to_sheet([headers]);
+    } else {
+      worksheet = XLSX.utils.json_to_sheet(data);
+    }
 
     // Auto width (ปรับให้พอดี)
-    const colWidths = Object.keys(data[0]).map((key) => ({ wch: Math.max(key.length, 12) }));
+    const colWidths = headers.map((key) => ({ wch: Math.max(key.length, 12) }));
     worksheet['!cols'] = colWidths.map((width) => ({ ...width, wpx: width.wch * 10 }));
 
     const workbook = XLSX.utils.book_new();

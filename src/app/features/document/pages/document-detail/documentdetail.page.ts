@@ -241,4 +241,14 @@ export class DocumentDetailPage implements OnInit, AfterViewInit, OnDestroy {
     }, 250);
   }
 
+  showQrPreview = false;
+
+openQrPreview() {
+  this.showQrPreview = true;
+}
+
+closeQrPreview() {
+  this.showQrPreview = false;
+}
+
 }

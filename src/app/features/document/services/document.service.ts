@@ -20,14 +20,14 @@ interface DocumentApiResponse extends Omit<Document, 'createdAt' | 'updatedAt' |
 }
 
 interface BorrowApiResponse
-  extends Omit<Borrow, 'document' | 'createdAt' | 'updatedAt' | 'deletedAt'> {
+  extends Omit<Borrow, 'document'  | 'updatedAt' | 'deletedAt'> {
   document: DocumentApiResponse;
-  createdAt: string;
   updatedAt?: string | null;
 }
 
-interface ReturnApiResponse extends Omit<Return, 'returnedAt' | 'borrow'> {
+interface ReturnApiResponse extends Omit<Return, 'returnedAt' | 'borrow' | 'createdAt'> {
   returnedAt: string;
+  createdAt: string;
   borrow: BorrowApiResponse;
 }
 
@@ -75,7 +75,7 @@ export class DocumentService {
 
   deleteRegistryBook(id: number): Observable<void> {
     return this.http
-      .delete<ApiResponse<null>>(`${this.documentUrl}/${id}`)
+      .delete<ApiResponse<null>>(`${environment.apiBaseUrl}/documents/${id}`)
       .pipe(map(() => undefined));
   }
 
@@ -88,6 +88,7 @@ export class DocumentService {
   getBorrows(): Observable<Borrow[]> {
     return this.http.get<ApiResponse<BorrowApiResponse[] | null>>(this.historyUrl).pipe(
       map((response) => response.result ?? []),
+      map((borrows) => borrows.filter((borrow) => borrow.document != null)),
       map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow)))
     );
   }
@@ -97,6 +98,7 @@ export class DocumentService {
       .get<ApiResponse<BorrowApiResponse[] | null>>(`${this.historyUrl}/?status=BORROWED`)
       .pipe(
         map((response) => response.result ?? []),
+        map((borrows) => borrows.filter((borrow) => borrow.document != null)),
         map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow)))
       );
   }
@@ -147,14 +149,15 @@ export class DocumentService {
       );
   }
 
-  getBorrowByBookId(bookId: string): Observable<Borrow | null> {
+  getBorrowByBookId(bookId: string): Observable<Omit<Borrow, 'updatedAt'> | null> {
     return this.http
-      .get<ApiResponse<BorrowApiResponse | null>>(
-        `${this.historyUrl}/by-book/${encodeURIComponent(bookId)}`
+      .get<ApiResponse<BorrowApiResponse[] | null>>(
+        `${this.historyUrl}/document?documentId=${bookId}`
       )
       .pipe(
-        map((response) => (response.result ? this.mapBorrow(response.result) : null)),
+        map((response) => (response.result ? this.mapBorrow(response.result[0]) : null)),
         catchError((error) => {
+          console.error('Failed to get borrow by book id', error);
           if (error?.status === 404) {
             return of(null);
           }
@@ -170,6 +173,7 @@ export class DocumentService {
       )
       .pipe(
         map((response) => response.result ?? []),
+        map((borrows) => borrows.filter((borrow) => borrow.document != null)),
         map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow)))
       );
   }
@@ -179,11 +183,15 @@ export class DocumentService {
       .get<ApiResponse<BorrowApiResponse[] | null>>(`${this.historyUrl}/document?documentId=${id}`)
       .pipe(
         map((response) => response.result ?? []),
+        map((borrows) => borrows.filter((borrow) => borrow.document != null)),
         map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow)))
       );
   }
 
-  private mapDocument(document: DocumentApiResponse): Document {
+  private mapDocument(document: DocumentApiResponse | null): Document {
+    if (!document) {
+      throw new Error('Document is null or undefined');
+    }
     return {
       ...document,
       createdAt: document.createdAt ? new Date(document.createdAt) : null,
@@ -202,6 +210,7 @@ export class DocumentService {
   }
 
   private mapReturn(record: ReturnApiResponse): Return {
+    console.log(record);
     return {
       ...record,
       borrow: this.mapBorrow(record.borrow),
