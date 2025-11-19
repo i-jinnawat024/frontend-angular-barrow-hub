@@ -88,6 +88,7 @@ export class DocumentService {
   getBorrows(): Observable<Borrow[]> {
     return this.http.get<ApiResponse<BorrowApiResponse[] | null>>(this.historyUrl).pipe(
       map((response) => response.result ?? []),
+      map((borrows) => borrows.filter((borrow) => borrow.document != null)),
       map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow)))
     );
   }
@@ -97,6 +98,7 @@ export class DocumentService {
       .get<ApiResponse<BorrowApiResponse[] | null>>(`${this.historyUrl}/?status=BORROWED`)
       .pipe(
         map((response) => response.result ?? []),
+        map((borrows) => borrows.filter((borrow) => borrow.document != null)),
         map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow)))
       );
   }
@@ -171,6 +173,7 @@ export class DocumentService {
       )
       .pipe(
         map((response) => response.result ?? []),
+        map((borrows) => borrows.filter((borrow) => borrow.document != null)),
         map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow)))
       );
   }
@@ -180,11 +183,15 @@ export class DocumentService {
       .get<ApiResponse<BorrowApiResponse[] | null>>(`${this.historyUrl}/document?documentId=${id}`)
       .pipe(
         map((response) => response.result ?? []),
+        map((borrows) => borrows.filter((borrow) => borrow.document != null)),
         map((borrows) => borrows.map((borrow) => this.mapBorrow(borrow)))
       );
   }
 
-  private mapDocument(document: DocumentApiResponse): Document {
+  private mapDocument(document: DocumentApiResponse | null): Document {
+    if (!document) {
+      throw new Error('Document is null or undefined');
+    }
     return {
       ...document,
       createdAt: document.createdAt ? new Date(document.createdAt) : null,
