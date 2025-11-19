@@ -2,8 +2,14 @@
   "buildCommand": "node scripts/vercel-build.js",
   "outputDirectory": "dist/frontend-angular-barrow-hub/browser",
   "framework": "angular",
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/.*", "dest": "/index.html" }
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://api-dev-borrow.ijinhub.com/api/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }
