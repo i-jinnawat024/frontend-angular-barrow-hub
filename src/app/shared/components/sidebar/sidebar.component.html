@@ -112,25 +112,16 @@
     </div>
 
     <!-- Sidebar footer -->
-    <!-- <div class="border-t border-subtle p-1">
-      <button
-        type="button"
-        class="group relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition hover:bg-surface-hover cursor-pointer"
-      >
-        <div
-          class="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary)] text-sm font-semibold text-[var(--color-on-primary)]"
-        >
-          {{ currentUser.initials }}
-        </div>
-
-        @if (!isCollapsed()) {
-        <div class="flex flex-1 flex-col text-sm">
-          <span class="font-medium text-primary">{{ currentUser.name }}</span>
-          <span class="text-xs text-muted">{{ currentUser.email }}</span>
-        </div>
-        <mat-icon class="material-symbols-outlined"> chevron_right </mat-icon>
-        }
-      </button>
-    </div> -->
+     @if (!isCollapsed()) {
+    <div class="mt-auto border-t border-subtle px-4 py-2">
+      <p class="text-center text-xs text-muted">
+        © Jinnawat Inyim. All rights reserved.
+      </p>
+        <!-- <app-footer
+          [sidebarOpen]="isOpen()"
+          [sidebarCollapsed]="isCollapsed()"
+        ></app-footer> -->
+    </div>
+    }
   </div>
 </aside>
